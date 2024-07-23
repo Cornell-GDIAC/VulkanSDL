@@ -1,0 +1,325 @@
+# MANIFEST FILE FOR CREATING A RELEASE
+srcroot: ..
+copy:
+# The SDL contents
+- comment: "Copying SDL base"
+- directory: components/SDL/src
+  destination: src
+  filter: false
+- directory: components/SDL/include
+  destination: include
+  filter: true
+  selection: '*.h'
+- directory: components/SDL/wayland-protocols
+  destination: wayland-protocols
+  filter: false
+# The SDL image contents
+- comment: "Copying SDL image"
+- directory: components/SDL_image/src
+  destination: src/image
+  filter: true
+  selection: 'IMG*'
+- directory: components/SDL_image/src
+  destination: src/image
+  filter: true
+  selection: '*.h'
+- directory: components/SDL_image/include
+  destination: include
+  filter: true
+  selection: '*.h'
+- directory: components/SDL_image/external/libtiff/libtiff
+  destination: external/libtiff/libtiff
+  filter: false
+- file: components/SDL_image/external/libtiff/libtiff-4.pc.in
+  destination: external/libtiff/libtiff-4.pc.in
+- directory: components/SDL_image/external/libwebp/src
+  destination: external/libwebp/src
+# The SDL ttf contents
+- comment: "Copying SDL ttf"
+- file: components/SDL_ttf/SDL_ttf.c
+  destination: src/ttf/SDL_ttf.c
+- file: components/SDL_ttf/SDL_ttf.h
+  destination: include/SDL_ttf.h
+- directory: components/SDL_ttf/external/freetype/src
+  destination: external/freetype/src
+  filter: false
+- directory: components/SDL_ttf/external/freetype/include
+  destination: external/freetype/include
+  filter: false
+- directory: components/SDL_ttf/external/freetype/builds
+  destination: external/freetype/builds
+  filter: true
+  selection:
+  - 'cmake'
+  - 'unix'
+  - 'wince'
+  - 'windows'
+- directory: components/SDL_ttf/external/harfbuzz/src
+  destination: external/harfbuzz/src
+  filter: false
+- directory: components/SDL_ttf/external/harfbuzz/util
+  destination: external/harfbuzz/util
+- group: 'components/SDL_ttf/external/harfbuzz/config*.h'
+  destination: external/harfbuzz
+- file: buildfiles/android/jni/sdl2ttf/external/harfbuzz/src/hb.hh  # Bug fix
+  destination: external/harfbuzz/src/hb.hh
+# The VulkanSDL contents
+- comment: "Copying VulkanSDL app extensions"
+- directory: src
+  destination: src/app
+  filter: false
+- directory: include
+  destination: include
+  filter: false
+# These files need post-process modifications
+- comment: "Copying VulkanSDL app buildfiles"
+- directory: buildfiles
+  destination: buildfiles
+  filter: false
+- directory: templates
+  destination: templates
+  filter: false
+- directory: scripts
+  destination: scripts
+  filter: true
+  selection:
+  - 'android.py'
+  - 'apple.py'
+  - 'cmake.py'
+  - 'iconify.py'
+  - 'util.py'
+  - 'windows.py'
+- file: scripts/APP.md
+  destination: README.md
+- file: scripts/app.py
+  destination: __main__.py
+configure:
+# Apple build files
+- comment: "Configuring Apple buildfiles"
+- file: buildfiles/apple/sdl2.xcodeproj/project.pbxproj
+  substitutions:
+  - old: '/components/SDL'
+    new: ''
+- file: buildfiles/apple/sdl2image.xcodeproj/project.pbxproj
+  substitutions:
+  - old: '/components/SDL_image/external'
+    new: '/external'
+  - old: '\t\t\tname = source;\n\t\t\tpath = ../../components/SDL_image/src;'
+    new: '\t\t\tname = source;\n\t\t\tpath = ../../src/image;'
+  - old: '\t\t\tname = include;\n\t\t\tpath = ../../components/SDL_image/include;'
+    new: '\t\t\tname = include;\n\t\t\tpath = ../../include;'
+  - old: '/components/SDL/'
+    new: '/'
+- file: buildfiles/apple/sdl2ttf.xcodeproj/project.pbxproj
+  substitutions:
+  - old: '/components/SDL_ttf/external'
+    new: '/external'
+  - old: '\t\t\tname = source;\n\t\t\tpath = ../../components/SDL_ttf;'
+    new: '\t\t\tname = source;\n\t\t\tpath = ../../src/ttf;'
+  - old: '\t\t\tname = include;\n\t\t\tpath = ../../components/SDL_ttf;'
+    new: '\t\t\tname = include;\n\t\t\tpath = ../../include;'
+  - old: '/components/SDL/'
+    new: '/'
+- file: buildfiles/apple/vulkansdl.xcodeproj/project.pbxproj
+  substitutions:
+  - old: '\t\t\tname = source;\n\t\t\tpath = ../../src;'
+    new: '\t\t\tname = source;\n\t\t\tpath = ../../src/app;'
+  - old: '/components/SDL/'
+    new: '/'
+# CMake build files
+- comment: "Configuring CMake buildfiles"
+- file: buildfiles/cmake/sdl2/CMakeLists.txt
+  substitutions:
+  - old: 'set(SDL2_BASE_OFFSET "/components/SDL")'
+    new: 'set(SDL2_BASE_OFFSET "")'
+- file: buildfiles/cmake/sdl2image/CMakeLists.txt
+  substitutions:
+  - old: 'set(SDL2_IMAGE_OFFSET "/components/SDL_image")'
+    new: 'set(SDL2_IMAGE_OFFSET "")'
+  - old: 'set(SDL2_IMAGE_SRC "${SDL2_IMAGE_DIR}/src")'
+    new: 'set(SDL2_IMAGE_SRC "${SDL2_IMAGE_DIR}/src/image")'
+  - old: 'set(SDL2_IMAGE_INC "${SDL2_IMAGE_DIR}/include")'
+    new: 'set(SDL2_IMAGE_INC "${SDL2_IMAGE_DIR}/include")'
+- file: buildfiles/cmake/sdl2image/external/libtiff/CMakeLists.txt
+  substitutions:
+  - old: 'set(SDL2_IMAGE_OFFSET "/components/SDL_image")'
+    new: 'set(SDL2_IMAGE_OFFSET "")'
+- file: buildfiles/cmake/sdl2image/external/libwebp/CMakeLists.txt
+  substitutions:
+  - old: 'set(SDL2_IMAGE_OFFSET "/components/SDL_image")'
+    new: 'set(SDL2_IMAGE_OFFSET "")'
+- file: buildfiles/cmake/sdl2ttf/CMakeLists.txt
+  substitutions:
+  - old: 'set(SDL2_TTF_OFFSET "/components/SDL_ttf")'
+    new: 'set(SDL2_TTF_OFFSET "")'
+  - old: 'set(SDL2_TTF_SRC "${SDL2_TTF_DIR}")'
+    new: 'set(SDL2_TTF_SRC "${SDL2_TTF_DIR}/src/ttf")'
+  - old: 'set(SDL2_TTF_INC "${SDL2_TTF_DIR}")'
+    new: 'set(SDL2_TTF_INC "${SDL2_TTF_DIR}/include")'
+- file: buildfiles/cmake/sdl2ttf/external/freetype/CMakeLists.txt
+  substitutions:
+  - old: 'set(SDL2_TTF_OFFSET "/components/SDL_ttf")'
+    new: 'set(SDL2_TTF_OFFSET "")'
+- file: buildfiles/cmake/sdl2ttf/external/harfbuzz/CMakeLists.txt
+  substitutions:
+  - old: 'set(SDL2_TTF_OFFSET "/components/SDL_ttf")'
+    new: 'set(SDL2_TTF_OFFSET "")'
+- file: buildfiles/cmake/vulkansdl/CMakeLists.txt
+  substitutions:
+  - old: 'set(VULKAN_APP_SRC   "${VULKAN_APP_DIR}/src")'
+    new: 'set(VULKAN_APP_SRC   "${VULKAN_APP_DIR}/src/app")'
+- file: buildfiles/cmake/CMakeLists.txt
+  substitutions:
+  - old: 'set(SDL2_BASE_DIR  "${SDL2_PCKG_DIR}/components/SDL")'
+    new: 'set(SDL2_BASE_DIR  "${SDL2_PCKG_DIR}")'
+  - old: 'set(SDL2_IMAGE_DIR "${SDL2_PCKG_DIR}/components/SDL_image")'
+    new: 'set(SDL2_IMAGE_DIR "${SDL2_PCKG_DIR}")'
+  - old: 'set(SDL2_TTF_DIR   "${SDL2_PCKG_DIR}/components/SDL_ttf")'
+    new: 'set(SDL2_TTF_DIR   "${SDL2_PCKG_DIR}")'
+# Android build files
+- comment: "Configuring Android buildfiles"
+- file: buildfiles/android/jni/sdl2/Android.mk
+  substitutions:
+  - old: 'SDL2_OFFSET := ../../../components/SDL'
+    new: 'SDL2_OFFSET := ../../..'
+- file: buildfiles/android/jni/sdl2image/Android.mk
+  substitutions:
+  - old: 'SDL2_OFFSET := ../../../components/SDL'
+    new: 'SDL2_OFFSET := ../../..'
+  - old: 'IMAGE_OFFSET := ../../../components/SDL_image'
+    new: 'IMAGE_OFFSET := ../../..'
+  - old: 'SDL2_IMAGE_SOURCE  := $(SDL2_IMAGE_PATH)/src'
+    new: 'SDL2_IMAGE_SOURCE  := $(SDL2_IMAGE_PATH)/src/image'
+  - old: 'SDL2_IMAGE_INCLUDE := $(SDL2_IMAGE_PATH)/include'
+    new: 'SDL2_IMAGE_INCLUDE := $(SDL2_IMAGE_PATH)/include'
+- file: buildfiles/android/jni/sdl2image/external/libwebp/Android.mk
+  substitutions:
+  - old: 'IMAGE_OFFSET := ../../../components/SDL_image'
+    new: 'IMAGE_OFFSET := ../../..'
+- file: buildfiles/android/jni/sdl2ttf/Android.mk
+  substitutions:
+  - old: 'SDL2_OFFSET := ../../../components/SDL'
+    new: 'SDL2_OFFSET := ../../..'
+  - old: 'TTF_OFFSET  := ../../../components/SDL_ttf'
+    new: 'TTF_OFFSET  := ../../..'
+  - old: 'SDL2_TTF_SOURCE := $(SDL2_TTF_PATH)'
+    new: 'SDL2_TTF_SOURCE := $(SDL2_TTF_PATH)/src/ttf'
+- file: buildfiles/android/jni/sdl2ttf/external/freetype/Android.mk
+  substitutions:
+  - old: 'TTF_OFFSET  := ../../../components/SDL_ttf'
+    new: 'TTF_OFFSET  := ../../..'
+- file: buildfiles/android/jni/sdl2ttf/external/harfbuzz/Android.mk
+  substitutions:
+  - old: 'TTF_OFFSET  := ../../../components/SDL_ttf'
+    new: 'TTF_OFFSET  := ../../..'
+- file: buildfiles/android/jni/vulkansdl/Android.mk
+  substitutions:
+  - old: 'SDL2_OFFSET := ../../../components/SDL'
+    new: 'SDL2_OFFSET := ../../..'
+  - old: 'VULKAN_APP_SOURCE := $(VULKAN_APP_PATH)/src'
+    new: 'VULKAN_APP_SOURCE := $(VULKAN_APP_PATH)/src/app'
+- file: buildfiles/android/jni/CMakeLists.txt
+  substitutions:
+  - old: 'set(SDL2_BASE_DIR  "${SDL2_PCKG_DIR}/components/SDL")'
+    new: 'set(SDL2_BASE_DIR  "${SDL2_PCKG_DIR}")'
+  - old: 'set(SDL2_IMAGE_DIR "${SDL2_PCKG_DIR}/components/SDL_image")'
+    new: 'set(SDL2_IMAGE_DIR "${SDL2_PCKG_DIR}")'
+  - old: 'set(SDL2_TTF_DIR   "${SDL2_PCKG_DIR}/components/SDL_ttf")'
+    new: 'set(SDL2_TTF_DIR   "${SDL2_PCKG_DIR}")'
+# Windows build files
+- comment: "Configuring Windows buildfiles"
+- file: buildfiles/windows/sdl2/sdl2.vcxproj
+  substitutions:
+  - old: 'components\\SDL\\'
+    new: '\\'
+- file: buildfiles/windows/sdl2/sdl2.vcxproj.filters
+  substitutions:
+  - old: 'components\\SDL\\'
+    new: '\\'
+- file: buildfiles/windows/sdl2image/sdl2image.vcxproj
+  substitutions:
+  - old: 'components\\SDL\\include'
+    new: 'include'
+  - old: 'components\\SDL_image\\src\\IMG.c'
+    new: 'src\\image\\IMG.c'
+  - old: 'components\\SDL_image\\src\\IMG_'
+    new: 'src\\image\\IMG_'
+  - old: 'components\\SDL_image\\SDL_image.h'
+    new: 'include\\SDL_image.h'
+  - old: 'components\\SDL_image\\external'
+    new: 'external'
+- file: buildfiles/windows/sdl2image/sdl2image.vcxproj.filters
+  substitutions:
+  - old: 'components\\SDL\\include'
+    new: 'include'
+  - old: 'components\\SDL_image\\src\\IMG.c'
+    new: 'src\\image\\IMG.c'
+  - old: 'components\\SDL_image\\src\\IMG_'
+    new: 'src\\image\\IMG_'
+  - old: 'components\\SDL_image\\SDL_image.h'
+    new: 'include\\SDL_image.h'
+  - old: 'components\\SDL_image\\external'
+    new: 'external'
+- file: buildfiles/windows/sdl2ttf/sdl2ttf.vcxproj
+  substitutions:
+  - old: 'components\\SDL\\include'
+    new: 'include'
+  - old: 'components\\SDL_ttf\\SDL_ttf.c'
+    new: 'src\\ttf\\SDL_ttf.c'
+  - old: 'components\\SDL_ttf\\SDL_ttf.h'
+    new: 'include\\SDL_ttf.h'
+  - old: 'components\\SDL_ttf\\external'
+    new: 'external'
+- file: buildfiles/windows/sdl2ttf/sdl2ttf.vcxproj.filters
+  substitutions:
+  - old: 'components\\SDL\\include'
+    new: 'include'
+  - old: 'components\\SDL_ttf\\SDL_ttf.c'
+    new: 'src\\ttf\\SDL_ttf.c'
+  - old: 'components\\SDL_ttf\\SDL_ttf.h'
+    new: 'include\\SDL_ttf.h'
+  - old: 'components\\SDL_ttf\\external'
+    new: 'external'
+- file: buildfiles/windows/sdl2app/vulkanapp.vcxproj
+  substitutions:
+  - old: 'components\\SDL\\include'
+    new: 'include'
+  - old: '..\\src'
+    new: '..\\src\\app'
+- file: buildfiles/windows/sdl2main/sdl2main.vcxproj
+  substitutions:
+  - old: 'components\\SDL\\'
+    new: '\\'
+- file: buildfiles/windows/sdl2app/vulkanapp.vcxproj.filters
+  substitutions:
+  - old: 'components\\SDL\\include'
+    new: 'include'
+  - old: '..\\src'
+    new: '..\\src\\app'
+remove:
+# Apple Extras
+- comment: "Removing unneeded Apple files"
+- directory: buildfiles/apple/vulkanapp.xcodeproj/xcuserdata
+- directory: buildfiles/apple/sdl2.xcodeproj/xcshareddata
+- directory: buildfiles/apple/sdl2.xcodeproj/xcuserdata
+- directory: buildfiles/apple/sdl2image.xcodeproj/xcshareddata
+- directory: buildfiles/apple/sdl2image.xcodeproj/xcuserdata
+- directory: buildfiles/apple/sdl2ttf.xcodeproj/xcshareddata
+- directory: buildfiles/apple/sdl2ttf.xcodeproj/xcuserdata
+# Android Extras
+- comment: "Removing unneeded Android files"
+- file: buildfiles/android/jni/sdl2ttf/CMakeLists.txt
+- file: buildfiles/android/jni/sdl2ttf/configure.ac
+- directory: buildfiles/android/jni/sdl2ttf/modules
+- file: buildfiles/android/jni/sdl2ttf/external/freetype/CMakeLists.txt
+- directory: buildfiles/android/jni/sdl2ttf/external/freetype/modules
+- file: buildfiles/android/jni/sdl2ttf/external/harfbuzz/CMakeLists.txt
+- file: buildfiles/android/jni/sdl2ttf/external/harfbuzz/configure.ac
+- file: buildfiles/android/jni/sdl2ttf/external/harfbuzz/README.md
+- directory: buildfiles/android/jni/sdl2ttf/external/harfbuzz/src
+# Windows Extras
+- comment: "Removing unneeded Windows files"
+- directory: buildfiles/windows/pkg-support
+- file: buildfiles/windows/sdl2/sdl2.sln
+- file: buildfiles/windows/sdl2image/sdl2image.sln
+- file: buildfiles/windows/sdl2ttf/sdl2ttf.sln
