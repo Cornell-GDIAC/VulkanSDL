@@ -6,7 +6,7 @@
 **/.vs
 **/.gradle
 **/.cxx
-**/.spv
+**/*.spv
 **/wmwhite.xcuserdatad
 docs
 token.txt
