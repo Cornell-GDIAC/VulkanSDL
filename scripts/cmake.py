@@ -1,13 +1,13 @@
 """
 Python Script for CMake Builds
 
-While CMake is naturally "out of source", there are still many reasons why we 
-want to autogenerate the CMake files. In particular, it makes it easier to link 
-in a new CUGL base (as upgrades are released) without having to change any files 
+While CMake is naturally "out of source", there are still many reasons why we
+want to autogenerate the CMake files. In particular, it makes it easier to link
+in a new CUGL base (as upgrades are released) without having to change any files
 in the project.
 
-Note that, because of how CMake works, this script both autogenerates a new 
-CMake file and then makes a separate build directory. For cleanliness, the 
+Note that, because of how CMake works, this script both autogenerates a new
+CMake file and then makes a separate build directory. For cleanliness, the
 new build directory is a subdirectory of the original build directory. This
 structure helps with Flatpak generation on Linux.
 
@@ -16,8 +16,9 @@ Version: 7/10/24
 """
 import os, os.path
 import shutil
-import subprocess
+import glob
 import re, string
+from subprocess import check_output
 from . import util
 
 # The subbuild folder for cmake
@@ -64,6 +65,10 @@ def place_project(config):
 
     ymlsrc = os.path.join(dst,'__APP_ID__.yml')
     ymldst = os.path.join(dst,appid+'.yml')
+    shutil.move(ymlsrc,ymldst)
+
+    ymlsrc = os.path.join(dst,'__APP_ID__-validation.yml')
+    ymldst = os.path.join(dst,appid+'-validation.yml')
     shutil.move(ymlsrc,ymldst)
 
     # Make the work folder
@@ -166,6 +171,20 @@ def config_flatpak(config,project):
     ymlfile = os.path.join(project, 'flatpak', appid+'.yml')
     util.file_replace(ymlfile,context)
 
+    # Find the validation layers on this platform
+    validationlib = find_validation()
+    if validationlib:
+        libname = os.path.split(validationlib)[1]
+        context['__MOVE_VALIDATION_LAYER__\n'] = '    - mv %s /app/lib/%s\n' % (libname,libname)
+        context['__COPY_VALIDATION_LAYER__\n'] = '    - type file\n      path: %s\n' % validationlib
+    else:
+        print('   WARNING: Could not find validation layer for Flatpak')
+        context['__MOVE_VALIDATION_LAYER__\n'] = ''
+        context['__COPY_VALIDATION_LAYER__\n'] = ''
+
+    ymlfile = os.path.join(project, 'flatpak', appid+'-validation.yml')
+    util.file_replace(ymlfile,context)
+
     name = config['name']
     pattern = re.compile('[^\w_]+')
     shortcut = pattern.sub('',name)
@@ -177,6 +196,38 @@ def config_flatpak(config,project):
 
     flatfile = os.path.join(project, 'flatpak', 'flatpak-run.sh')
     util.file_replace(flatfile,context)
+
+
+def find_validation():
+    """
+    Returns the path to validation layer library on the current platform.
+
+    This function is generally designed for Linux, as it is looking for an .so
+    file. That is because it is for packaging validation layers with flatpak
+
+    :return: The path to validation layer library on the current platform
+    :rtype:  ``str``
+    """
+    libs = []
+    if 'VULKAN_SDK' in os.environ:
+        path = os.path.join(os.environ['VULKAN_SDK'],'lib')
+        if os.path.exists(path):
+            files = os.path.join(path,'*')
+            libs = glob.glob(files)
+
+    if len(libs) == 0:
+        try:
+            out = check_output(['ldconfig', '-p']).decode('ascii')
+            libs = out.split('\n')
+            libs = list(map(lambda x: x[x.find('=> ')+3:],libs))
+        except:
+            pass
+
+    libs = list(filter(lambda x: 'libVkLayer_khronos_validation' in x, libs))
+
+    if len(libs) > 0:
+        return libs[0]
+    return None
 
 
 def make(config):

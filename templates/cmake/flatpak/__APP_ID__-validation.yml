@@ -31,8 +31,16 @@ modules:
     - mkdir /app/data
     - cp -r * /app/data/
     - rm /app/data/flatpak-run.sh
+    - mkdir /app/share
+    - mkdir /app/share/vulkan
+    - mkdir /app/share/vulkan/explicit_layer.d
+    - mv VkLayer_khronos_validation.json /app/share/vulkan/explicit_layer.d
+__MOVE_VALIDATION_LAYER__
     sources:
     - type: dir
       path: ../cmake/install/
     - type: file
       path: flatpak-run.sh
+    - type: file
+      path: VkLayer_khronos_validation.json
+__COPY_VALIDATION_LAYER__

@@ -29,7 +29,6 @@ set(SDL2_APP_DIR   "${VULKAN_SDL_DIR}")
 set(SDL2_BASE_DIR  "${VULKAN_SDL_DIR}/components/SDL")
 set(SDL2_IMAGE_DIR "${VULKAN_SDL_DIR}/components/SDL_image")
 set(SDL2_TTF_DIR   "${VULKAN_SDL_DIR}/components/SDL_ttf")
-set(SDL2_ATK_DIR   "${VULKAN_SDL_DIR}/components/SDL_atk")
 
 # Resume the normal SDL CMake project
 

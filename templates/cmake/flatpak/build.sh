@@ -5,7 +5,7 @@ INSTDIR=${BASEDIR}/../install
 
 # Notify the user of the correct script usage
 warn() {
-    echo "usage: build.sh2 [clean]"
+    echo "usage: build.sh [-v] [clean]"
 }
 
 # Remove the repo and flatpak build directories
@@ -22,7 +22,7 @@ build() {
     echo "Building __APP_ID__.flatpak"
 
     # Create the flatpak
-    flatpak-builder --repo=repo --force-clean cache ${BASEDIR}/__APP_ID__.yml
+    flatpak-builder --repo=repo --force-clean cache ${BASEDIR}/${YAMLFILE}
     flatpak build-bundle repo ${BASEDIR}/__APP_ID__.flatpak __APP_ID__
     rm -rf ${INSTDIR}
     mkdir ${INSTDIR}
@@ -41,7 +41,7 @@ build() {
 
     # Create the flatpak uninstaller
     echo "#!/bin/sh" >> ${INSTDIR}/uninstall.sh
-    echo "flatpak uninstall edu.cornell.gdiac.hello " >> ${INSTDIR}/uninstall.sh
+    echo "flatpak uninstall __APP_ID__ " >> ${INSTDIR}/uninstall.sh
     chmod a+x ${INSTDIR}/uninstall.sh
 
     echo "Files written to ${INSTDIR}"
@@ -49,7 +49,7 @@ build() {
 
 
 # Main script
-if [ $# -gt 1 ]
+if [ $# -gt 2]
 then
     warn
 elif [ $# -eq 1 ]
@@ -57,9 +57,15 @@ then
     if [ $1 = "clean" ]
     then
         clean
+    elif [ $1 = "-v" ]
+        YAMLFILE="__APP_ID__-validation.yml"
+        build
+    then
+        clean
     else
         warn
     fi
 else
+    YAMLFILE="__APP_ID__.yml"
     build
 fi

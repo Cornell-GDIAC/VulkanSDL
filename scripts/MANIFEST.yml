@@ -18,28 +18,28 @@ copy:
   filter: false
 # The SDL image contents
 - comment: "Copying SDL image"
-- directory: components/SDL_image/src
+- directory: components/SDL_Image/src
   destination: src/image
   filter: true
   selection: 'IMG*'
-- directory: components/SDL_image/src
+- directory: components/SDL_Image/src
   destination: src/image
   filter: true
   selection: '*.h'
-- directory: components/SDL_image/include
+- directory: components/SDL_Image/include
   destination: include
   filter: true
   selection: '*.h'
-- directory: components/SDL_image/include
+- directory: components/SDL_Image/include
   destination: headers/SDL
   filter: true
   selection: '*.h'
-- directory: components/SDL_image/external/libtiff/libtiff
+- directory: components/SDL_Image/external/libtiff/libtiff
   destination: external/libtiff/libtiff
   filter: false
-- file: components/SDL_image/external/libtiff/libtiff-4.pc.in
+- file: components/SDL_Image/external/libtiff/libtiff-4.pc.in
   destination: external/libtiff/libtiff-4.pc.in
-- directory: components/SDL_image/external/libwebp/src
+- directory: components/SDL_Image/external/libwebp/src
   destination: external/libwebp/src
 # The SDL ttf contents
 - comment: "Copying SDL ttf"
