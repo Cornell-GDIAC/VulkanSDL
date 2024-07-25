@@ -1,9 +1,9 @@
 """
 Python Script for Apple Builds
 
-Another reason for the custom build set-up for SDL is iOS builds. There is a
-lot to set up in an iOS build beyond the source code. Note, however, that we do
-not separate iOS and macOS projects. We build one XCode project and put it in
+Another reason for the custom build set-up for CUGL is iOS builds. There is a 
+lot to set up in an iOS build beyond the source code. Note, however, that we do 
+not separate iOS and macOS projects. We build one XCode project and put it in 
 the Apple build folder.
 
 This code is some of the most complicated of our build script namely due to the
@@ -12,8 +12,8 @@ Instead of xml/json, it is an eclectic file format that freely mixes () and {}
 to group subelements, and does so with no apparent explanation. As a result,
 a lot of the file manipulation is essentially hard-coded.
 
-Author:  Walker M. White
-Version: 7/10/24
+Author: Walker M. White
+Date:   7/10/24
 """
 import os, os.path
 import shutil
@@ -237,12 +237,17 @@ def place_project(config):
     # Copy the XCode project
     template = os.path.join(config['sdl2'],'templates','apple','app.xcodeproj')
     project  = os.path.join(build,config['camel']+'.xcodeproj')
-    shutil.copytree(template, project, copy_function = shutil.copy)
+    shutil.copytree(template, project, symlinks=True, copy_function = shutil.copy)
     
     # Now copy the resources folder
     src = os.path.join(config['sdl2'],'templates','apple','Resources')
     dst  = os.path.join(build,'Resources')
-    shutil.copytree(src, dst, copy_function = shutil.copy)
+    shutil.copytree(src, dst, symlinks=True, copy_function = shutil.copy)
+
+    # And the frameworks folder
+    src = os.path.join(config['sdl2'],'templates','apple','Frameworks')
+    dst  = os.path.join(build,'Frameworks')
+    shutil.copytree(src, dst, symlinks=True, copy_function = shutil.copy)
     
     return project
 
@@ -322,7 +327,7 @@ def reassign_pbxproj(config,pbxproj):
     
     # Expand the remaining build settings (includes, display name, target id)
     section = pbxproj['XCBuildConfiguration']
-    groupdir = lambda x: '"../../'+util.path_to_posix(x)+'"'
+    groupdir = lambda x: '"$(SRCROOT)/../../'+util.path_to_posix(x)+'"'
     
     indent = '\t\t\t\t\t'
     entries = config['include_dict']
@@ -355,7 +360,9 @@ def reassign_pbxproj(config,pbxproj):
     
     for pos in range(len(section)):
         if '__SDL_INCLUDE__' in section[pos]:
-            section[pos] = section[pos].replace('__SDL_INCLUDE__','"'+sdl2dir+'/include"')
+            section[pos] = section[pos].replace('__SDL_INCLUDE__','"$(SRCROOT)/'+sdl2dir+'/include"')
+        if '__VULKAN_INCLUDE__' in section[pos]:
+            section[pos] = section[pos].replace('__VULKAN_INCLUDE__','"$(SRCROOT)/'+sdl2dir+'/extras"')
         if '__APPLE_INCLUDE__' in section[pos]:
             section[pos] = section[pos].replace(indent+'__APPLE_INCLUDE__,\n',allincludes)
         if '__MACOS_INCLUDE__' in section[pos]:

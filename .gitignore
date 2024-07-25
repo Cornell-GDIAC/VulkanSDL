@@ -1,0 +1,15 @@
+**/.DS_Store
+**/build
+**/obj
+**/libs
+**/__pycache__
+**/.vs
+**/.gradle
+**/.cxx
+**/.spv
+**/wmwhite.xcuserdatad
+docs
+token.txt
+analysis
+temp
+release

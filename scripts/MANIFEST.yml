@@ -10,6 +10,9 @@ copy:
   destination: include
   filter: true
   selection: '*.h'
+- directory: extras
+  destination: extras
+  filter: false
 - directory: components/SDL/wayland-protocols
   destination: wayland-protocols
   filter: false
@@ -27,6 +30,10 @@ copy:
   destination: include
   filter: true
   selection: '*.h'
+- directory: components/SDL_image/include
+  destination: headers/SDL
+  filter: true
+  selection: '*.h'
 - directory: components/SDL_image/external/libtiff/libtiff
   destination: external/libtiff/libtiff
   filter: false
@@ -40,6 +47,8 @@ copy:
   destination: src/ttf/SDL_ttf.c
 - file: components/SDL_ttf/SDL_ttf.h
   destination: include/SDL_ttf.h
+- file: components/SDL_ttf/SDL_ttf.h
+  destination: headers/SDL/SDL_ttf.h
 - directory: components/SDL_ttf/external/freetype/src
   destination: external/freetype/src
   filter: false
@@ -63,16 +72,19 @@ copy:
   destination: external/harfbuzz
 - file: buildfiles/android/jni/sdl2ttf/external/harfbuzz/src/hb.hh  # Bug fix
   destination: external/harfbuzz/src/hb.hh
-# The VulkanSDL contents
-- comment: "Copying VulkanSDL app extensions"
+# The SDL app contents
+- comment: "Copying SDL app extensions"
 - directory: src
   destination: src/app
   filter: false
 - directory: include
   destination: include
   filter: false
+- directory: include
+  destination: headers/SDL
+  filter: false
 # These files need post-process modifications
-- comment: "Copying VulkanSDL app buildfiles"
+- comment: "Copying SDL app buildfiles"
 - directory: buildfiles
   destination: buildfiles
   filter: false
@@ -120,7 +132,7 @@ configure:
     new: '\t\t\tname = include;\n\t\t\tpath = ../../include;'
   - old: '/components/SDL/'
     new: '/'
-- file: buildfiles/apple/vulkansdl.xcodeproj/project.pbxproj
+- file: buildfiles/apple/sdl2app.xcodeproj/project.pbxproj
   substitutions:
   - old: '\t\t\tname = source;\n\t\t\tpath = ../../src;'
     new: '\t\t\tname = source;\n\t\t\tpath = ../../src/app;'
@@ -164,24 +176,30 @@ configure:
   substitutions:
   - old: 'set(SDL2_TTF_OFFSET "/components/SDL_ttf")'
     new: 'set(SDL2_TTF_OFFSET "")'
-- file: buildfiles/cmake/vulkansdl/CMakeLists.txt
+- file: buildfiles/cmake/sdl2app/CMakeLists.txt
   substitutions:
-  - old: 'set(VULKAN_APP_SRC   "${VULKAN_APP_DIR}/src")'
-    new: 'set(VULKAN_APP_SRC   "${VULKAN_APP_DIR}/src/app")'
+  - old: 'set(SDL2_APP_SRC   "${SDL2_APP_DIR}/src")'
+    new: 'set(SDL2_APP_SRC   "${SDL2_APP_DIR}/src/app")'
 - file: buildfiles/cmake/CMakeLists.txt
   substitutions:
-  - old: 'set(SDL2_BASE_DIR  "${SDL2_PCKG_DIR}/components/SDL")'
-    new: 'set(SDL2_BASE_DIR  "${SDL2_PCKG_DIR}")'
-  - old: 'set(SDL2_IMAGE_DIR "${SDL2_PCKG_DIR}/components/SDL_image")'
-    new: 'set(SDL2_IMAGE_DIR "${SDL2_PCKG_DIR}")'
-  - old: 'set(SDL2_TTF_DIR   "${SDL2_PCKG_DIR}/components/SDL_ttf")'
-    new: 'set(SDL2_TTF_DIR   "${SDL2_PCKG_DIR}")'
+  - old: 'set(SDL2_BASE_DIR  "${VULKAN_SDL_DIR}/components/SDL")'
+    new: 'set(SDL2_BASE_DIR  "${VULKAN_SDL_DIR}")'
+  - old: 'set(SDL2_IMAGE_DIR "${VULKAN_SDL_DIR}/components/SDL_image")'
+    new: 'set(SDL2_IMAGE_DIR "${VULKAN_SDL_DIR}")'
+  - old: 'set(SDL2_TTF_DIR   "${VULKAN_SDL_DIR}/components/SDL_ttf")'
+    new: 'set(SDL2_TTF_DIR   "${VULKAN_SDL_DIR}")'
 # Android build files
 - comment: "Configuring Android buildfiles"
 - file: buildfiles/android/jni/sdl2/Android.mk
   substitutions:
   - old: 'SDL2_OFFSET := ../../../components/SDL'
     new: 'SDL2_OFFSET := ../../..'
+- file: buildfiles/android/jni/sdl2app/Android.mk
+  substitutions:
+  - old: 'SDL2_OFFSET := ../../../components/SDL'
+    new: 'SDL2_OFFSET := ../../..'
+  - old: 'SDL2_APP_SOURCE := $(SDL2_APP_PATH)/src'
+    new: 'SDL2_APP_SOURCE := $(SDL2_APP_PATH)/src/app'
 - file: buildfiles/android/jni/sdl2image/Android.mk
   substitutions:
   - old: 'SDL2_OFFSET := ../../../components/SDL'
@@ -190,8 +208,6 @@ configure:
     new: 'IMAGE_OFFSET := ../../..'
   - old: 'SDL2_IMAGE_SOURCE  := $(SDL2_IMAGE_PATH)/src'
     new: 'SDL2_IMAGE_SOURCE  := $(SDL2_IMAGE_PATH)/src/image'
-  - old: 'SDL2_IMAGE_INCLUDE := $(SDL2_IMAGE_PATH)/include'
-    new: 'SDL2_IMAGE_INCLUDE := $(SDL2_IMAGE_PATH)/include'
 - file: buildfiles/android/jni/sdl2image/external/libwebp/Android.mk
   substitutions:
   - old: 'IMAGE_OFFSET := ../../../components/SDL_image'
@@ -212,20 +228,14 @@ configure:
   substitutions:
   - old: 'TTF_OFFSET  := ../../../components/SDL_ttf'
     new: 'TTF_OFFSET  := ../../..'
-- file: buildfiles/android/jni/vulkansdl/Android.mk
-  substitutions:
-  - old: 'SDL2_OFFSET := ../../../components/SDL'
-    new: 'SDL2_OFFSET := ../../..'
-  - old: 'VULKAN_APP_SOURCE := $(VULKAN_APP_PATH)/src'
-    new: 'VULKAN_APP_SOURCE := $(VULKAN_APP_PATH)/src/app'
 - file: buildfiles/android/jni/CMakeLists.txt
   substitutions:
-  - old: 'set(SDL2_BASE_DIR  "${SDL2_PCKG_DIR}/components/SDL")'
-    new: 'set(SDL2_BASE_DIR  "${SDL2_PCKG_DIR}")'
-  - old: 'set(SDL2_IMAGE_DIR "${SDL2_PCKG_DIR}/components/SDL_image")'
-    new: 'set(SDL2_IMAGE_DIR "${SDL2_PCKG_DIR}")'
-  - old: 'set(SDL2_TTF_DIR   "${SDL2_PCKG_DIR}/components/SDL_ttf")'
-    new: 'set(SDL2_TTF_DIR   "${SDL2_PCKG_DIR}")'
+  - old: 'set(SDL2_BASE_DIR  "${VULKAN_SDL_DIR}/components/SDL")'
+    new: 'set(SDL2_BASE_DIR  "${VULKAN_SDL_DIR}")'
+  - old: 'set(SDL2_IMAGE_DIR "${VULKAN_SDL_DIR}/components/SDL_image")'
+    new: 'set(SDL2_IMAGE_DIR "${VULKAN_SDL_DIR}")'
+  - old: 'set(SDL2_TTF_DIR   "${VULKAN_SDL_DIR}/components/SDL_ttf")'
+    new: 'set(SDL2_TTF_DIR   "${VULKAN_SDL_DIR}")'
 # Windows build files
 - comment: "Configuring Windows buildfiles"
 - file: buildfiles/windows/sdl2/sdl2.vcxproj
@@ -280,7 +290,13 @@ configure:
     new: 'include\\SDL_ttf.h'
   - old: 'components\\SDL_ttf\\external'
     new: 'external'
-- file: buildfiles/windows/sdl2app/vulkanapp.vcxproj
+- file: buildfiles/windows/sdl2app/sdl2app.vcxproj
+  substitutions:
+  - old: 'components\\SDL\\include'
+    new: 'include'
+  - old: '..\\src'
+    new: '..\\src\\app'
+- file: buildfiles/windows/sdl2app/sdl2app.vcxproj.filters
   substitutions:
   - old: 'components\\SDL\\include'
     new: 'include'
@@ -290,33 +306,16 @@ configure:
   substitutions:
   - old: 'components\\SDL\\'
     new: '\\'
-- file: buildfiles/windows/sdl2app/vulkanapp.vcxproj.filters
-  substitutions:
-  - old: 'components\\SDL\\include'
-    new: 'include'
-  - old: '..\\src'
-    new: '..\\src\\app'
 remove:
 # Apple Extras
 - comment: "Removing unneeded Apple files"
-- directory: buildfiles/apple/vulkanapp.xcodeproj/xcuserdata
+- directory: buildfiles/apple/sdl2app.xcodeproj/xcuserdata
 - directory: buildfiles/apple/sdl2.xcodeproj/xcshareddata
 - directory: buildfiles/apple/sdl2.xcodeproj/xcuserdata
 - directory: buildfiles/apple/sdl2image.xcodeproj/xcshareddata
 - directory: buildfiles/apple/sdl2image.xcodeproj/xcuserdata
 - directory: buildfiles/apple/sdl2ttf.xcodeproj/xcshareddata
 - directory: buildfiles/apple/sdl2ttf.xcodeproj/xcuserdata
-# Android Extras
-- comment: "Removing unneeded Android files"
-- file: buildfiles/android/jni/sdl2ttf/CMakeLists.txt
-- file: buildfiles/android/jni/sdl2ttf/configure.ac
-- directory: buildfiles/android/jni/sdl2ttf/modules
-- file: buildfiles/android/jni/sdl2ttf/external/freetype/CMakeLists.txt
-- directory: buildfiles/android/jni/sdl2ttf/external/freetype/modules
-- file: buildfiles/android/jni/sdl2ttf/external/harfbuzz/CMakeLists.txt
-- file: buildfiles/android/jni/sdl2ttf/external/harfbuzz/configure.ac
-- file: buildfiles/android/jni/sdl2ttf/external/harfbuzz/README.md
-- directory: buildfiles/android/jni/sdl2ttf/external/harfbuzz/src
 # Windows Extras
 - comment: "Removing unneeded Windows files"
 - directory: buildfiles/windows/pkg-support

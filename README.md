@@ -1,6 +1,6 @@
 # VulkanSDL
 ---
-VulkanSDL is a package to simplify the build processes for Vulkan applications built on top of SDL. It is a variation of SDL App, a package builder that we designed for SDL Apps on top of OpenGL (and which is the core of CUGL, our simple game library).
+VulkanSDL is a package to simplify the build processes for Vulkan applications built on top of SDL. It is a variation of SDL App, a package builder that we designed for SDL Apps on top of OpenGL (and which is the core of CUGL, our simple game library). This is the reason for references to SDL App throughout this project.
 
 While this package does add a few minor C functions to SDL, it mainly exists to minimize the work need to build a new project. While this may seem like a non-issue (CMake exists), creating SDL applications for mobile devices is nontrivial. Beyond compiling the software, there are issues with configuring the app permissions, setting the unique identifier, and assigning the asset directories. This is especially tricky when many of these settings are in things like plists or manifests not manageable by CMake.
 
@@ -9,6 +9,8 @@ This configuration process is particularly a problem for teams doing cross-platf
 To solve this problem, VulkanSDL is itself a Python script. This Python script enables the creation of an IDE project (Android Studio, Visual Studio, XCode, or CMake) for your application. The configured project is ready to build and deploy, minimizing the amount of time needed to port to a new platform. See the [instructions](scripts/APP.md) for how to use this script. These instructions are stored as a README in the release folder.
 
 VulkanSDL is regularly tested against Android, Linux, iOS, macOS, and Windows. It also provides a Flatpak project for packaging an x86 Linux build for the SteamDeck. While SDL itself supports a wider variety of platforms, these are the platforms we need for our course at Cornell, and are therefore the only ones we support at this time.
+
+Note that while this version of SDL App is intended for Vulkan apps, it still fully supports OpenGL. That is so that students can experiment comparing to the two.
 
 ## Dependencies
 

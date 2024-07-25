@@ -69,6 +69,8 @@ def setup():
     parser.add_argument('-t', '--target', type=str,
                         choices=['android','apple','macos','ios','windows','cmake'],
                         help='The active build target')
+    parser.add_argument('-s', '--symlink', action='store_true',
+                        help='Add symbolic link for SDL includes')
     return parser.parse_args()
 
 
@@ -123,6 +125,15 @@ def get_config(args):
         data['build_to_sdl2'] = os.path.relpath(data['sdl2'],data['build'])
         data['build_to_root'] = os.path.relpath(data['root'],data['build'])
     
+    
+    if args.symlink:
+        dst = os.path.abspath(os.path.join(data['sdl2'],'extras','SDL'))
+        if not os.path.exists(dst):
+            src = os.path.abspath(os.path.join(data['sdl2'],'include'))
+            dir = os.path.dirname(dst)
+            src = os.path.relpath(src, dir)
+            os.symlink(src, dst, True)
+
     return data
 
 

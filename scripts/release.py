@@ -2,10 +2,10 @@
 Release creation script for VulkanSDL
 
 When we release VulkanSDL to students, we are giving them a full source code 
-release to SDL, SDL_image, and SDL_ttf (as well as the VulkanSDL specific 
-extensions). To enable continuous integration, these subprojects are arranged 
+release to SDL, SDL_image, and SDL_ttf, as well as the SDL App specific 
+extensions. To enable continuous integration, these subprojects are arranged 
 as submodules of this repository. But that is not the optimal way to organize 
-this  for a release.
+this for a release.
 
 This script will copy the latest code from the submodules into the release 
 folder. The scripts and templates will all be modified to reflect this new 
@@ -26,7 +26,7 @@ import yaml
 import traceback
 
 # Default values
-VERSION   = '1.2.0'
+VERSION   = '2.1.0'
 DIRECTORY = os.path.join('..','release')
 MANIFEST  = 'MANIFEST.yml'
 
@@ -38,7 +38,7 @@ def setup():
     :return: The parsed args
     :rtype:  ``Namespace``
     """
-    parser = argparse.ArgumentParser(description='Create a VulkanSDL release.')
+    parser = argparse.ArgumentParser(description='Create an SDLApp release.')
     parser.add_argument('directory', type=str, nargs='?', default=DIRECTORY, help='The release directory')
     parser.add_argument('-v', '--version', type=str, help='The build version')
     parser.add_argument('-m', '--manifest', type=str, help='The build manifest')
@@ -220,7 +220,7 @@ def configure_manifest(path,manifest):
     for item in manifest['configure']:
         if 'comment' in item:
             print('-- %s' % item['comment'])
-        elif 'substitutions' in item and 'file' in item:
+        elif 'file' in item and 'substitutions' in item:
             patterns = {}
             for pair in item['substitutions']:
                 if 'old' in pair and 'new' in pair:
@@ -234,6 +234,13 @@ def configure_manifest(path,manifest):
 
             file = os.path.join(path,util.posix_to_path(item['file']))
             util.file_replace(file,patterns)
+        elif 'link' in item and 'name' in item:
+            src = os.path.abspath(os.path.join(path,util.posix_to_path(item['link'])))
+            dst = os.path.abspath(os.path.join(path,util.posix_to_path(item['name'])))
+            dir = os.path.dirname(dst)
+            src = os.path.relpath(src, dir)
+            isdir = 'directory' in item and item['directory']
+            os.symlink(src, dst, isdir)
 
 
 def prune_manifest(path,manifest):
@@ -272,6 +279,7 @@ def prune_manifest(path,manifest):
                         shutil.rmtree(item)
                     elif os.path.exists(item):
                         os.remove(item)
+                
         except:
             traceback.print_exc()
             print('WARNING: Removal failed for %s.' % repr(item))
@@ -317,7 +325,7 @@ def main():
     if os.path.isdir(path):
         shutil.rmtree(path)
 
-    print("Creating VulkanSDL release")
+    print("Creating SDL_app release")
     os.mkdir(path)
     try:
         deploy_manifest(path,data)

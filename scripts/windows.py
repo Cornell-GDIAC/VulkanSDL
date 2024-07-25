@@ -7,7 +7,7 @@ MSVC compiler does not support stdatomic.h in C (sigh).  Therefore, we prefer
 to use Visual Studio for Windows builds.
 
 Author: Walker M. White
-Version: 7/10/24
+Date:   11/29/22
 """
 import os, os.path
 import shutil

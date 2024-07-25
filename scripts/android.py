@@ -1,7 +1,7 @@
 """
 Python Script for Android Builds
 
-Behold the entire reason we have a custom build set-up for SDL. While CMake 
+Behold the entire reason we have a custom build set-up for CUGL. While CMake 
 conceivably works with iOS (though not well), it is not sufficient (by itself)
 for Android. That is because an Android project is an amalgamation of C++ files, 
 Java files, Makefiles and Gradle files. Configuring these projects is error 
@@ -218,7 +218,7 @@ def config_ndkmake(config,project):
     srcdir  = util.path_to_posix(srcdir)
     
     # Modify the SDL2 Android.mk files recursively
-    sdlroot  = os.path.join(project,'app','jni','sd2pckg')
+    sdlroot  = os.path.join(project,'app','jni','vulkansdl')
     contents = {'__SDL2_PATH__':sdldir}
     util.directory_replace(sdlroot,contents,lambda path,file : file == 'Android.mk')
     

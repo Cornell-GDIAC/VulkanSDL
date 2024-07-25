@@ -59,8 +59,8 @@ support some command line arguments as well. They are as follows.
 - `-c, --config`   The configuration file
 - `-t, --target`   The active build target
 
-The latter option can be used to specify a single build target. It can be one of 
-`android`, `apple`, `macos`, `ios`, `windows` or `cmake`. The `cmake` option 
+The latter option can be used to specify a single build target. It can be one 
+of `android`, `apple`, `macos`, `ios`, `windows` or `cmake`. The `cmake` option 
 supports all of the platforms that SDL does, though we have only tested it 
 against Linux and the platforms listed above. We have also made minor 
 modifications to the default SDL CMake file.  
@@ -74,6 +74,63 @@ We also have a `flatpak` option. This is a project built on top of CMake for
 packaging x86 Linux builds for rapid deployment on the Steam Deck.  See the
 readme in the `cmake` build folder for your project for how to package
 with flatpak.
+
+## Project Includes
+
+Because we are building SDL and its extensions by source, it would break the 
+code to put the headers inside of a folder called `SDL` (as SDL source code 
+does not use angle brackets and instead expects these headers to be in folder 
+called `include`). Hence all SDL headers should be included directly without 
+a prefix. In other words
+
+```
+#include <SDL.h>     // Correct
+#include <SDL/SDL.h> // Incorrect
+```
+
+It is possible to solve this problem by duplicating the headers, creating a 
+second include directory. But seeing as the headers for SDL are almost 3 MB, 
+we opted not to do this.
+
+In an attempt at compatibility, you can add a symbolic link named `SDL` in 
+the `extras` directory, which is the secondary include directory. As symbolic
+links are OS dependent, it is not installed automatically. You can install it
+by calling the python script with the flag `-s, --symlink ` with no arguments.
+
+All other headers should be included normally.
+
+## Project Suffix
+
+One of the least understood aspects of the config file is the project suffix. 
+The `appid` is used to define your application on mobile devices. However, in
+the case of iOS, this appid must be **globally unique**. That means that if 
+you download a demo that was built under one Apple Developer account (i.e. mine),
+it cannot be code signed under another Apple Developer account (i.e. yours).
+This can cause all sorts of headaches when trying to deliver demos to students.
+
+The solution is to tack on a unique suffix to the appid. If `suffix` is set
+to true, this is exactly what happens. The suffix is a hash generated on the
+full path from root to the config file, so technically collisions are possible
+on laptops with the same name and same user accounts. But for our purposes,
+this does not happen.
+
+More importantly, the first time this setuo script is run, this suffix value
+is placed in the config file. From that point on, this is the suffix that is
+guaranteed to be used. This is useful for when project teams want to share
+the same suffix (as theoretically all students on the team should be working
+with the same Apple Developer account). The config file can be committed to 
+the repository for all members to share that suffix.
+
+Note that if `suffix` is false, no suffix will be generated. This should only
+be used for your own projects that will not be distributed to others.
+
+## Code Signing
+
+Because of the dynamic frameworks used by Vulkan, both the macOS and the iOS 
+build require code signing. Fortunately, this can be done with a "personal 
+team" even if you do not have an Apple Developer membership. You will need
+to set your development team in **Signings & Capabilities** tab in Xcode 
+for both the macOS and iOS targets.
 
 ## SDL Support
 
@@ -97,13 +154,20 @@ of Vulkan that we have determined to be stable.
 - **macOS**: MoltenVK 1.2.5 (newer versions have an issue)
 - **iOS**: MoltenVK 1.2.10
 
-Feel free to update these with newer versions of the library as you see fit. 
+Feel free to update these with newer versions of the Vulkan as you see fit. 
 Libraries are installed in the following folders:
 
 - `templates/apple/Frameworks`
+- `templates/apple/Resources`
 - `templates/windows/dlls`
 - `templates/windows/libs`
 
-All versions of Vulkan use the vulkan loader (e.g. they do not statically link
-to vulkan) and provide support for validation layers.
+All versions of VulkanSDL use the Vulkan loader (e.g. they do not statically 
+link to Vulkan) and provide support for validation layers. We include headers 
+for `vma` and `glm` in addition to the Vulkan headers.
+
+Note that we do *not* include SPIRV tools with the build. On some platforms, 
+adding SPIRV to your application can add up to 1 GB to your footprint. This 
+is completely unacceptable for mobile applications. We assume that you compile
+all shaders to bytecode ahead of time using the Vulkan SDK.
 

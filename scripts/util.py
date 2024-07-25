@@ -592,11 +592,11 @@ def file_replace_after(path,data):
                 pos0 = contents.find(key,pos1)
                 if pos0 != -1:
                     pos0 += len(key)
-                pos1 = contents.find('\n',pos0)
-                if pos1 == -1:
-                    pos1 = len(contents)
-                contents = contents[:pos0]+data[key]+contents[pos1:]
-    
+                    pos1 = contents.find('\n',pos0)
+                    if pos1 == -1:
+                        pos1 = len(contents)
+                    contents = contents[:pos0]+data[key]+contents[pos1:]
+        
     if contents:
         with open(path, 'w') as file:
             file.write(contents)
@@ -701,9 +701,9 @@ def merge_copy(src,dst):
                 suffix = os.path.split(item)[1]
                 merge_copy(os.path.join(src,suffix),os.path.join(dst,suffix))
         else:
-            shutil.copytree(src,dst)
+            shutil.copytree(src,dst,symlinks=True)
     else:
-        shutil.copyfile(src,dst)
+        shutil.copyfile(src,dst,follow_symlinks=False)
 
 
 

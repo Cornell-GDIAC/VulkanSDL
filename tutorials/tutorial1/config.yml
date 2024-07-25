@@ -1,0 +1,30 @@
+---
+name:   Hello Triangle          # The application name
+short:  Tutorial1               # The "short" name (no spaces)
+appid:  git.overv.tutorial1     # Application identifier for Mac, iOS, Android
+suffix: G87CBFAC
+
+build:  build                   # The build directory (targets are each a subdirectory)
+assets: assets                  # The folder with the game assets (do not list asset)
+
+# This must be one of portrait, landscape, portrait-flipped, landscape-flipped,
+orientation: landscape          # The orientation for mobile devices
+
+icon: 
+    image:       icon.png       # The image file for the icon
+    background:  '#FFFFFF'      # The background color
+    transparent: true           # Whether to omit the background on desktops
+    rounded:     true           # Whether to use a round background on desktops
+
+
+includes:                       # The list of the include files
+    - source/extras/*.h
+
+sources:                        # The list of the source code files
+    - source/*.cpp
+
+targets:                        # The target platforms to build for
+    - android                   # Android Studio
+    - apple                     # XCode (note macOS and iOS use one project)
+    - windows                   # Windows Visual Studio
+    - cmake                     # This supports all Desktop platforms

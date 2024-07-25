@@ -3,7 +3,7 @@ Python Script for CMake Builds
 
 While CMake is naturally "out of source", there are still many reasons why we 
 want to autogenerate the CMake files. In particular, it makes it easier to link 
-in a new SDL base (as upgrades are released) without having to change any files 
+in a new CUGL base (as upgrades are released) without having to change any files 
 in the project.
 
 Note that, because of how CMake works, this script both autogenerates a new 
@@ -11,7 +11,7 @@ CMake file and then makes a separate build directory. For cleanliness, the
 new build directory is a subdirectory of the original build directory. This
 structure helps with Flatpak generation on Linux.
 
-Author:  Walker M. White
+Author: Walker M. White
 Version: 7/10/24
 """
 import os, os.path
