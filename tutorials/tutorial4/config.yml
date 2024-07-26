@@ -17,8 +17,7 @@ icon:
     rounded:     true           # Whether to use a round background on desktops
 
 
-includes: ~                     # The list of the include files
-
+includes: ~                     # The list of the include directories
 
 sources:                        # The list of the source code files (and/or headers)
     - source/*.h

@@ -1,13 +1,14 @@
 ---
-name:   Base Test               # The application name
-short:  Base                    # The "short" name (no spaces)
-appid:  edu.gdiac.sdldemo       # Application identifier for Mac, iOS, Android
+name:   Loading Models          # The application name
+short:  Tutorial6               # The "short" name (no spaces)
+appid:  git.overv.tutorial6     # Application identifier for Mac, iOS, Android
 suffix: true                    # Set to true to avoid global appid collisions
 
 build:  build                   # The build directory (targets are each a subdirectory)
 assets: assets                  # The folder with the game assets (do not list asset)
 
-orientation: portrait           # The orientation for mobile devices
+# This must be one of portrait, landscape, portrait-flipped, landscape-flipped,
+orientation: landscape          # The orientation for mobile devices
 
 icon: 
     image:       icon.png       # The image file for the icon
@@ -16,16 +17,15 @@ icon:
     rounded:     true           # Whether to use a round background on desktops
 
 
-includes: ~                     # The list of the include directories
+includes:                       # The list of the include directories
+    - source
 
-sources:                        # The list of the source code files
-    - source/main.cpp
-    - source/extras/*.h
-    - source/extras/*.cpp
+sources:                        # The list of the source code files (and/or headers)
+    - source/*.h
+    - source/*.cpp
 
-# This must be one of portrait, landscape, portrait-flipped, landscape-flipped,
 targets:                        # The target platforms to build for
     - android                   # Android Studio
     - apple                     # XCode (note macOS and iOS use one project)
-    - windows                   # Windows Sisual Studio
+    - windows                   # Windows Visual Studio
     - cmake                     # This supports all Desktop platforms

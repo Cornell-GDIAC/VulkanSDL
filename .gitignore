@@ -6,6 +6,7 @@
 **/.vs
 **/.gradle
 **/.cxx
+**/*.spv
 **/wmwhite.xcuserdatad
 vulkan/apple/*
 vulkan/include/*
