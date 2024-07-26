@@ -38,7 +38,7 @@ def setup():
     :return: The parsed args
     :rtype:  ``Namespace``
     """
-    parser = argparse.ArgumentParser(description='Create an SDLApp release.')
+    parser = argparse.ArgumentParser(description='Create a VulkanSDL release.')
     parser.add_argument('directory', type=str, nargs='?', default=DIRECTORY, help='The release directory')
     parser.add_argument('-v', '--version', type=str, help='The build version')
     parser.add_argument('-m', '--manifest', type=str, help='The build manifest')

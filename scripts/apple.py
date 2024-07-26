@@ -25,15 +25,10 @@ TYPE_APPLE = 0
 TYPE_MACOS = 1
 TYPE_IOS   = 2
 
-# The components of a pbxproj file
-PBX_SEQUENCE = ['PBXHeader','PBXBuildFile','PBXContainerItemProxy','PBXFileReference',
-                'PBXFrameworksBuildPhase','PBXGroup','PBXNativeTarget','PBXProject',
-                'PBXReferenceProxy','PBXResourcesBuildPhase','PBXSourcesBuildPhase',
-                'XCBuildConfiguration','XCConfigurationList','PBXFooter']
-
 # These are unique to the template project
 MAC_TARGET = 'EB0F3C9527FB9DCB0037CC66'
 IOS_TARGET = 'EBC7AEC127FBB41F001F1467'
+ALL_TARGET = 'XXXXXX'
 
 # The subbuild folder for the project
 MAKEDIR = 'apple'
@@ -48,44 +43,50 @@ SOURCE_EXT = ['.cpp', '.c', '.cc', '.cxx', '.m', '.mm','.asm', '.asmx','.swift']
 def parse_pbxproj(project):
     """
     Returns a dictionary composed of XCode objects
-    
+
     An XCode object is a single XCode entity representing a feature like a file,
-    a group, or a build setting. When we modify an XCode file, we do it by adding and
-    removing text at the object level. Parsing the XCode file into its component objects
-    makes it easier to modify.
-    
-    The resulting value is a dictionary that maps XCode PBX entries (see PBX_SEQUENCE)
-    to lists of objects (which are all strings).
-    
+    a group, or a build setting. When we modify an XCode file, we do it by adding
+    and removing text at the object level. Parsing the XCode file into its
+    component objects makes it easier to modify.
+
+    The resulting value is a dictionary that maps XCode PBX entries (represented
+    as strings) to lists of objects (which are also all strings).
+
     :param project: The Apple build directory
     :type project:  ``str``
-    
+
     :return: The dictionary of XCode objects
     :rtype:  ``dict``
     """
     source = os.path.join(project,'project.pbxproj')
-    contents = None
     with open(source) as file:
-        index = 0
-        state = PBX_SEQUENCE[index]
+        state = 'PBXHeader'
         block = []
         accum = None
         brace = 0
-        contents = {state:block}
+        contents = {'PBXOrder':[]}
+        contents[state] = block
+        contents['PBXOrder'].append(state)
         between  = False
-        
+
+        check = 0
         for line in file:
+            check += 1
             advance  = False
             if state != 'PBXFooter':
-                advance = ('/* Begin '+PBX_SEQUENCE[index+1]+' section */') in line
+                advance = '/* Begin' in line and 'section */' in line
+                if advance:
+                    pos = line.find('/* Begin ')+len('/* Begin ')
+                    state = line[pos:]
+                    pos = state.find('section */')
+                    state = state[:pos].strip()
+                    contents['PBXOrder'].append(state)
             complete = ('/* End '+state+' section */') in line
-            
-            if advance or (complete and index == len(PBX_SEQUENCE)-2):
+
+            if advance:
                 # Time to advance state
                 if accum:
                     block.append(accum)
-                index += 1
-                state = PBX_SEQUENCE[index]
                 block = []
                 accum = None
                 brace = 0
@@ -96,12 +97,24 @@ def parse_pbxproj(project):
             elif complete:
                 if accum and accum != '\n':
                     block.append(accum)
-                    between = True
-            elif not between:
+                between = True
+            elif between:
+                # Look for evidence of the end
+                if len(line.strip()) > 0:
+                    state = 'PBXFooter'
+                    contents['PBXOrder'].append(state)
+                    if accum:
+                        block.append(accum)
+                    block = []
+                    accum = line
+                    brace = 0
+                    contents[state] = block
+                    between = False
+            else:
                 # Now it is time to parse objects
                 brace += util.group_parity(line,'{}')
                 if brace < 0:
-                    print('ERROR: Braces mistmatch in pbxproj file')
+                    print('ERROR: Braces mismatch at line %d of pbxproj file' % check)
                     return None
                 else:
                     accum = line if accum is None else accum+line
@@ -109,10 +122,10 @@ def parse_pbxproj(project):
                         if accum != '\n':
                             block.append(accum)
                         accum = None
-        
+
         # Do not forget the footer
         block.append(accum)
-    
+
     return contents
 
 
@@ -128,14 +141,14 @@ def write_pbxproj(pbxproj,project):
     """
     path = os.path.join(project,'project.pbxproj')
     with open(path,'w') as file:
-        for state in pbxproj:
+        for state in pbxproj['PBXOrder']:
             if not state in ['PBXHeader', 'PBXFooter']:
                 file.write('/* Begin '+state+' section */\n')
             for item in pbxproj[state]:
-                #file.write(item.replace('__DISPLAY_NAME__',name))
                 file.write(item)
             if not state in ['PBXHeader', 'PBXFooter']:
                 file.write('/* End '+state+' section */\n\n')
+
 
 # Template specific functions
 def determine_orientation(orientation):
@@ -244,8 +257,8 @@ def place_project(config):
     dst  = os.path.join(build,'Resources')
     shutil.copytree(src, dst, symlinks=True, copy_function = shutil.copy)
 
-    # And the frameworks folder
-    src = os.path.join(config['sdl2'],'templates','apple','Frameworks')
+    # Copy frameworks from the Vulkan folder
+    src = os.path.join(config['sdl2'],'vulkan','apple')
     dst  = os.path.join(build,'Frameworks')
     shutil.copytree(src, dst, symlinks=True, copy_function = shutil.copy)
     
@@ -362,7 +375,7 @@ def reassign_pbxproj(config,pbxproj):
         if '__SDL_INCLUDE__' in section[pos]:
             section[pos] = section[pos].replace('__SDL_INCLUDE__','"$(SRCROOT)/'+sdl2dir+'/include"')
         if '__VULKAN_INCLUDE__' in section[pos]:
-            section[pos] = section[pos].replace('__VULKAN_INCLUDE__','"$(SRCROOT)/'+sdl2dir+'/extras"')
+            section[pos] = section[pos].replace('__VULKAN_INCLUDE__','"$(SRCROOT)/'+sdl2dir+'/vulkan/include"')
         if '__APPLE_INCLUDE__' in section[pos]:
             section[pos] = section[pos].replace(indent+'__APPLE_INCLUDE__,\n',allincludes)
         if '__MACOS_INCLUDE__' in section[pos]:

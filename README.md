@@ -14,26 +14,16 @@ Note that while this version of SDL App is intended for Vulkan apps, it still fu
 
 ## Dependencies
 
-VulkanSDL itself is a software release composed of the following packages:
+This repository does not contain any headers or binaries for supporting Vulkan. This is not necessary for Android or CMake, as those tools will search for the version of Vulkan installed on that platform. However, for Xcode and Visual Studio, you will need to install extra files in the `vulkan` folder. See the [instructions](vulkan/README.md) for what to 
+install.
+
+In addition to the VulkanSDK, VulkanSDL is a software release composed of the following packages:
 
 - SDL2, version 2.30.5
 - SDL2-Image, version 2.8.2
 - SDL2-TTF, version 2.20.1
 
-These are integrated by source. On mobile devices, these have to be built from source anyway, so we find it easiest to just to link these as submodules to this project.
-
-Whenever possible, we use the Vulkan installed on the deployment platform. However, for deployment, it is always ideal to keep the Vulkan version stable, so we include tested libraries for Windows and macOS/iOS.
-
-- **Windows**: VulkanSDK 1.3.290
-- **macOS**: MoltenVK 1.2.5 (newer versions have an issue)
-- **iOS**: MoltenVK 1.2.10
-
-Feel free to update these with newer versions of the library as you see fit. Libraries are installed in the following folders:
-
-- `templates/apple/Frameworks`
-- `templates/windows/dlls`
-- `templates/windows/libs`
-
+These are integrated by source. On mobile devices, these have to be built from source anyway, so we find it easiest to just to link these as submodules to this project. They can be found in the `components` folder.
 
 ## Building VulkanSDL
 
@@ -42,6 +32,8 @@ VulkanSDL is a source code release (with minimal dynamic libraries). Therefore, 
 	python build.py [<directory>]
 
 You will need the module [PyYAML](https://pyyaml.org) to run this command. The optional `<directory>` is the location to store the release. By default it is stored  in a folder called `release`.  The version of the package can be set with the optional flag, `-v, --version`.
+
+Note that you should populate the `vulkan` folder with the necessar [headers and libraries](vulkan/README.md) before creating a release.
 
 ## Demos
 

@@ -14,7 +14,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := main
 LOCAL_C_INCLUDES := $(SDL2_PATH)/include
-LOCAL_C_INCLUDES += $(SDL2_PATH)/extras
+LOCAL_C_INCLUDES += $(SDL2_PATH)/vulkan/include
 __EXTRA_INCLUDES__
 
 # Add your application source files here.

@@ -8,6 +8,9 @@
 **/.cxx
 **/*.spv
 **/wmwhite.xcuserdatad
+vulkan/apple/*
+vulkan/include/*
+vulkan/windows/*
 docs
 token.txt
 analysis

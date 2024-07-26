@@ -127,7 +127,7 @@ def get_config(args):
     
     
     if args.symlink:
-        dst = os.path.abspath(os.path.join(data['sdl2'],'extras','SDL'))
+        dst = os.path.abspath(os.path.join(data['sdl2'],'vulkan','include','SDL'))
         if not os.path.exists(dst):
             src = os.path.abspath(os.path.join(data['sdl2'],'include'))
             dir = os.path.dirname(dst)

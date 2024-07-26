@@ -23,7 +23,71 @@ from . import util
 
 # The subbuild folder for cmake
 MAKEDIR = 'cmake'
-# The subfolder for containing the results
+
+# Supported header extensions
+HEADER_EXT = ['.h', '.hh', '.hpp', '.hxx', '.hm', '.inl', '.inc']
+# Supportes source extensions
+SOURCE_EXT = ['.cpp', '.c', '.cc', '.cxx', '.m', '.mm','.asm', '.asmx','.swift']
+
+
+def expand_cmake_sources(path, filetree):
+    """
+    Returns the string of source files to insert into CMake file
+    
+    This string should replace __SOURCE_FILES__ in the makefile.
+    
+    :param path: The path to the root directory for the filters
+    :type path:  ``str1``
+    
+    :param filetree: The file tree storing both files and filters
+    :type filetree:  ``dict``
+    
+    :return: The string of source files to insert into Android.mk
+    :rtype:  ``str``
+    """
+    result = ''
+    for key in filetree:
+        # Recurse on directories
+        if type(filetree[key]) == dict:
+            result += expand_cmake_sources(path+'/'+key,filetree[key])
+        else:
+            category = filetree[key]
+            if category in ['all', 'cmake'] and os.path.splitext(key)[1] in SOURCE_EXT:
+                result += '\n    %s/%s' % (path,key)
+    return result
+
+
+def expand_cmake_includes(path, filetree):
+    """
+    Returns a set of directories to add to CMake for inclusion
+    
+    :param path: The path to the root directory for the filters
+    :type path:  ``str1``
+    
+    :param filetree: The file tree storing both files and filters
+    :type filetree:  ``dict``
+    
+    :return: A set of directories to add to Android.mk for inclusion
+    :rtype:  ``set``
+    """
+    result = set()
+    for key in filetree:
+        # Recurse on directories
+        if type(filetree[key]) == dict:
+            if path is None:
+                result.update(expand_cmake_includes(key,filetree[key]))
+            else:
+                result.update(expand_cmake_includes(path+'/'+key,filetree[key]))
+        else:
+            category = filetree[key]
+            if category in ['all', 'cmake'] and not (os.path.splitext(key)[1] in SOURCE_EXT):
+                if path is None:
+                    result.add('')
+                else:
+                    result.add(path)
+
+    return result
+
 
 def place_project(config):
     """
@@ -112,32 +176,28 @@ def config_cmake(config,project):
     context['__ASSETDIR__'] = util.path_to_posix(assetdir)
 
     # Set the sources
-    srclist = []
-    entries = config['sources'][:]
-
-    if 'cmake' in config and 'sources' in config['cmake']:
-        if type(config['cmake']['sources']) == list:
-            entries += config['cmake']['sources']
-        elif config['cmake']['sources']:
-            entries.append(config['cmake']['sources'])
-
-    for item in entries:
-        path = os.path.join(*prefix,config['build_to_root'],item)
-        path = util.path_to_posix(path)
-        srclist.append(path)
-
-    context['__SOURCELIST__'] = '\n    '.join(srclist)
+    filetree = config['source_tree']
+    localdir = os.path.join(*prefix,config['build_to_root'])
+    localdir = '${PROJECT_SOURCE_DIR}/'+util.path_to_posix(localdir)
+    if len(config['source_tree']) == 1:
+        key = list(config['source_tree'].keys())[0]
+        localdir += '/'+util.path_to_posix(key)
+        filetree = filetree[key]
+    context['__SOURCELIST__'] = expand_cmake_sources(localdir,filetree)
 
     # Set the include directories
     inclist = []
     entries = config['include_dict']
     inclist.extend(entries['all'] if ('all' in entries and entries['all']) else [])
     inclist.extend(entries['cmake'] if ('cmake' in entries and entries['cmake']) else [])
-
+    
+    for item in expand_cmake_includes(None,filetree):
+        inclist.append(item)
+    
     incstr = ''
     for item in inclist:
         path = os.path.join(*prefix,config['build_to_root'],item)
-        path = util.path_to_posix(path)
+        path = '${PROJECT_SOURCE_DIR}/'+util.path_to_posix(path)
         incstr += 'list(APPEND EXTRA_INCLUDES "'+path+'")\n'
     context['__EXTRA_INCLUDES__'] = incstr
 

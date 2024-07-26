@@ -31,7 +31,7 @@ copy:
   filter: true
   selection: '*.h'
 - directory: components/SDL_Image/include
-  destination: headers/SDL
+  destination: include
   filter: true
   selection: '*.h'
 - directory: components/SDL_Image/external/libtiff/libtiff
@@ -48,7 +48,7 @@ copy:
 - file: components/SDL_ttf/SDL_ttf.h
   destination: include/SDL_ttf.h
 - file: components/SDL_ttf/SDL_ttf.h
-  destination: headers/SDL/SDL_ttf.h
+  destination: include/SDL_ttf.h
 - directory: components/SDL_ttf/external/freetype/src
   destination: external/freetype/src
   filter: false
@@ -80,13 +80,13 @@ copy:
 - directory: include
   destination: include
   filter: false
-- directory: include
-  destination: headers/SDL
-  filter: false
 # These files need post-process modifications
-- comment: "Copying SDL app buildfiles"
+- comment: "Copying VulkanSDL buildfiles"
 - directory: buildfiles
   destination: buildfiles
+  filter: false
+- directory: vulkan
+  destination: vulkan
   filter: false
 - directory: templates
   destination: templates

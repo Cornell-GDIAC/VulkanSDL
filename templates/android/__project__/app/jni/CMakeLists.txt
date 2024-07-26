@@ -35,12 +35,11 @@ set(ASSET_DIR  __ASSETDIR__)
 # Add the SDL App project
 add_subdirectory(${SDL2_DIR}/buildfiles/cmake "vulkansdl.dir")
 list(APPEND EXTRA_INCLUDES "${SDL2_DIR}/include")
-list(APPEND EXTRA_INCLUDES "${SDL2_DIR}/extras")
+list(APPEND EXTRA_INCLUDES "${SDL2_DIR}/vulkan/include")
 __EXTRA_INCLUDES__
 
 # Add the source code
-file(GLOB SOURCE_FILES
-    __SOURCELIST__)
+file(GLOB SOURCE_FILES __SOURCELIST__)
 
 # Build and link
 if (USE_VULKAN)

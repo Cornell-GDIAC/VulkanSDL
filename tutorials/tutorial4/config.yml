@@ -1,13 +1,14 @@
 ---
-name:   Base Test               # The application name
-short:  Base                    # The "short" name (no spaces)
-appid:  edu.gdiac.sdldemo       # Application identifier for Mac, iOS, Android
-suffix: true                    # Set to true to avoid global appid collisions
+name:   Texture Mapping         # The application name
+short:  Tutorial4               # The "short" name (no spaces)
+appid:  git.overv.tutorial4     # Application identifier for Mac, iOS, Android
+suffix: GADC0F55
 
 build:  build                   # The build directory (targets are each a subdirectory)
 assets: assets                  # The folder with the game assets (do not list asset)
 
-orientation: portrait           # The orientation for mobile devices
+# This must be one of portrait, landscape, portrait-flipped, landscape-flipped,
+orientation: landscape          # The orientation for mobile devices
 
 icon: 
     image:       icon.png       # The image file for the icon
@@ -15,16 +16,16 @@ icon:
     transparent: true           # Whether to omit the background on desktops
     rounded:     true           # Whether to use a round background on desktops
 
-includes: ~                      # The list of addition include directories
 
-sources:                        # The list of the source code files
-    - source/main.cpp
-    - source/extras/*.h
-    - source/extras/*.cpp
+includes: ~                     # The list of the include files
 
-# This must be one of portrait, landscape, portrait-flipped, landscape-flipped,
+
+sources:                        # The list of the source code files (and/or headers)
+    - source/*.h
+    - source/*.cpp
+
 targets:                        # The target platforms to build for
     - android                   # Android Studio
     - apple                     # XCode (note macOS and iOS use one project)
-    - windows                   # Windows Sisual Studio
+    - windows                   # Windows Visual Studio
     - cmake                     # This supports all Desktop platforms
