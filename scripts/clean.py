@@ -57,6 +57,26 @@ def fix_configs(path):
                     file.write(contents)
 
 
+def remove_suffix(path,suffix):
+    """
+    Recursively removes all files with the given suffix from the path.
+    
+    :param path: The directory to search
+    :type path:  ``str``
+
+    :param suffix: The file suffix to filter
+    :type suffix:  ``str``
+    """
+    for item in os.listdir(path):
+        fullpath = os.path.join(path,item)
+        if os.path.isdir(fullpath):
+            remove_suffix(fullpath,suffix)
+        elif os.path.isfile(fullpath):
+            end = os.path.splitext(fullpath)[1]
+            if suffix == end:
+                os.remove(fullpath)
+
+
 def main():
     """
     Runs the clean-up script
@@ -68,6 +88,7 @@ def main():
 
     path = os.path.join(root,util.posix_to_path(args.directory))
     fix_configs(path)
+    remove_suffix(path,'.spv')
 
 
 if __name__ == '__main__':
