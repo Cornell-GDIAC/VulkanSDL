@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include <SDL_vulkan.h>
+#include <SDL_app.h>
 #include <vulkan/vulkan.h>
 
 #include <glm/glm.hpp>
@@ -1127,9 +1128,8 @@ private:
     }
 
     static std::vector<char> readFile(const std::string& filename) {
-        // Android does NOT have a normal file system. CANNOT use ifstream
-        const char* base = SDL_GetBasePath();
-        std::string path = base == NULL ? filename : std::string(base)+filename;
+        // APP_GetAssetPath is an SDL_app extension pointing to the asset directory
+        std::string path = std::string(APP_GetAssetPath())+filename;
         SDL_RWops* file = SDL_RWFromFile(path.c_str(), "rb");
         
         if (file == NULL) {

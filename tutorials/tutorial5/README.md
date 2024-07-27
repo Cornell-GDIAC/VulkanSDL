@@ -6,6 +6,11 @@ This code is the depth buffering tutorial from the
 tutorial from the original beyond what was necessary for the previous tutorial
 on texture mapping.
 
+To build this tutorial, you will first need to compile the shaders in the
+`assets/shaders` directory using the right script for your platform. Then
+link this tutorial to VulkanSDL using the python script. No additional
+configuration is necessary.
+
 This code is presented without comments to make it easier to diff against the 
 original.  People who know me are aware of how painful it is for me to let code 
 go without spec comments.

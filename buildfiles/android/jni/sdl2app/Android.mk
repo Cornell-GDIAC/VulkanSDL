@@ -25,9 +25,10 @@ LOCAL_C_INCLUDES += $(SDL2_APP_PATH)/include
 
 LOCAL_SRC_FILES :=  \
 	$(subst $(LOCAL_PATH)/,, \
+	$(LOCAL_PATH)/APP_appinfo.c \
 	$(LOCAL_PATH)/APP_device.c \
 	$(LOCAL_PATH)/APP_display.c \
-	$(LOCAL_PATH)/APP_version.c \
+	$(LOCAL_PATH)/android/APP_sysappinfo.c \
 	$(LOCAL_PATH)/android/APP_sysdevice.c \
 	$(LOCAL_PATH)/android/APP_sysdisplay.c)
 

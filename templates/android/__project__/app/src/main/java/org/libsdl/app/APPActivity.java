@@ -51,7 +51,9 @@ public class APPActivity extends SDLActivity {
     protected static Rect mSafeInsets;
     /** Whether or not a cutout exists */
     protected static boolean hasCutout;
-
+    /** The package name of this application */
+    protected static String packageName;
+    
     /**
      * Initializes this activity.
      *
@@ -106,6 +108,7 @@ public class APPActivity extends SDLActivity {
         mDeviceOrientation = new DeviceOrientation(mDefaultOrientation == SDL_ORIENTATION_PORTRAIT);
         mInitialOrientation = mCurrentOrientation;
         computeSafeInsets();
+        packageName = getApplicationContext().getPackageName();
     }
 
     /**
@@ -372,8 +375,8 @@ public class APPActivity extends SDLActivity {
     /**
      * Returns the model of this device
      *
-     * This value is typically Build.MODEL, unless it is missing manufacturer information.
-     * In that case, we append the manufacturer to Build.MODEL.
+     * This value is typically Build.MODEL, unless it is missing manufacturer 
+     * information. In that case, we append the manufacturer to Build.MODEL.
      *
      * @return the model of this device
      */
@@ -391,8 +394,8 @@ public class APPActivity extends SDLActivity {
     /**
      * Returns the OS version of this device
      *
-     * This value is the version number (we do not use Android code names) together with the
-     * date of the latest patch.
+     * This value is the version number (we do not use Android code names) 
+     * together with the date of the latest patch.
      *
      * @return the OS version of this device
      */
@@ -403,13 +406,25 @@ public class APPActivity extends SDLActivity {
     /**
      * Returns the Android ID of this device
      *
-     * This is a unique identifier for the device that does not require special privileges (like
-     * the serial number does). While this number can be reassigned, it is generally stable enough
-     * to use for app tracking.
+     * This is a unique identifier for the device that does not require special 
+     * privileges (like the serial number does). While this number can be 
+     * reassigned, it is generally stable enough to use for app tracking.
      *
      * @return the Android ID of this device
      */
     public static String getDeviceID() {
         return Secure.getString(getContext().getContentResolver(), Secure.ANDROID_ID);
+    }
+
+    /**
+     * Returns the id of this application
+     *
+     * This is the unique identifier for the application. No device can have two
+     * applications with the same identifier.
+     *
+     * @return the id of this application
+     */
+    public static String getApplicationID() {
+        return packageName;
     }
 }

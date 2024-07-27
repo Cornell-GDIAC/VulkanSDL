@@ -41,6 +41,8 @@
 
 /**
  * System dependent version of APP_GetAppID
+ * 
+ * @return the application id as defined by the configuration file.
  */
 const char* APP_SYS_GetAppID() {
     static std::string APPID;
@@ -50,11 +52,10 @@ const char* APP_SYS_GetAppID() {
         CString resource;
         if (resource.LoadString(APPID_STRING)) {
             char* utf8 = SDL_iconv_string("UTF-8", "UTF-16LE",
-                (char*)((LPCTSTR)resource),
-                (SDL_wcslen((LPCTSTR)resource) + 1) * sizeof(WCHAR));
+                                          (char*)((LPCTSTR)resource),
+                                          (SDL_wcslen((LPCTSTR)resource) + 1) * sizeof(WCHAR));
 
             APPID = utf8;
-
             SDL_free(utf8);
         }
     }
@@ -75,6 +76,8 @@ const char* APP_SYS_GetAppID() {
 
 /**
  * System dependent version of APP_GetAssetPath
+ * 
+ * @return the path to the application asset directory
  */
 const char* APP_SYS_GetAssetPath() {
     static std::string ASSETDIR;
@@ -83,9 +86,13 @@ const char* APP_SYS_GetAssetPath() {
         WCHAR* path = (WCHAR*)SDL_malloc(bufflen * sizeof(WCHAR));
         GetCurrentDirectory(bufflen, path);
 
-        char* utf8 = SDL_iconv_string("UTF-8", "UTF-16LE", (char*)(path), (SDL_wcslen(path) + 1) * sizeof(WCHAR));
+        char* utf8 = SDL_iconv_string("UTF-8", "UTF-16LE", 
+                                      (char*)(path), 
+                                      (SDL_wcslen(path) + 1) * sizeof(WCHAR));
 
         ASSETDIR = utf8;
+        ASSETDIR.append("\\");
+
         SDL_free(utf8);
         SDL_free(path);
     } else {

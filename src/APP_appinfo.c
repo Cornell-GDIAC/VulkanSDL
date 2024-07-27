@@ -33,17 +33,19 @@
 /**
  * Returns the application id as defined by the configuration file.
  *
- * The app id has many incarnations. It is the bundle identifier for iOS
+ * The app id has many incarnations. It is the bundle identifier for iOS 
  * and macOS apps. It is the package name for Android apps. This function
  * provides a uniform way of accessing this value.
- *
+ * 
  * Almost all applications built by SDL_app will have such an identifier.
- * On Windows apps, it is stored in the application resource file. As a
- * fallback, all command line applications (including Linux) will store
+ * On Windows apps, it is stored in the application resource file. As a 
+ * fallback, all command line applications (including Linux) will store 
  * it in a file called appid.info in the asset directory. However, if the
  * platform does not have a native interpretation of appid, and the file
  * appid.info cannot be found, this function returns NULL.
  *
+ * The string returned has static lifetime and does not need to be freed.
+ * 
  * @return the application id as defined by the configuration file.
  */
 const char* APP_GetAppID(void) {
@@ -55,18 +57,20 @@ const char* APP_GetAppID(void) {
  *
  * This function is essentially the same as SDL_GetBasePath with two minor
  * changes, both designed to make that function a little easier to work
- * with. The first difference is on Android. For that platform, this
- * function returns the empty string instead of NULL, simplifying path
- * concatentation.
+ * with. The first difference is on Android. For that platform, this 
+ * function returns the empty string instead of NULL, simplifying path 
+ * concatentation. 
  *
  * But the biggest change is on Windows. We do not want to have to copy
  * the asset files into the build folder if we are using the Visual Studio
- * debugger. So this function returns the debugger's working directory if
+ * debugger. So this function returns the debugger's working directory if 
  * it is active. Otherwise it returns SDL_GetBasePath().
  *
+ * The string returned has static lifetime and does not need to be freed.
+ * 
  * @return the path to the application asset directory
  */
-const char* APP_GetAssetPath() {
+const char* APP_GetAssetPath(void) {
     return APP_SYS_GetAssetPath();
 }
 
@@ -76,11 +80,13 @@ const char* APP_GetAssetPath() {
  * This allows the program to query the versions of the various libaries that
  * SDL_app depends on.
  *
+ * The string returned has static lifetime and does not need to be freed.
+ *
  * @param dep   The library dependency
  *
  * @return the version of the given SDL dependency
  */
-const char* APP_GetVersion(APP_Dependency dep) {
+const char* APP_GetSDLVersion(APP_Dependency dep) {
     switch (dep) {
         case APP_DEPENDENCY_SDL:
             return "2.30.5";

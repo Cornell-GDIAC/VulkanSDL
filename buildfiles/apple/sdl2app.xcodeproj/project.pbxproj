@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EB29CE892C55611900DBF3DD /* APP_appinfo.c in Sources */ = {isa = PBXBuildFile; fileRef = EB29CE882C55611900DBF3DD /* APP_appinfo.c */; };
+		EB29CE8A2C55611900DBF3DD /* APP_appinfo.c in Sources */ = {isa = PBXBuildFile; fileRef = EB29CE882C55611900DBF3DD /* APP_appinfo.c */; };
+		EB29CE8E2C55613C00DBF3DD /* APP_sysappinfo.m in Sources */ = {isa = PBXBuildFile; fileRef = EB29CE8D2C55613C00DBF3DD /* APP_sysappinfo.m */; };
+		EB29CE902C55614900DBF3DD /* APP_sysappinfo.m in Sources */ = {isa = PBXBuildFile; fileRef = EB29CE8F2C55614900DBF3DD /* APP_sysappinfo.m */; };
 		EB5150D32C322B1C00DA7B09 /* APP_device.c in Sources */ = {isa = PBXBuildFile; fileRef = EB5150D22C322B1C00DA7B09 /* APP_device.c */; };
 		EB5150D42C322B1C00DA7B09 /* APP_device.c in Sources */ = {isa = PBXBuildFile; fileRef = EB5150D22C322B1C00DA7B09 /* APP_device.c */; };
 		EB5150D62C32F1C900DA7B09 /* APP_sysdevice.m in Sources */ = {isa = PBXBuildFile; fileRef = EB5150D52C32F1C900DA7B09 /* APP_sysdevice.m */; };
@@ -15,10 +19,8 @@
 		EB5D7556293D5E7300B318A8 /* libsdl2image.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EB5D7549293D5E5F00B318A8 /* libsdl2image.a */; };
 		EB85F220293D6A4A009AC4A8 /* libsdl2ttf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EBB10C31293D678B00F11D7F /* libsdl2ttf.a */; };
 		EB8A28552B0D9AD8005BF406 /* libsdl2-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EBA377062B0C2681001427EA /* libsdl2-ios.a */; platformFilter = ios; };
-		EBA377512B0C2A4C001427EA /* APP_version.c in Sources */ = {isa = PBXBuildFile; fileRef = EBA3774D2B0C2A4C001427EA /* APP_version.c */; };
 		EBA377522B0C2A4C001427EA /* APP_display.c in Sources */ = {isa = PBXBuildFile; fileRef = EBA377502B0C2A4C001427EA /* APP_display.c */; };
 		EBA377532B0C2A50001427EA /* APP_display.c in Sources */ = {isa = PBXBuildFile; fileRef = EBA377502B0C2A4C001427EA /* APP_display.c */; };
-		EBA377542B0C2A59001427EA /* APP_version.c in Sources */ = {isa = PBXBuildFile; fileRef = EBA3774D2B0C2A4C001427EA /* APP_version.c */; };
 		EBA377592B0C30B8001427EA /* APP_sysdisplay.m in Sources */ = {isa = PBXBuildFile; fileRef = EBA377582B0C30B8001427EA /* APP_sysdisplay.m */; };
 		EBA3775C2B0C33E6001427EA /* APP_sysdisplay.m in Sources */ = {isa = PBXBuildFile; fileRef = EBA3775A2B0C33DC001427EA /* APP_sysdisplay.m */; };
 		EBA3775D2B0C3B4E001427EA /* libsdl2-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EBA377042B0C2681001427EA /* libsdl2-mac.a */; platformFilters = (maccatalyst, macos, ); };
@@ -64,6 +66,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		EB29CE882C55611900DBF3DD /* APP_appinfo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = APP_appinfo.c; sourceTree = "<group>"; };
+		EB29CE8B2C55612500DBF3DD /* APP_sysappinfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APP_sysappinfo.h; sourceTree = "<group>"; };
+		EB29CE8C2C55613200DBF3DD /* APP_sysappinfo.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = APP_sysappinfo.c; sourceTree = "<group>"; };
+		EB29CE8D2C55613C00DBF3DD /* APP_sysappinfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = APP_sysappinfo.m; sourceTree = "<group>"; };
+		EB29CE8F2C55614900DBF3DD /* APP_sysappinfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = APP_sysappinfo.m; sourceTree = "<group>"; };
 		EB5150D12C322B1C00DA7B09 /* APP_sysdevice.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = APP_sysdevice.h; sourceTree = "<group>"; };
 		EB5150D22C322B1C00DA7B09 /* APP_device.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = APP_device.c; sourceTree = "<group>"; };
 		EB5150D52C32F1C900DA7B09 /* APP_sysdevice.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = APP_sysdevice.m; sourceTree = "<group>"; };
@@ -74,7 +81,6 @@
 		EB7089351CD51810005B1025 /* libsdlapp-mac.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libsdlapp-mac.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EBA376FE2B0C2681001427EA /* sdl2.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = sdl2.xcodeproj; sourceTree = "<group>"; };
 		EBA377222B0C27D4001427EA /* SDL_app.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_app.h; sourceTree = "<group>"; };
-		EBA3774D2B0C2A4C001427EA /* APP_version.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = APP_version.c; sourceTree = "<group>"; };
 		EBA3774E2B0C2A4C001427EA /* APP_sysdisplay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APP_sysdisplay.h; sourceTree = "<group>"; };
 		EBA377502B0C2A4C001427EA /* APP_display.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = APP_display.c; sourceTree = "<group>"; };
 		EBA377562B0C30A8001427EA /* APP_sysdisplay.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = APP_sysdisplay.c; sourceTree = "<group>"; };
@@ -137,11 +143,12 @@
 		EBA377212B0C27B6001427EA /* source */ = {
 			isa = PBXGroup;
 			children = (
+				EB29CE8B2C55612500DBF3DD /* APP_sysappinfo.h */,
 				EB5150D12C322B1C00DA7B09 /* APP_sysdevice.h */,
 				EBA3774E2B0C2A4C001427EA /* APP_sysdisplay.h */,
+				EB29CE882C55611900DBF3DD /* APP_appinfo.c */,
 				EB5150D22C322B1C00DA7B09 /* APP_device.c */,
 				EBA377502B0C2A4C001427EA /* APP_display.c */,
-				EBA3774D2B0C2A4C001427EA /* APP_version.c */,
 				EBA377552B0C3092001427EA /* dummy */,
 				EBA3774B2B0C2A23001427EA /* ios */,
 				EBA3774C2B0C2A2A001427EA /* macos */,
@@ -153,6 +160,7 @@
 		EBA3774B2B0C2A23001427EA /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				EB29CE8D2C55613C00DBF3DD /* APP_sysappinfo.m */,
 				EB5150FD2C3303C300DA7B09 /* APP_sysdevice.m */,
 				EBA3775A2B0C33DC001427EA /* APP_sysdisplay.m */,
 			);
@@ -162,6 +170,7 @@
 		EBA3774C2B0C2A2A001427EA /* macos */ = {
 			isa = PBXGroup;
 			children = (
+				EB29CE8F2C55614900DBF3DD /* APP_sysappinfo.m */,
 				EB5150D52C32F1C900DA7B09 /* APP_sysdevice.m */,
 				EBA377582B0C30B8001427EA /* APP_sysdisplay.m */,
 			);
@@ -172,6 +181,7 @@
 		EBA377552B0C3092001427EA /* dummy */ = {
 			isa = PBXGroup;
 			children = (
+				EB29CE8C2C55613200DBF3DD /* APP_sysappinfo.c */,
 				EB5151262C331EF400DA7B09 /* APP_sysdevice.c */,
 				EBA377562B0C30A8001427EA /* APP_sysdisplay.c */,
 			);
@@ -257,7 +267,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1430;
+				LastUpgradeCheck = 1520;
 				ORGANIZATIONNAME = "Simple DirectMedia Layer";
 				TargetAttributes = {
 					EB7089271CD517C2005B1025 = {
@@ -345,8 +355,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				EB5150FE2C3303C300DA7B09 /* APP_sysdevice.m in Sources */,
-				EBA377542B0C2A59001427EA /* APP_version.c in Sources */,
+				EB29CE8E2C55613C00DBF3DD /* APP_sysappinfo.m in Sources */,
 				EBA377532B0C2A50001427EA /* APP_display.c in Sources */,
+				EB29CE8A2C55611900DBF3DD /* APP_appinfo.c in Sources */,
 				EB5150D42C322B1C00DA7B09 /* APP_device.c in Sources */,
 				EBA3775C2B0C33E6001427EA /* APP_sysdisplay.m in Sources */,
 			);
@@ -357,8 +368,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				EB5150D62C32F1C900DA7B09 /* APP_sysdevice.m in Sources */,
+				EB29CE902C55614900DBF3DD /* APP_sysappinfo.m in Sources */,
 				EBA377522B0C2A4C001427EA /* APP_display.c in Sources */,
-				EBA377512B0C2A4C001427EA /* APP_version.c in Sources */,
+				EB29CE892C55611900DBF3DD /* APP_appinfo.c in Sources */,
 				EB5150D32C322B1C00DA7B09 /* APP_device.c in Sources */,
 				EBA377592B0C30B8001427EA /* APP_sysdisplay.m in Sources */,
 			);
@@ -421,6 +433,7 @@
 				CLANG_X86_VECTOR_INSTRUCTIONS = default;
 				CODE_SIGN_IDENTITY = "";
 				COPY_PHASE_STRIP = YES;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = NO;
 				EXECUTABLE_PREFIX = lib;
 				GCC_C_LANGUAGE_STANDARD = c11;
@@ -452,6 +465,7 @@
 				CLANG_X86_VECTOR_INSTRUCTIONS = default;
 				CODE_SIGN_IDENTITY = "";
 				COPY_PHASE_STRIP = YES;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_NS_ASSERTIONS = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = NO;
 				EXECUTABLE_PREFIX = lib;
@@ -508,11 +522,13 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 2.14.0;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DYLIB_COMPATIBILITY_VERSION = 2.1.0;
 				DYLIB_CURRENT_VERSION = 2.1.0;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -580,11 +596,13 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 2.14.0;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 2.1.0;
 				DYLIB_CURRENT_VERSION = 2.1.0;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;

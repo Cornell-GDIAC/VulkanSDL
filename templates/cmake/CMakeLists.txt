@@ -155,4 +155,4 @@ if (MSVC)
 endif()
 
 # This a command line app. Write appid.info
-file(WRITE "${CMAKE_BINARY_DIR}/install/appid.info", "__APP_ID__")
+file(WRITE "${CMAKE_BINARY_DIR}/install/appid.info" "__APP_ID__")

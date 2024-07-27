@@ -2,7 +2,7 @@
 name:   Hello Triangle          # The application name
 short:  Tutorial1               # The "short" name (no spaces)
 appid:  git.overv.tutorial1     # Application identifier for Mac, iOS, Android
-suffix: true                    # Set to true to avoid global appid collisions
+suffix: G87CBFAC
 
 build:  build                   # The build directory (targets are each a subdirectory)
 assets: assets                  # The folder with the game assets (do not list asset)

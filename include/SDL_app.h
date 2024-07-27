@@ -169,8 +169,12 @@ extern DECLSPEC SDL_DisplayOrientation APP_GetDefaultOrientation(int displayInde
  * Returns the name of this device
  *
  * Typically this resolves to the user-visible name of this host (e.g. phone
- * or computer name). For Unix devices, this is the same as HOSTNAME. If the
- * value cannot be determined, this returns the empty string.
+ * or computer name). However, this is not guaranteed. In some cases it may
+ * resolve to the name of the volume on which this application is being run.
+ * In other cases (iPhone) it may simply resolve to the device model, in
+ * compliance with Apple's privacy model.
+ *
+ * The string returned has static lifetime and does not need to be freed.
  *
  * @return the name of this device
  */
@@ -184,7 +188,9 @@ extern DECLSPEC const char* APP_GetDeviceName(void);
  * to sysctl. For mobile devices it is the vendor model. Note that the result
  * may be a code internal to the vendor (e.g. iPhone15,3).
  *
- * If the value cannot be determined, this returns "UNKNOWN"
+ * If the value cannot be determined, this returns "UNKNOWN".
+ *
+ * The string returned has static lifetime and does not need to be freed.
  *
  * @return the model of this device
  */
@@ -195,7 +201,9 @@ extern DECLSPEC const char* APP_GetDeviceModel(void);
  *
  * This value returned will be a generic name like "Windows" or "macOS". For
  * the version, use {@link APP_GetDeviceOSVersion}. If the value cannot be 
- * determined, this returns "UNKNOWN"
+ * determined, this returns "UNKNOWN".
+ *
+ * The string returned has static lifetime and does not need to be freed.
  *
  * @return the operating system running this device
  */
@@ -208,6 +216,8 @@ extern DECLSPEC const char* APP_GetDeviceOS(void);
  * form) such as "13.6.5". However, the exact representation is platform
  * dependent. It the version cannot be determined, this function will return
  * "UNKNOWN".
+ *
+ * The string returned has static lifetime and does not need to be freed.
  *
  * @return the operating system version of this device
  */
@@ -230,6 +240,8 @@ extern DECLSPEC const char* APP_GetDeviceOSVersion(void);
  * not possible to obtain a unique identifier, this function returns the empty
  * string.
  *
+ * The string returned has static lifetime and does not need to be freed.
+ *
  * @return a unique identifier for this device
  */
 extern DECLSPEC const char* APP_GetDeviceID(void);
@@ -251,10 +263,12 @@ extern DECLSPEC const char* APP_GetDeviceID(void);
  * it in a file called appid.info in the asset directory. However, if the
  * platform does not have a native interpretation of appid, and the file
  * appid.info cannot be found, this function returns NULL.
+ *
+ * The string returned has static lifetime and does not need to be freed.
  * 
  * @return the application id as defined by the configuration file.
  */
-extern DECLSPEC const char* APP_GetAppID();
+extern DECLSPEC const char* APP_GetAppID(void);
 
 /**
  * Returns the path to the application asset directory
@@ -269,10 +283,12 @@ extern DECLSPEC const char* APP_GetAppID();
  * the asset files into the build folder if we are using the Visual Studio
  * debugger. So this function returns the debugger's working directory if 
  * it is active. Otherwise it returns SDL_GetBasePath().
+ *
+ * The string returned has static lifetime and does not need to be freed.
  * 
  * @return the path to the application asset directory
  */
-extern DECLSPEC const char* APP_GetAssetPath();
+extern DECLSPEC const char* APP_GetAssetPath(void);
 
 /** An enumeration of the libraries used by SDL_App */
 typedef enum APP_Dependency {
@@ -293,6 +309,8 @@ typedef enum APP_Dependency {
  *
  * This allows the program to query the versions of the various libaries that
  * SDL_app depends on.
+ *
+ * The string returned has static lifetime and does not need to be freed.
  *
  * @param dep   The library dependency
  *

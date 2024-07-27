@@ -4,7 +4,7 @@
  *
  * This library is built on the assumption that an application built for SDL
  * will contain its own versions of the SDL libraries (either statically linked
- * or packaged with a specific set of dynamic libraries). While this is not
+ * or packaged with a specific set of dynamic libraries).  While this is not
  * considered the right way to do it on Unix, it makes one step installation
  * easier for Mac and Windows. It is also the only way to create SDL apps for
  * mobile devices.
@@ -27,32 +27,64 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
-#ifndef __APP_SYS_DISPLAY_H__
-#define __APP_SYS_DISPLAY_H__
-#include "SDL_app.h"
+#include "../APP_sysappinfo.h"
+#include "string.h"
 
-/**
- *  \file APP_sysappinfo.h
- *
- *  \brief Include file for application-specific information
- *  \author Walker M. White
- */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define MAX_SIZE 1024
+#define MAX_PATH 4096 // Linux max
 
 /**
  * System dependent version of APP_GetAppID
+ * 
+ * @return the application id as defined by the configuration file.
  */
-extern const char* APP_SYS_GetAppID(void);
+const char* APP_SYS_GetAppID(void) {
+    static char app_id[MAX_SIZE];
+
+	char* base = SDL_GetBasePath();
+	size_t len = strlen(base);
+	char* path = (char*)malloc((len+11)*sizeof(char));
+
+	strcpy(path,base);
+	strcpy(path+len,"appid.info");
+	path[len+10] = 0;
+	
+	SDL_RWops* file = SDL_RWFromFile(path,"r");
+	SDL_free(base);
+	free(path);
+	
+	if (file == NULL) {
+		return NULL;
+	}
+	
+	size_t read = SDL_RWread(file, app_id, sizeof(char), MAX_SIZE-1);
+	SDL_RWclose(file);
+	
+	if (read) {
+		app_id[read] = 0;
+		return app_id;
+	}
+	
+	return NULL;
+}
 
 /**
  * System dependent version of APP_GetAssetPath
+ * 
+ * @return the path to the application asset directory
  */
-extern const char* APP_SYS_GetAssetPath(void);
-
-#ifdef __cplusplus
+const char* APP_SYS_GetAssetPath(void) {
+	static char asset_path[MAX_PATH];
+	
+	char* path = SDL_GetBasePath();
+	size_t amt = strlen(path);
+	if (amt >= MAX_PATH) {
+		amt = MAX_PATH-1;
+	}
+	
+	strncpy(asset_path,path,amt);
+	asset_path[amt] = 0;
+	SDL_free(path);
+	
+    return asset_path;
 }
-#endif
-
-#endif /* __APP_SYS_DISPLAY_H__ */

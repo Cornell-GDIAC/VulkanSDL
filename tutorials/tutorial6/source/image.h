@@ -2,10 +2,10 @@
 //  image.h
 //  A simple function for loading images in SDL
 //
-//  The header stb_image used by the tutorial is not portable, as it cannot
-//  be used on Android (again, no file system). Instead, in SDL you should use
-//  SDL_Image (which also seems to produce better quality images for JPEGs).
-//  This function shows how to do this.
+//  The header stb_image used by the tutorial is a bit limiting. SDL_Image
+//  provides a much wider array of potential file formats (and can also 
+//  produce better looking JPEGs on certain platforms). This function shows
+//  how to do this.
 //
 //  Author:  Walker White
 //  Version: 7/26/24.
@@ -14,6 +14,7 @@
 #ifndef __IMAGE_H__
 #define __IMAGE_H__
 #include <SDL_image.h>
+#include <SDL_app.h>
 #include <string>
 #include <cstring>
 #include <cstdint>
@@ -38,9 +39,8 @@
  * @return an array of pixels representing an RGBA image.
  */
 uint8_t* load_image_asset(const std::string path, int* w, int* h) {
-    const char* base = SDL_GetBasePath();
-    std::string fullpath = base == NULL ? path : std::string(base)+path;
-    
+	// APP_GetAssetPath is an SDL_app extension pointing to the asset directory
+	std::string fullpath = std::string(APP_GetAssetPath())+path;
     SDL_Surface* surface = IMG_Load(fullpath.c_str());
     if (surface == NULL) {
         return NULL;

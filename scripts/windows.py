@@ -229,8 +229,9 @@ def place_project(config):
     vulkan = os.path.join(config['sdl2'],'vulkan','windows')
     for item in os.listdir(vulkan):
         src = os.path.join(vulkan,item)
-        dst = os.path.join(build,item)
-        shutil.copytree(src, dst, symlinks=True, copy_function = shutil.copy)
+        if os.path.isdir(src):
+            dst = os.path.join(build,item)
+            shutil.copytree(src, dst, symlinks=True, copy_function = shutil.copy)
 
 
     return project

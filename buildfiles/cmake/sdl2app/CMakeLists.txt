@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.10)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/modules")
 set(MAJOR_VERSION 2)
-set(MINOR_VERSION 1)
+set(MINOR_VERSION 3)
 set(MICRO_VERSION 0)
 set(SDL_REQUIRED_VERSION 2.0.9)
 
@@ -81,27 +81,33 @@ if(POLICY CMP0127)
 endif()
 
 set(APP_SOURCES
+    ${SDL2_APP_SRC}/APP_appinfo.c
     ${SDL2_APP_SRC}/APP_device.c
     ${SDL2_APP_SRC}/APP_display.c
-    ${SDL2_APP_SRC}/APP_version.c
 )
 
 if(ANDROID)
+	list(APPEND APP_SOURCES ${SDL2_APP_SRC}/android/APP_sysappinfo.c)
 	list(APPEND APP_SOURCES ${SDL2_APP_SRC}/android/APP_sysdevice.c)
 	list(APPEND APP_SOURCES ${SDL2_APP_SRC}/android/APP_sysdisplay.c)
 elseif(DARWIN OR MACOSX)
+    list(APPEND APP_SOURCES ${SDL2_APP_SRC}/macosx/APP_sysappinfo.m)
 	list(APPEND APP_SOURCES ${SDL2_APP_SRC}/macosx/APP_sysdevice.m)
 	list(APPEND APP_SOURCES ${SDL2_APP_SRC}/macosx/APP_sysdisplay.m)
 elseif(IOS OR TVOS)
+    list(APPEND APP_SOURCES ${SDL2_APP_SRC}/ios/APP_sysappinfo.m)
 	list(APPEND APP_SOURCES ${SDL2_APP_SRC}/ios/APP_sysdevice.m)
 	list(APPEND APP_SOURCES ${SDL2_APP_SRC}/ios/APP_sysdisplay.c)
 elseif(WIN32)
+    list(APPEND APP_SOURCES ${SDL2_APP_SRC}/windows/APP_sysappinfo.cpp)
     list(APPEND APP_SOURCES ${SDL2_APP_SRC}/windows/APP_sysdevice.cpp)
     list(APPEND APP_SOURCES ${SDL2_APP_SRC}/dummy/APP_sysdisplay.c)
 elseif(LINUX)
     list(APPEND APP_SOURCES ${SDL2_APP_SRC}/linux/APP_sysdevice.cpp)
+    list(APPEND APP_SOURCES ${SDL2_APP_SRC}/dummy/APP_sysappinfo.c)
     list(APPEND APP_SOURCES ${SDL2_APP_SRC}/dummy/APP_sysdisplay.c)
 else()
+    list(APPEND APP_SOURCES ${SDL2_APP_SRC}/dummy/APP_sysappinfo.c)
 	list(APPEND APP_SOURCES ${SDL2_APP_SRC}/dummy/APP_sysdevice.c)
 	list(APPEND APP_SOURCES ${SDL2_APP_SRC}/dummy/APP_sysdisplay.c)
 endif()
