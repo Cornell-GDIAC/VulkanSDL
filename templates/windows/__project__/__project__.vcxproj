@@ -131,8 +131,7 @@ if not exist "$(SolutionDir)output\explicit_layer.d" md "$(SolutionDir)output\ex
 xcopy /y /d  "$(SDL2Dir)buildfiles\windows\dlls\x86\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x86\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x86\explicit_layer.d\*" "$(SolutionDir)output\explicit_layer.d"
-xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"
-xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)x86\$(Configuration)"</Command>
+xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -164,8 +163,7 @@ if not exist "$(SolutionDir)output\explicit_layer.d" md "$(SolutionDir)output\ex
 xcopy /y /d  "$(SDL2Dir)buildfiles\windows\dlls\x64\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x64\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x64\explicit_layer.d\*" "$(SolutionDir)output\explicit_layer.d"
-xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"
-xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)$(Platform)\$(Configuration)"</Command>
+xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -197,8 +195,7 @@ if not exist "$(SolutionDir)output\explicit_layer.d" md "$(SolutionDir)output\ex
 xcopy /y /d  "$(SDL2Dir)buildfiles\windows\dlls\x86\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x86\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x86\explicit_layer.d\*" "$(SolutionDir)output\explicit_layer.d"
-xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"
-xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)x86\$(Configuration)"</Command>
+xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>
@@ -234,8 +231,7 @@ if not exist "$(SolutionDir)output\explicit_layer.d" md "$(SolutionDir)output\ex
 xcopy /y /d  "$(SDL2Dir)buildfiles\windows\dlls\x64\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x64\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x64\explicit_layer.d\*" "$(SolutionDir)output\explicit_layer.d"
-xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"
-xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)$(Platform)\$(Configuration)"</Command>
+xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

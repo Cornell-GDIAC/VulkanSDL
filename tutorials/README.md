@@ -13,6 +13,5 @@ platforms:
 - macOS
 - iOS
 - Android
-- Linux (including Steam Deck)
-
+- Linux (Steam Deck via Flatpak)
 

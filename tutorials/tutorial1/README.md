@@ -7,6 +7,12 @@ on [swap chain recreation](https://vulkan-tutorial.com/Drawing_a_triangle/Swap_c
 Note that most of the differences in this code from the example stem from that 
 recreation since window handling is different in SDL.
 
+One of the biggest issue is the inclusion of the semaphores in the swapchain 
+clean up. This is a race condition issue. It is possible for the swapchain
+to be destroyed and rebuilt while keeping the semphores in a signaled state.
+Signaled semaphores cannot be used until reset, which requires waiting. It 
+is simply easier to rebuild the semaphores.
+
 The code uses one nonstandard SDL function: `App_GetAssetPath`. This is one 
 of the extensions added by `SDL_app`. This function is an alternative to 
 `SDL_GetBasePath` which does not need to be freed (it has static allocation).

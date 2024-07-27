@@ -1,10 +1,11 @@
-Loading Models
+Compute Shaders
 --------
 
-This code is the loading models tutorial from the 
-[Vulkan Tutorial](https://vulkan-tutorial.com). The only change to the 
-original (beyond what was done for the previous tutorial on texture loading)
-is the use of `APP_GetAssetPath` to locate the models and textures.
+This code is the compute shader tutorial from the 
+[Vulkan Tutorial](https://vulkan-tutorial.com). The modifications made to
+this tutorial are similar to those made to the uniform buffer tutorial.
+Other than SDL specific changes, no real changes have been made to this
+tutorial. 
 
 To build this tutorial, you will first need to compile the shaders in the
 `assets/shaders` directory using the right script for your platform. Then

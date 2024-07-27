@@ -1,0 +1,31 @@
+---
+name:   Generating Mipmaps      # The application name
+short:  Tutorial7               # The "short" name (no spaces)
+appid:  git.overv.tutorial7     # Application identifier for Mac, iOS, Android
+suffix: true                    # Set to true to avoid global appid collisions
+
+build:  build                   # The build directory (targets are each a subdirectory)
+assets: assets                  # The folder with the game assets (do not list asset)
+
+# This must be one of portrait, landscape, portrait-flipped, landscape-flipped,
+orientation: landscape          # The orientation for mobile devices
+
+icon: 
+    image:       icon.png       # The image file for the icon
+    background:  '#FFFFFF'      # The background color
+    transparent: true           # Whether to omit the background on desktops
+    rounded:     true           # Whether to use a round background on desktops
+
+
+includes:                       # The list of the include directories
+    - source
+
+sources:                        # The list of the source code files (and/or headers)
+    - source/*.h
+    - source/*.cpp
+
+targets:                        # The target platforms to build for
+    - android                   # Android Studio
+    - apple                     # XCode (note macOS and iOS use one project)
+    - windows                   # Windows Visual Studio
+    - cmake                     # This supports all Desktop platforms

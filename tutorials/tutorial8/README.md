@@ -1,10 +1,10 @@
-Loading Models
+Multisampling
 --------
 
-This code is the loading models tutorial from the 
-[Vulkan Tutorial](https://vulkan-tutorial.com). The only change to the 
-original (beyond what was done for the previous tutorial on texture loading)
-is the use of `APP_GetAssetPath` to locate the models and textures.
+This code is the multisampling tutorial from the 
+[Vulkan Tutorial](https://vulkan-tutorial.com). There are no changes to this 
+tutorial from the original beyond what was necessary for the previous tutorial
+on generating mipmaps.
 
 To build this tutorial, you will first need to compile the shaders in the
 `assets/shaders` directory using the right script for your platform. Then
