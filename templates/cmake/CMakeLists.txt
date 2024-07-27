@@ -153,3 +153,6 @@ if (MSVC)
         file(COPY ${DLL} DESTINATION "${CMAKE_BINARY_DIR}/install/")
     endforeach()
 endif()
+
+# This a command line app. Write appid.info
+file(WRITE "${CMAKE_BINARY_DIR}/install/appid.info", "__APP_ID__")

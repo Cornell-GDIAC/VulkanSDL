@@ -292,7 +292,29 @@ def reassign_vcxproj(config,project):
     file = os.path.join(project,config['camel']+'.props')
     util.file_replace(file,context)
 
-    # TODO: Process include directories
+
+def reassign_appid(config,project):
+    """
+    Modifies the resouce rc file to have the correct appid.
+
+    The appid is __APP_ID__ by default. This function reassins that value.
+
+    :param config: The project configuration settings
+    :type config:  ``dict``
+
+    :param project: The Windows build directory
+    :type project:  ``str``
+    """
+    path = os.path.join(project,config['camel']+'.rc')
+    data = None
+    with open(path,'rb') as file:
+        data = file.read()
+        text = data.decode('UTF-16')
+        text = text.replace('__APP_ID__',config['appid'])
+        data = text.encode('UTF-16')
+    if not data is None:
+        with open(path,'wb') as file:
+            file.write(data)
 
 
 def populate_sources(config,project):
@@ -360,6 +382,7 @@ def make(config):
     project = place_project(config)
     print('-- Modifying project settings')
     reassign_vcxproj(config,project)
+    reassign_appid(config,project)
     print('-- Populating project file')
     populate_sources(config,project)
 

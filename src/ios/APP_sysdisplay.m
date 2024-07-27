@@ -1,23 +1,32 @@
 /*
-  Simple DirectMedia Layer Extensions
-  Copyright (C) 2022 Walker White
-
-  This software is provided 'as-is', without any express or implied
-  warranty.  In no event will the authors be held liable for any damages
-  arising from the use of this software.
-
-  Permission is granted to anyone to use this software for any purpose,
-  including commercial applications, and to alter it and redistribute it
-  freely, subject to the following restrictions:
-
-  1. The origin of this software must not be misrepresented; you must not
-     claim that you wrote the original software. If you use this software
-     in a product, an acknowledgment in the product documentation would be
-     appreciated but is not required.
-  2. Altered source versions must be plainly marked as such, and must not be
-     misrepresented as being the original software.
-  3. This notice may not be removed or altered from any source distribution.
-*/
+ * SDL_app:  An all-in-one library for packing SDL applications.
+ * Copyright (C) 2022-2023 Walker M. White
+ *
+ * This library is built on the assumption that an application built for SDL
+ * will contain its own versions of the SDL libraries (either statically linked
+ * or packaged with a specific set of dynamic libraries).  While this is not
+ * considered the right way to do it on Unix, it makes one step installation
+ * easier for Mac and Windows. It is also the only way to create SDL apps for
+ * mobile devices.
+ *
+ * SDL License:
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ */
 #include "SDL_app.h"
 
 #import <Foundation/Foundation.h>
@@ -48,15 +57,15 @@ void APP_SYS_GetDisplayPixelBounds(int displayIndex, SDL_Rect *rect) {
         rect->y = displayRect.origin.y;
         rect->w = displayRect.size.width;
         rect->h = displayRect.size.height;
-        
+
 		// Convert to pixels
-		CGRect screenRect  = [screen nativeBounds];    
+		CGRect screenRect  = [screen nativeBounds];
 		if (displayRect.size.width > displayRect.size.height) {
 			CGFloat temp = screenRect.size.width;
 			screenRect.size.width  = screenRect.size.height;
 			screenRect.size.height = temp;
 		}
-	
+
 		float sx = screenRect.size.width/displayRect.size.width;
 		float sy = screenRect.size.height/displayRect.size.height;
 		rect->x *= sx;
@@ -85,14 +94,14 @@ void APP_SYS_GetDisplaySafeBounds(int displayIndex, SDL_Rect *rect) {
     CGRect displayRect;
     UIScreen* screen;
     screen = [UIScreen mainScreen];
-    
+
     // Convert to SDL_Rect
     displayRect = [screen bounds];
     rect->x = displayRect.origin.x;
     rect->y = displayRect.origin.y;
     rect->w = displayRect.size.width;
     rect->h = displayRect.size.height;
-    
+
     if (@available(iOS 11.0, *)) {
         NSArray<UIWindow *> *windows = [[UIApplication sharedApplication] windows];
         if (windows.count > 0) {
@@ -105,13 +114,13 @@ void APP_SYS_GetDisplaySafeBounds(int displayIndex, SDL_Rect *rect) {
     }
 
 	// Convert to pixels
-	CGRect screenRect  = [screen nativeBounds];    
+	CGRect screenRect  = [screen nativeBounds];
 	if (displayRect.size.width > displayRect.size.height) {
 		CGFloat temp = screenRect.size.width;
 		screenRect.size.width = screenRect.size.height;
 		screenRect.size.height = temp;
 	}
-	
+
 	float sx = screenRect.size.width/displayRect.size.width;
 	float sy = screenRect.size.height/displayRect.size.height;
     rect->x *= sx;
@@ -155,20 +164,20 @@ float APP_SYS_GetPixelDensity(int displayIndex) {
     } else {
         screen = nil;
     }
-    
+
     if (screen == nil) {
         return -1;
     }
-    
+
     CGRect screenRect  = [screen nativeBounds];
     CGRect displayRect = [screen bounds];
-    
+
     if (displayRect.size.width > displayRect.size.height) {
         CGFloat temp = screenRect.size.width;
         screenRect.size.width = screenRect.size.height;
         screenRect.size.height= temp;
     }
-    
+
     float w = (float)screenRect.size.width/displayRect.size.width;
     float h = (float)screenRect.size.height/displayRect.size.height;
     return h < w ? h : w;

@@ -197,6 +197,7 @@ int main(int argc, char* argv[]) {
     SDL_Log("OS: %s",APP_GetDeviceOS());
     SDL_Log("Version: %s",APP_GetDeviceOSVersion());
     SDL_Log("Vendor ID: %s",APP_GetDeviceID());
+    SDL_Log("Application ID: %s", APP_GetAppID());
 
     int tsize = 64;
     SDL_Rect test;

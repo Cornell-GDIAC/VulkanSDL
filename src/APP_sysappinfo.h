@@ -4,7 +4,7 @@
  *
  * This library is built on the assumption that an application built for SDL
  * will contain its own versions of the SDL libraries (either statically linked
- * or packaged with a specific set of dynamic libraries).  While this is not
+ * or packaged with a specific set of dynamic libraries). While this is not
  * considered the right way to do it on Unix, it makes one step installation
  * easier for Mac and Windows. It is also the only way to create SDL apps for
  * mobile devices.
@@ -27,32 +27,32 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
+#ifndef __APP_SYS_DISPLAY_H__
+#define __APP_SYS_DISPLAY_H__
 #include "SDL_app.h"
 
 /**
- * Returns the version of the given dependency
+ *  \file APP_sysappinfo.h
  *
- * This allows the program to query the versions of the various libaries that
- * SDL_app depends on.
- *
- * @param dep   The library dependency
- *
- * @return the version of the given dependency
+ *  \brief Include file for application-specific information
+ *  \author Walker M. White
  */
-const char* APP_GetVersion(APP_Depedency dep) {
-    switch (dep) {
-        case APP_DEPENDENCY_SDL:
-            return "2.30.5";
-        case APP_DEPENDENCY_IMG:
-            return "2.8.2";
-        case APP_DEPENDENCY_TTF:
-            return "2.22.0";
-        case APP_DEPENDENCY_ATK: 	// NO AUDIO TOOLS IN THE VULKAN RELEASE
-            return "UNSUPPORTED";
-        case APP_DEPENDENCY_APP:
-            return "2.3.0";
-        default:
-            break;
-    }
-    return "";
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * System dependent version of APP_GetAppID
+ */
+extern const char* APP_SYS_GetAppID();
+
+/**
+ * System dependent version of APP_GetAssetPath
+ */
+extern const char* APP_SYS_GetAssetPath();
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __APP_SYS_DISPLAY_H__ */

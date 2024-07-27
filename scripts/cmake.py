@@ -33,15 +33,15 @@ SOURCE_EXT = ['.cpp', '.c', '.cc', '.cxx', '.m', '.mm','.asm', '.asmx','.swift']
 def expand_cmake_sources(path, filetree):
     """
     Returns the string of source files to insert into CMake file
-    
+
     This string should replace __SOURCE_FILES__ in the makefile.
-    
+
     :param path: The path to the root directory for the filters
     :type path:  ``str1``
-    
+
     :param filetree: The file tree storing both files and filters
     :type filetree:  ``dict``
-    
+
     :return: The string of source files to insert into Android.mk
     :rtype:  ``str``
     """
@@ -60,13 +60,13 @@ def expand_cmake_sources(path, filetree):
 def expand_cmake_includes(path, filetree):
     """
     Returns a set of directories to add to CMake for inclusion
-    
+
     :param path: The path to the root directory for the filters
     :type path:  ``str1``
-    
+
     :param filetree: The file tree storing both files and filters
     :type filetree:  ``dict``
-    
+
     :return: A set of directories to add to Android.mk for inclusion
     :rtype:  ``set``
     """
@@ -174,6 +174,7 @@ def config_cmake(config,project):
     # Set the Asset directory
     assetdir = os.path.join(*prefix,config['build_to_root'],config['assets'])
     context['__ASSETDIR__'] = util.path_to_posix(assetdir)
+    context['__APP_ID__'] = config['appid']
 
     # Set the sources
     filetree = config['source_tree']
@@ -190,10 +191,10 @@ def config_cmake(config,project):
     entries = config['include_dict']
     inclist.extend(entries['all'] if ('all' in entries and entries['all']) else [])
     inclist.extend(entries['cmake'] if ('cmake' in entries and entries['cmake']) else [])
-    
+
     for item in expand_cmake_includes(None,filetree):
         inclist.append(item)
-    
+
     incstr = ''
     for item in inclist:
         path = os.path.join(*prefix,config['build_to_root'],item)

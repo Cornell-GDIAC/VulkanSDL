@@ -200,14 +200,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\SDL_app.h" />
+    <ClInclude Include="..\..\..\src\APP_sysappinfo.h" />
     <ClInclude Include="..\..\..\src\APP_sysdevice.h" />
     <ClInclude Include="..\..\..\src\APP_sysdisplay.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\APP_appinfo.c" />
     <ClCompile Include="..\..\..\src\APP_device.c" />
     <ClCompile Include="..\..\..\src\APP_display.c" />
-    <ClCompile Include="..\..\..\src\APP_version.c" />
     <ClCompile Include="..\..\..\src\dummy\APP_sysdisplay.c" />
+    <ClCompile Include="..\..\..\src\windows\APP_sysappinfo.cpp" />
     <ClCompile Include="..\..\..\src\windows\APP_sysdevice.cpp" />
   </ItemGroup>
   <ItemGroup>
