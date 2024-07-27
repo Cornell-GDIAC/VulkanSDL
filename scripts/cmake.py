@@ -237,7 +237,7 @@ def config_flatpak(config,project):
     if validationlib:
         libname = os.path.split(validationlib)[1]
         context['__MOVE_VALIDATION_LAYER__\n'] = '    - mv %s /app/lib/%s\n' % (libname,libname)
-        context['__COPY_VALIDATION_LAYER__\n'] = '    - type file\n      path: %s\n' % validationlib
+        context['__COPY_VALIDATION_LAYER__\n'] = '    - type: file\n      path: %s\n' % validationlib
     else:
         print('   WARNING: Could not find validation layer for Flatpak')
         context['__MOVE_VALIDATION_LAYER__\n'] = ''
