@@ -60,7 +60,7 @@ uint8_t* load_image_asset(const std::string path, int* w, int* h) {
     
     // Technically we can just return the surface, which is what we normally do
     // But we are trying to keep the code close to the tutorial.
-    uint8_t* result = (uint8_t*)malloc(sizeof(uint8_t)*normal->w*normal->h);
+    uint8_t* result = (uint8_t*)malloc(sizeof(uint8_t)*normal->w*normal->h*4);
     if (result != NULL) {
         memcpy(result,normal->pixels,sizeof(uint8_t)*normal->w*normal->h*4);
         if (w != NULL) {

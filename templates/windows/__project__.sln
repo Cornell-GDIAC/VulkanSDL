@@ -17,8 +17,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdl2image", "__BUILD_2_SDL_
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdl2ttf", "__BUILD_2_SDL__\buildfiles\windows\sdl2ttf\sdl2ttf.vcxproj", "{DDDBD07D-DC76-4AF6-8D02-3E2DEB6EE255}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdl2atk", "__BUILD_2_SDL__\buildfiles\windows\sdl2atk\sdl2atk.vcxproj", "{531302A4-1972-4DD5-A0CD-24EE1D93D2FB}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -75,14 +73,6 @@ Global
 		{DDDBD07D-DC76-4AF6-8D02-3E2DEB6EE255}.Release|x64.Build.0 = Release|x64
 		{DDDBD07D-DC76-4AF6-8D02-3E2DEB6EE255}.Release|x86.ActiveCfg = Release|Win32
 		{DDDBD07D-DC76-4AF6-8D02-3E2DEB6EE255}.Release|x86.Build.0 = Release|Win32
-		{531302A4-1972-4DD5-A0CD-24EE1D93D2FB}.Debug|x64.ActiveCfg = Debug|x64
-		{531302A4-1972-4DD5-A0CD-24EE1D93D2FB}.Debug|x64.Build.0 = Debug|x64
-		{531302A4-1972-4DD5-A0CD-24EE1D93D2FB}.Debug|x86.ActiveCfg = Debug|Win32
-		{531302A4-1972-4DD5-A0CD-24EE1D93D2FB}.Debug|x86.Build.0 = Debug|Win32
-		{531302A4-1972-4DD5-A0CD-24EE1D93D2FB}.Release|x64.ActiveCfg = Release|x64
-		{531302A4-1972-4DD5-A0CD-24EE1D93D2FB}.Release|x64.Build.0 = Release|x64
-		{531302A4-1972-4DD5-A0CD-24EE1D93D2FB}.Release|x86.ActiveCfg = Release|Win32
-		{531302A4-1972-4DD5-A0CD-24EE1D93D2FB}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -93,7 +83,6 @@ Global
 		{AF490661-A652-4D5B-9CEE-75536D8330C4} = {4A2E03FB-FBB5-4066-8AD4-B3E97372FF2A}
 		{2BD5534E-00E2-4BEA-AC96-D9A92EA24696} = {4A2E03FB-FBB5-4066-8AD4-B3E97372FF2A}
 		{DDDBD07D-DC76-4AF6-8D02-3E2DEB6EE255} = {4A2E03FB-FBB5-4066-8AD4-B3E97372FF2A}
-		{531302A4-1972-4DD5-A0CD-24EE1D93D2FB} = {4A2E03FB-FBB5-4066-8AD4-B3E97372FF2A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B8FE4B13-E5F8-40D1-A2FA-4D5FD6FAA2B2}
