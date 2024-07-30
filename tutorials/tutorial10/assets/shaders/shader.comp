@@ -1,8 +1,8 @@
 #version 450
 
 struct Particle {
-	vec2 position;
-	vec2 velocity;
+    vec2 position;
+    vec2 velocity;
     vec4 color;
     vec2 offsides;
     // Padding required for std140 alignment
@@ -51,4 +51,5 @@ void main()
     } else if (particlesOut[index].offsides.y > 0) {
         particlesOut[index].offsides.y = -1.0;
     }
+
 }

@@ -95,7 +95,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				EB81CFB92C51990D00585C8B /* vulkan.xcframework in Embed Frameworks */,
-				EB81CFC12C51993400585C8B /* MoltenVK.xcframework in Embed Frameworks */,
+				EB29CE552C53F25C00DBF3DD /* MoltenVK.xcframework in Embed Frameworks */,
 				EB81CFB62C51990C00585C8B /* VkLayer_khronos_validation.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";

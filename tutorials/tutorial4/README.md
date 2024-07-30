@@ -9,11 +9,24 @@ This code replaces `stb_image.h` with an implementation using SDL_Image. This
 is partly for portability reasons, but mainly because SDL_Image provides a 
 wider array of file formats.
 
-To build this tutorial, you will first need to compile the shaders in the
-`assets/shaders` directory using the right script for your platform. Then
-link this tutorial to VulkanSDL using the python script. No additional
-configuration is necessary.
+This code is presented without comments to make it easier to diff against 
+the original (as an comments would appear in the diff).
 
-This code is presented without comments to make it easier to diff against the 
-original.  People who know me are aware of how painful it is for me to let code 
-go without spec comments.
+### SDL Window Management
+
+Our code uses `SDL_PollEvents` to handle windowed events rather than using a 
+callback function like `SDL_AddEventWatch`. This is the preferred way to 
+handle events in SDL, as events have to be processed on the same thread that
+the window was created. We support two window events, namely quiting and 
+resizing.
+
+However, there is a [known issue with SDL](https://github.com/libsdl-org/SDL/issues/1059)
+on Windows. Moving or resizing a window on Windows causes the application 
+to freeze until the operating is complete. This is particularly egregious 
+in this demo, as the spinning animation will freeze whenever the window is
+moved. This delay is not present on Linux or macOS, which behave normally.
+
+The solution to this problem is to move Vulkan rendering to a separate 
+thread. However, this significantly alters the tutorial and comes with its
+own challenges. Therefore, we do not do that here, and instead defer that
+to a [later tutorial](../tutorial10/README.md).

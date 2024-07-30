@@ -9,7 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdl2", "__BUILD_2_SDL__\bui
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdl2main", "__BUILD_2_SDL__\buildfiles\windows\sdl2main\sdl2main.vcxproj", "{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sdl2pckg", "sdl2pckg", "{4A2E03FB-FBB5-4066-8AD4-B3E97372FF2A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vulkansdl", "vulkansdl", "{4A2E03FB-FBB5-4066-8AD4-B3E97372FF2A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdl2app", "__BUILD_2_SDL__\buildfiles\windows\sdl2app\sdl2app.vcxproj", "{AF490661-A652-4D5B-9CEE-75536D8330C4}"
 EndProject

@@ -89,6 +89,9 @@ struct Particle {
     glm::vec2 position;
     glm::vec2 velocity;
     glm::vec4 color;
+    glm::vec2 offsides;
+    // Padding required for std140 alignment
+    glm::vec2 padding;
 
     static VkVertexInputBindingDescription getBindingDescription() {
         VkVertexInputBindingDescription bindingDescription{};
@@ -240,10 +243,10 @@ private:
             
             if (running) {
                 drawFrame();
-				// We want to animate the particle system using the last frames time to get smooth, frame-rate independent animation
-				double currentTime = SDL_GetTicks()/1000.0;
-				lastFrameTime = (currentTime - lastTime) * 1000.0;
-				lastTime = currentTime;
+                // We want to animate the particle system using the last frames time to get smooth, frame-rate independent animation
+                double currentTime = SDL_GetTicks()/1000.0;
+                lastFrameTime = (currentTime - lastTime) * 1000.0;
+                lastTime = currentTime;
             }
         }
 
@@ -265,7 +268,7 @@ private:
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
             vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
-            vkDestroySemaphore(device, computeFinishedSemaphores[i], nullptr); // May move
+            vkDestroySemaphore(device, computeFinishedSemaphores[i], nullptr);
             vkDestroyFence(device, inFlightFences[i], nullptr);
             vkDestroyFence(device, computeInFlightFences[i], nullptr);
         }
@@ -825,6 +828,7 @@ private:
             particle.position = glm::vec2(x, y);
             particle.velocity = glm::normalize(glm::vec2(x,y)) * 0.00025f;
             particle.color = glm::vec4(rndDist(rndEngine), rndDist(rndEngine), rndDist(rndEngine), 1.0f);
+            particle.offsides = glm::vec2(-1,-1);
         }
 
         VkDeviceSize bufferSize = sizeof(Particle) * PARTICLE_COUNT;
