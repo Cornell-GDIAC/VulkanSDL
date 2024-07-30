@@ -142,15 +142,41 @@ resizing involves multiple variables (`framebufferResized` and `newExtent`)
 and we do not want race conditions where they have inconsistent values. So
 we use mutexes to make sure these two variables are read and written as a
 transactional unit. Technically it is possible to do that with atomics,
-but we also do not want these values to change during the entire execution
+but we also do not want these values to change during the relevant portions
 of `drawFrame`.
 
 A mutex does not do anything by itself. Instead a mutex is used to create
 [locks guards](https://en.cppreference.com/w/cpp/thread/lock_guard). No two
 blocks of code with a lock guard around the same mutex can execute at the
-same time. So in our code, the methods `resizeSwapChain`, `resizeWindow` and 
-`drawFrame` all have lock guards that keep them from being executed 
-simultaneously.
+same time. So if we put this as the first line of code in a method, we guarantee
+that new two methods with this lock guard can execute at the same time. We 
+use these to keep `resizeSwapChain`, `resizeWindow` and `drawFrame` from
+executing simultaneously.
+
+However, there is one more thing that we have to consider when using lock 
+guards. The C++ `std::mutex` is not guaranteed to be *fair* (and it is most
+definitely not fair on Windows). A fair mutex is one where each method that 
+wants a lock will eventually be guaranteed to acquire the lock. Our method 
+`mainLoop` is very simple, so it is quite possible for the render thread to 
+release the lock upon exiting `drawFrame` only to immediately reacquire it.
+As a result, the main thread is blocked forever trying to acquire a lock that
+it is never fast enough to grab.
+
+There are several ways to handle this. One would be to replace the lock guards
+with a custom [ordered lock](https://stackoverflow.com/questions/14792016/creating-a-lock-that-preserves-the-order-of-locking-attempts-in-c11)
+that is fair. Alternatively, we just put a command to sleep a few microseconds
+at the end of each `mainLoop`. This is enough time for the main thread to 
+acquire the lock and make progress.
+
+But neither of these should be necessary. Our render thread already periodically
+waits on the GPU via `VkFenceWait`, and that is a perfect time for the main
+thread to acquire the lock. But if we put the lock guard at the start of 
+`drawFrame`, this means we are holding the lock while blocked on the fence.
+This is bad. A thread should never block while holding a lock it does not need;
+that quickly leads to deadlock. So instead of locking all of `drawFrame`, we
+only lock the relevant portion after `VkFenceWait`. Note that we do not lock
+the compute shader code at all, but that is okay because it does not depend
+upon the swapchain.
 
 ## SDL Window Management
 
