@@ -2,7 +2,7 @@
 name:   Compute Revisited       # The application name
 short:  Tutorial10              # The "short" name (no spaces)
 appid:  edu.gdiac.tutorial10    # Application identifier for Mac, iOS, Android
-suffix: true                    # Set to true to avoid global appid collisions
+suffix: G15C9E73
 
 build:  build                   # The build directory (targets are each a subdirectory)
 assets: assets                  # The folder with the game assets (do not list asset)
@@ -28,4 +28,4 @@ targets:                        # The target platforms to build for
     - android                   # Android Studio
     - apple                     # XCode (note macOS and iOS use one project)
     - windows                   # Windows Visual Studio
-    - cmake                     # This supports all Desktop platforms
+    - cmake                     # This supports all Desktop platforms G15C9E73

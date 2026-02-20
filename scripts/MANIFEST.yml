@@ -6,49 +6,46 @@ copy:
 - directory: components/SDL/src
   destination: src
   filter: false
-- directory: components/SDL/include
-  destination: include
+- directory: components/SDL/include/SDL3
+  destination: include/SDL3
   filter: true
   selection: '*.h'
-- directory: extras
-  destination: extras
-  filter: false
+- directory: components/SDL/include/build_config
+  destination: include/build_config
+  filter: true
+  selection: '*.h'
 - directory: components/SDL/wayland-protocols
   destination: wayland-protocols
   filter: false
 # The SDL image contents
 - comment: "Copying SDL image"
-- directory: components/SDL_Image/src
+- directory: components/SDL_image/src
   destination: src/image
   filter: true
   selection: 'IMG*'
-- directory: components/SDL_Image/src
+- directory: components/SDL_image/src
   destination: src/image
   filter: true
   selection: '*.h'
-- directory: components/SDL_Image/include
-  destination: include
+- directory: components/SDL_image/include/SDL3_image
+  destination: include/SDL3
   filter: true
   selection: '*.h'
-- directory: components/SDL_Image/include
-  destination: include
-  filter: true
-  selection: '*.h'
-- directory: components/SDL_Image/external/libtiff/libtiff
-  destination: external/libtiff/libtiff
-  filter: false
-- file: components/SDL_Image/external/libtiff/libtiff-4.pc.in
-  destination: external/libtiff/libtiff-4.pc.in
-- directory: components/SDL_Image/external/libwebp/src
+- directory: components/SDL_image/external/libwebp/src
   destination: external/libwebp/src
+- directory: components/SDL_image/external/libwebp/sharpyuv
+  destination: external/libwebp/sharpyuv
 # The SDL ttf contents
 - comment: "Copying SDL ttf"
-- file: components/SDL_ttf/SDL_ttf.c
-  destination: src/ttf/SDL_ttf.c
-- file: components/SDL_ttf/SDL_ttf.h
-  destination: include/SDL_ttf.h
-- file: components/SDL_ttf/SDL_ttf.h
-  destination: include/SDL_ttf.h
+- directory: components/SDL_ttf/src
+  destination: src/ttf
+  filter: true
+  selection:
+  - '*.h'
+  - '*.c'
+- directory: components/SDL_ttf/include/SDL3_ttf
+  destination: include/SDL3
+  filter: false
 - directory: components/SDL_ttf/external/freetype/src
   destination: external/freetype/src
   filter: false
@@ -70,15 +67,22 @@ copy:
   destination: external/harfbuzz/util
 - group: 'components/SDL_ttf/external/harfbuzz/config*.h'
   destination: external/harfbuzz
-- file: buildfiles/android/jni/sdl2ttf/external/harfbuzz/src/hb.hh  # Bug fix
-  destination: external/harfbuzz/src/hb.hh
+- directory: components/SDL_ttf/external/plutosvg/source
+  destination: external/plutosvg/source
+  filter: false
+- directory: components/SDL_ttf/external/plutosvg/plutovg/source
+  destination: external/plutosvg/plutovg/source
+  filter: false
+- directory: components/SDL_ttf/external/plutosvg/plutovg/include
+  destination: external/plutosvg/plutovg/include
+  filter: false
 # The SDL app contents
 - comment: "Copying SDL app extensions"
 - directory: src
   destination: src/app
   filter: false
-- directory: include
-  destination: include
+- directory: include/SDL3_app
+  destination: include/SDL3
   filter: false
 # These files need post-process modifications
 - comment: "Copying VulkanSDL buildfiles"
@@ -106,88 +110,146 @@ copy:
 - file: scripts/app.py
   destination: __main__.py
 configure:
+# Make sure all files agree on header space
+- comment: "Reconfiguring SDL3 header locations"
+- file: include/SDL3/SDL_textengine.h
+  substitutions:
+  - old: '<SDL3_ttf/'
+    new: '<SDL3/'
+- directory: src/ttf
+  substitutions:
+  - old: '<SDL3_ttf/'
+    new: '<SDL3/'
+  filter: true
+  selection:
+  - '*.c'
+  - '*.h'
+- directory: src/image
+  substitutions:
+  - old: '<SDL3_image/'
+    new: '<SDL3/'
+- directory: src/app
+  substitutions:
+  - old: '<SDL3_app/'
+    new: '<SDL3/'
+  filter: true
+  selection:
+  - '*.c'
+  - '*.h'
+- file: src/app/display/appkit/APP_sysinternals.m
+  substitutions:
+  - old: '../components/SDL/src/video'
+    new: 'video'
+- file: src/app/display/uikit/APP_sysinternals.m
+  substitutions:
+  - old: '../components/SDL/src/video'
+    new: 'video'
 # Apple build files
 - comment: "Configuring Apple buildfiles"
-- file: buildfiles/apple/sdl2.xcodeproj/project.pbxproj
+- file: buildfiles/apple/sdl3.xcodeproj/project.pbxproj
   substitutions:
   - old: '/components/SDL'
     new: ''
-- file: buildfiles/apple/sdl2image.xcodeproj/project.pbxproj
+- file: buildfiles/apple/sdl3image.xcodeproj/project.pbxproj
   substitutions:
-  - old: '/components/SDL_image/external'
-    new: '/external'
   - old: '\t\t\tname = source;\n\t\t\tpath = ../../components/SDL_image/src;'
     new: '\t\t\tname = source;\n\t\t\tpath = ../../src/image;'
-  - old: '\t\t\tname = include;\n\t\t\tpath = ../../components/SDL_image/include;'
-    new: '\t\t\tname = include;\n\t\t\tpath = ../../include;'
+  - old: '\t\t\tname = include;\n\t\t\tpath = ../../components/SDL_image/include/SDL3_image;'
+    new: '\t\t\tname = include;\n\t\t\tpath = ../../include/SDL3;'
   - old: '/components/SDL/'
     new: '/'
-- file: buildfiles/apple/sdl2ttf.xcodeproj/project.pbxproj
+  - old: '/components/SDL_image/'
+    new: '/'
+- file: buildfiles/apple/sdl3ttf.xcodeproj/project.pbxproj
   substitutions:
-  - old: '/components/SDL_ttf/external'
-    new: '/external'
-  - old: '\t\t\tname = source;\n\t\t\tpath = ../../components/SDL_ttf;'
+  - old: '\t\t\tname = source;\n\t\t\tpath = ../../components/SDL_ttf/src;'
     new: '\t\t\tname = source;\n\t\t\tpath = ../../src/ttf;'
-  - old: '\t\t\tname = include;\n\t\t\tpath = ../../components/SDL_ttf;'
-    new: '\t\t\tname = include;\n\t\t\tpath = ../../include;'
+  - old: '\t\t\tname = include;\n\t\t\tpath = ../../components/SDL_ttf/include/SDL3_ttf;'
+    new: '\t\t\tname = include;\n\t\t\tpath = ../../include/SDL3;'
   - old: '/components/SDL/'
     new: '/'
-- file: buildfiles/apple/sdl2app.xcodeproj/project.pbxproj
+  - old: '/components/SDL_ttf/'
+    new: '/'
+- file: buildfiles/apple/sdl3app.xcodeproj/project.pbxproj
   substitutions:
   - old: '\t\t\tname = source;\n\t\t\tpath = ../../src;'
     new: '\t\t\tname = source;\n\t\t\tpath = ../../src/app;'
+  - old: '\t\t\tname = include;\n\t\t\tpath = ../../include/SDL3_app;'
+    new: '\t\t\tname = include;\n\t\t\tpath = ../../include/SDL3;'
+  - old: '\t\t\tpath = ../../components/SDL/include/SDL3;\n'
+    new: ''
+  - old: '\t\t\tpath = ../../components/SDL_image/include/SDL3_image;\n'
+    new: ''
+  - old: '\t\t\tpath = ../../components/SDL_ttf/include/SDL3_ttf;\n'
+    new: ''
   - old: '/components/SDL/'
     new: '/'
 # CMake build files
 - comment: "Configuring CMake buildfiles"
-- file: buildfiles/cmake/sdl2/CMakeLists.txt
+- file: buildfiles/cmake/sdl3/CMakeLists.txt
   substitutions:
-  - old: 'set(SDL2_BASE_OFFSET "/components/SDL")'
-    new: 'set(SDL2_BASE_OFFSET "")'
-- file: buildfiles/cmake/sdl2image/CMakeLists.txt
+  - old: 'set(SDL3_BASE_OFFSET "/components/SDL")'
+    new: 'set(SDL3_BASE_OFFSET "")'
+- file: buildfiles/cmake/sdl3image/CMakeLists.txt
   substitutions:
-  - old: 'set(SDL2_IMAGE_OFFSET "/components/SDL_image")'
-    new: 'set(SDL2_IMAGE_OFFSET "")'
-  - old: 'set(SDL2_IMAGE_SRC "${SDL2_IMAGE_DIR}/src")'
-    new: 'set(SDL2_IMAGE_SRC "${SDL2_IMAGE_DIR}/src/image")'
-  - old: 'set(SDL2_IMAGE_INC "${SDL2_IMAGE_DIR}/include")'
-    new: 'set(SDL2_IMAGE_INC "${SDL2_IMAGE_DIR}/include")'
-- file: buildfiles/cmake/sdl2image/external/libtiff/CMakeLists.txt
+  - old: 'set(SDL3_IMAGE_OFFSET "/components/SDL_image")'
+    new: 'set(SDL3_IMAGE_OFFSET "")'
+  - old: 'set(SDL3_IMAGE_SRC "${SDL3_IMAGE_DIR}/src")'
+    new: 'set(SDL3_IMAGE_SRC "${SDL3_IMAGE_DIR}/src/image")'
+  - old: 'FILES "${SDL3_IMAGE_INC}/SDL3_image/SDL_image.h"'
+    new: 'FILES "${SDL3_IMAGE_INC}/SDL3/SDL_image.h"'
+- file: buildfiles/cmake/sdl3image/external/jpeg/CMakeLists.txt
   substitutions:
-  - old: 'set(SDL2_IMAGE_OFFSET "/components/SDL_image")'
-    new: 'set(SDL2_IMAGE_OFFSET "")'
-- file: buildfiles/cmake/sdl2image/external/libwebp/CMakeLists.txt
+  - old: 'set(SDL3_IMAGE_OFFSET "/components/SDL_image")'
+    new: 'set(SDL3_IMAGE_OFFSET "")'
+- file: buildfiles/cmake/sdl3image/external/libpng/CMakeLists.txt
   substitutions:
-  - old: 'set(SDL2_IMAGE_OFFSET "/components/SDL_image")'
-    new: 'set(SDL2_IMAGE_OFFSET "")'
-- file: buildfiles/cmake/sdl2ttf/CMakeLists.txt
+  - old: 'set(SDL3_IMAGE_OFFSET "/components/SDL_image")'
+    new: 'set(SDL3_IMAGE_OFFSET "")'
+- file: buildfiles/cmake/sdl3image/external/libwebp/CMakeLists.txt
   substitutions:
-  - old: 'set(SDL2_TTF_OFFSET "/components/SDL_ttf")'
-    new: 'set(SDL2_TTF_OFFSET "")'
-  - old: 'set(SDL2_TTF_SRC "${SDL2_TTF_DIR}")'
-    new: 'set(SDL2_TTF_SRC "${SDL2_TTF_DIR}/src/ttf")'
-  - old: 'set(SDL2_TTF_INC "${SDL2_TTF_DIR}")'
-    new: 'set(SDL2_TTF_INC "${SDL2_TTF_DIR}/include")'
-- file: buildfiles/cmake/sdl2ttf/external/freetype/CMakeLists.txt
+  - old: 'set(SDL3_IMAGE_OFFSET "/components/SDL_image")'
+    new: 'set(SDL3_IMAGE_OFFSET "")'
+- file: buildfiles/cmake/sdl3image/external/zlib/CMakeLists.txt
   substitutions:
-  - old: 'set(SDL2_TTF_OFFSET "/components/SDL_ttf")'
-    new: 'set(SDL2_TTF_OFFSET "")'
-- file: buildfiles/cmake/sdl2ttf/external/harfbuzz/CMakeLists.txt
+  - old: 'set(SDL3_IMAGE_OFFSET "/components/SDL_image")'
+    new: 'set(SDL3_IMAGE_OFFSET "")'
+- file: buildfiles/cmake/sdl3ttf/CMakeLists.txt
   substitutions:
-  - old: 'set(SDL2_TTF_OFFSET "/components/SDL_ttf")'
-    new: 'set(SDL2_TTF_OFFSET "")'
-- file: buildfiles/cmake/sdl2app/CMakeLists.txt
+  - old: 'set(SDL3_TTF_OFFSET "/components/SDL_ttf")'
+    new: 'set(SDL3_TTF_OFFSET "")'
+  - old: 'set(SDL3_TTF_SRC "${SDL3_TTF_DIR}/src")'
+    new: 'set(SDL3_TTF_SRC "${SDL3_TTF_DIR}/src/ttf")'
+  - old: '${SDL3_TTF_INC}/SDL3_ttf'
+    new: '${SDL3_TTF_INC}/SDL3'
+- file: buildfiles/cmake/sdl3ttf/external/freetype/CMakeLists.txt
   substitutions:
-  - old: 'set(SDL2_APP_SRC   "${SDL2_APP_DIR}/src")'
-    new: 'set(SDL2_APP_SRC   "${SDL2_APP_DIR}/src/app")'
+  - old: 'set(SDL3_TTF_OFFSET "/components/SDL_ttf")'
+    new: 'set(SDL3_TTF_OFFSET "")'
+- file: buildfiles/cmake/sdl3ttf/external/harfbuzz/CMakeLists.txt
+  substitutions:
+  - old: 'set(SDL3_TTF_OFFSET "/components/SDL_ttf")'
+    new: 'set(SDL3_TTF_OFFSET "")'
+- file: buildfiles/cmake/sdl3ttf/external/plutosvg/CMakeLists.txt
+  substitutions:
+  - old: 'set(SDL3_TTF_OFFSET "/components/SDL_ttf")'
+    new: 'set(SDL3_TTF_OFFSET "")'
+- file: buildfiles/cmake/sdl3ttf/external/plutosvg/plutovg/CMakeLists.txt
+  substitutions:
+  - old: 'set(SDL3_TTF_OFFSET "/components/SDL_ttf")'
+    new: 'set(SDL3_TTF_OFFSET "")'
 - file: buildfiles/cmake/CMakeLists.txt
   substitutions:
-  - old: 'set(SDL2_BASE_DIR  "${VULKAN_SDL_DIR}/components/SDL")'
-    new: 'set(SDL2_BASE_DIR  "${VULKAN_SDL_DIR}")'
-  - old: 'set(SDL2_IMAGE_DIR "${VULKAN_SDL_DIR}/components/SDL_image")'
-    new: 'set(SDL2_IMAGE_DIR "${VULKAN_SDL_DIR}")'
-  - old: 'set(SDL2_TTF_DIR   "${VULKAN_SDL_DIR}/components/SDL_ttf")'
-    new: 'set(SDL2_TTF_DIR   "${VULKAN_SDL_DIR}")'
+  - old: 'set(SDL3_APP_SRC   "${SDL3_APP_DIR}/src")'
+    new: 'set(SDL3_APP_SRC   "${SDL3_APP_DIR}/src/app")'
+  - old: 'set(SDL3_BASE_DIR  "${SDL3_APP_DIR}/components/SDL")'
+    new: 'set(SDL3_BASE_DIR  "${SDL3_APP_DIR}")'
+  - old: 'set(SDL3_IMAGE_DIR "${SDL3_APP_DIR}/components/SDL_image")'
+    new: 'set(SDL3_IMAGE_DIR "${SDL3_APP_DIR}")'
+  - old: 'set(SDL3_TTF_DIR   "${SDL3_APP_DIR}/components/SDL_ttf")'
+    new: 'set(SDL3_TTF_DIR   "${SDL3_APP_DIR}")'
+  - old: '${SDL3_APP_INC}/SDL3_app'
+    new: '${SDL3_APP_INC}/SDL3'
 # Android build files
 - comment: "Configuring Android buildfiles"
 - file: buildfiles/android/jni/sdl2/Android.mk
@@ -309,13 +371,14 @@ configure:
 remove:
 # Apple Extras
 - comment: "Removing unneeded Apple files"
-- directory: buildfiles/apple/sdl2app.xcodeproj/xcuserdata
-- directory: buildfiles/apple/sdl2.xcodeproj/xcshareddata
-- directory: buildfiles/apple/sdl2.xcodeproj/xcuserdata
-- directory: buildfiles/apple/sdl2image.xcodeproj/xcshareddata
-- directory: buildfiles/apple/sdl2image.xcodeproj/xcuserdata
-- directory: buildfiles/apple/sdl2ttf.xcodeproj/xcshareddata
-- directory: buildfiles/apple/sdl2ttf.xcodeproj/xcuserdata
+- directory: buildfiles/apple/sdl3app.xcodeproj/xcshareddata
+- directory: buildfiles/apple/sdl3app.xcodeproj/xcuserdata
+- directory: buildfiles/apple/sdl3.xcodeproj/xcshareddata
+- directory: buildfiles/apple/sdl3.xcodeproj/xcuserdata
+- directory: buildfiles/apple/sdl3image.xcodeproj/xcshareddata
+- directory: buildfiles/apple/sdl3image.xcodeproj/xcuserdata
+- directory: buildfiles/apple/sdl3ttf.xcodeproj/xcshareddata
+- directory: buildfiles/apple/sdl3ttf.xcodeproj/xcuserdata
 # Windows Extras
 - comment: "Removing unneeded Windows files"
 - directory: buildfiles/windows/pkg-support

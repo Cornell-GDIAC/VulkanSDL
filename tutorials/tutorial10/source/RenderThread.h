@@ -20,8 +20,8 @@
 //
 #ifndef __SDL_WINDOW_H__
 #define __SDL_WINDOW_H__
+#include <SDL3/SDL.h>
 #include <vulkan/vulkan.h>
-#include <SDL.h>
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -47,6 +47,49 @@ typedef steadyclock_t::time_point timestamp_t;
 struct QueueFamilyIndices;
 struct SwapChainSupportDetails;
 
+/**
+ * Prints out the API for the given version.
+ *
+ * The optional patch argument is for cases in which the path is not part of
+ * the actual version number.
+ *
+ * @param source    The API source (instance, driver, etc.)
+ * @param version    The version number
+ * @param patch        The patch number (if >= 0)
+ */
+static void print_version(const char* source, uint32_t version, int patch=-1) {
+    uint32_t major = VK_VERSION_MAJOR(version);
+    uint32_t minor = VK_VERSION_MINOR(version);
+    uint32_t impl  = patch;
+    if (patch < 0) {
+        impl = VK_VERSION_PATCH(version);
+    }
+    SDL_Log("%s %d.%d.%d",source,major,minor,impl);
+}
+
+/**
+ * Returns the absolute path to the given asset.
+ *
+ * This function allows us to use the asset/bundle directory on most devices,
+ * but switch to the working directory in Windows for better Visual Studio
+ * support
+ *
+ * @param asset The asset name
+ *
+ * @return the absolute path to the given asset.
+ */
+static std::string get_asset(const std::string& asset) {
+#if defined (SDL_PLATFORM_WINDOWS)
+    char* path = SDL_GetCurrentDirectory();
+    std::string result = std::string(path)+asset;
+    SDL_free(path);
+#else
+    std::string result = std::string(SDL_GetBasePath())+asset;
+#endif
+    return result;
+}
+
+    
 /**
  * An offscreen Vulkan renderer
  *

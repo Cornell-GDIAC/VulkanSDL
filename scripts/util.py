@@ -4,14 +4,8 @@ Utility functions the build script
 This module is a collection of utility functions that are used by all the build 
 scripts.
 
-The primary thing in this module is a collection of path functions.  Windows
-makes everything complicated.  It needs its own paths format (e.g. \ instead of
-/). But to make matters worse, "sometimes" is uses posix format. So it is not
-just a matter of using os.path, especially since we want Windows to be able
-to generate build files for Apple and vice versa.
-
-Author:  Walker M. White
-Version: 7/10/24
+Author: Walker M. White
+Date:   11/21/25
 """
 import os, os.path
 import glob
@@ -20,7 +14,11 @@ import pathlib
 import platform
 import shortuuid
 import uuid
+import fnmatch
 
+
+# Salt value to help with UUID collisions
+SALT = "__sdlapp__"
 
 #mark UUIDS
 
@@ -134,7 +132,7 @@ class UUIDService(object):
         if tries >= self.MAX_TRIES:
             raise RuntimeError('ERROR: Unable to get unique UUID for %s' % repr(url))
         
-        result = self._shortus.uuid(name=url).upper()[:self.APPLE_SIZE]
+        result = self._shortus.uuid(name=url+"/"+SALT).upper()[:self.APPLE_SIZE]
         if result in self._uniques:
             # We have a problem.  Hope this is rare
             return self._compute_Apple_UUID_(url,tries+1)
@@ -189,7 +187,7 @@ class UUIDService(object):
         if tries >= self.MAX_TRIES:
             raise RuntimeError('ERROR: Unable to get unique UUID for %s' % repr(url))
         
-        result = uuid.uuid5(uuid.NAMESPACE_URL,url)
+        result = uuid.uuid5(uuid.NAMESPACE_URL,url+"/"+SALT)
         result = str(result).upper()
         
         if result in self._uniques:
@@ -592,11 +590,11 @@ def file_replace_after(path,data):
                 pos0 = contents.find(key,pos1)
                 if pos0 != -1:
                     pos0 += len(key)
-                    pos1 = contents.find('\n',pos0)
-                    if pos1 == -1:
-                        pos1 = len(contents)
-                    contents = contents[:pos0]+data[key]+contents[pos1:]
-        
+                pos1 = contents.find('\n',pos0)
+                if pos1 == -1:
+                    pos1 = len(contents)
+                contents = contents[:pos0]+data[key]+contents[pos1:]
+    
     if contents:
         with open(path, 'w') as file:
             file.write(contents)
@@ -662,10 +660,21 @@ def directory_replace(path,contents,filter=None):
     """
     for item in os.listdir(path):
         abspath = os.path.join(path,item)
-        if filter is None or filter(path,item):
+        if filter is None or filter(item):
             file_replace(abspath,contents)
         elif os.path.isdir(abspath):
             directory_replace(abspath,contents,filter)
+
+
+def make_file_filter(data):
+    if 'selection' in data:
+        pattern = data['selection']
+    
+        if type(pattern) == str:
+            return lambda x: fnmatch.fnmatch(x,pattern)
+        elif type(pattern) == list:
+            return lambda x: any([fnmatch.fnmatch(x,y) for y in pattern])
+    return lambda x : False
 
 
 def merge_copy(src,dst):
@@ -701,39 +710,15 @@ def merge_copy(src,dst):
                 suffix = os.path.split(item)[1]
                 merge_copy(os.path.join(src,suffix),os.path.join(dst,suffix))
         else:
-            shutil.copytree(src,dst,symlinks=True)
+            shutil.copytree(src, dst, symlinks=True, dirs_exist_ok=True)
     else:
-        shutil.copyfile(src,dst,follow_symlinks=False)
+        shutil.copyfile(src,dst)
 
 
 
 pass
 #mark -
 #mark OTHER
-def get_dev_platform():
-    """
-    Returns the development platform in use.
-    
-    We currently only support three development platforms: 'windows', 'macos', 
-    and 'linux'. For the most part, we do not need to identify our platform. 
-    But in some cases (such as adding in external libraries), we do need to 
-    know our platform.
-    
-    If the platform cannot be determined, this function will return 'unknown'.
-    
-    :return: The development platform in use.
-    :rtype:  ``str``
-    """
-    if (any(platform.win32_ver())):
-        return 'windows'
-    if (any(platform.mac_ver())):
-        return 'macos'
-    try:
-        platform.freedesktop_os_release()
-        return 'linux'
-    except:
-        return 'unknown'
-
 
 def group_parity(text,parens='()'):
     """
@@ -759,76 +744,4 @@ def group_parity(text,parens='()'):
             result += 1
         elif text[pos] == parens[-1]:
             result -= 1
-    return result
-
-
-def merge_dict(d1, d2):
-    """
-    Returns a dictionary that it is a recursive merge of d1 and d2
-    
-    The resulting dictionary will contain all keys of d1 and d2. When a key
-    appears in both d1 and d2, merge rules are defined as follows:
-    
-    - If both values are dicts, they are merged recursively
-    - If both values are lists, the lists are concatenated, sorted, with dups removed
-    - If both values are tuples, the tuples are concatenated, sorted, with dups removed
-    - If only one value is a list or tuple, the other element is added with above rules
-    - Otherwise, a sorted list is created with both elements (with dups removed)
-    
-    All values are (deep) copies.
-    
-    :param d1: The first dictionary
-    :type d1:  ``dict``
-    
-    :param d2: The first dictionary
-    :type d2:  ``dict``
-    
-    :return: The merge of dictionary d1 and d2
-    :rtype:  ``dict``
-    """
-    import copy
-    result = {}
-    for key in d1:
-        result[key] = copy.deepcopy(d1[key])
-    
-    for key in d2:
-        if key in result:
-            v1 = result[key]
-            v2 = d2[key]
-            if type(v1) == dict and type(v2) == dict:
-                result[key] = merge_dict(v1,v2)
-            elif type(v1) in [list,tuple] and type(v2) in [list,tuple]:
-                v3 = list(v1)+list(v2)
-                v3 = list(set(v3))
-                try:
-                    v3.sort()
-                except:
-                    pass
-                result[key] = v3
-            elif type(v1) in [list,tuple]:
-                v3 = list(v1)+[v2]
-                v3 = list(set(v3))
-                try:
-                    v3.sort()
-                except:
-                    pass
-                result[key] = v3
-            elif type(v2) in [list,tuple]:
-                v3 = [v1]+list(v2)
-                v3 = list(set(v3))
-                try:
-                    v3.sort()
-                except:
-                    pass
-                result[key] = v3
-            else:
-                v3 = list(set((v1,copy.deepcopy(v2))))
-                try:
-                    v3.sort()
-                except:
-                    pass
-                result[key] = v3
-        else:
-            result[key] = copy.deepcopy(d2[key])
-    
     return result

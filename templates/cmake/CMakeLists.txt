@@ -39,7 +39,7 @@ option(BUILD_SHARED_BASE "Build the SDL component as a shared library" OFF)
 option(USE_VULKAN "Include Vulkan in this application build" ON)
 
 # Set the correct directories
-set(SDL2_DIR  __SDL2DIR__)
+set(SDL3_DIR  __SDL3DIR__)
 set(ASSET_DIR  __ASSETDIR__)
 if (MSVC)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/install>)
@@ -47,18 +47,18 @@ else()
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/install")
 endif()
 
-# Link in sdl2
+# Link in sdl3
 if (BUILD_SHARED_BASE)
     set(VULKAN_SDL_BUILD_SHARED_LIBS ON)
-    add_subdirectory("${SDL2_DIR}/buildfiles/cmake" "vulkan-sdl.dir")
+    add_subdirectory("${SDL3_DIR}/buildfiles/cmake" "vulkan-sdl.dir")
     list(APPEND EXTRA_LIBS VulkanSDL::VulkanSDL)
 else()
     set(VULKAN_SDL_BUILD_SHARED_LIBS OFF)
-    add_subdirectory("${SDL2_DIR}/buildfiles/cmake" "vulkan-sdl.dir")
+    add_subdirectory("${SDL3_DIR}/buildfiles/cmake" "vulkan-sdl.dir")
     list(APPEND EXTRA_LIBS VulkanSDL::VulkanSDL-static)
 endif()
-list(APPEND EXTRA_INCLUDES "${SDL2_DIR}/include")
-list(APPEND EXTRA_INCLUDES "${SDL2_DIR}/vulkan/include")
+list(APPEND EXTRA_INCLUDES "${SDL3_DIR}/include")
+list(APPEND EXTRA_INCLUDES "${SDL3_DIR}/vulkan/include")
 __EXTRA_INCLUDES__
 
 
@@ -114,8 +114,8 @@ if (MSVC)
     add_compile_options(/wd26495)
     add_definitions(-D_WINDOWS)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    list(APPEND EXTRA_INCLUDES "${SDL2_DIR}/templates/windows/include")
-    list(APPEND EXTRA_LIBS "${CMAKE_SOURCE_DIR}/${SDL2_DIR}/buildfiles/windows/sdl2/lib/${PROCESSOR_ARCH}/glew32.lib")
+    list(APPEND EXTRA_INCLUDES "${SDL3_DIR}/templates/windows/include")
+    list(APPEND EXTRA_LIBS "${CMAKE_SOURCE_DIR}/${SDL3_DIR}/buildfiles/windows/sdl3/lib/${PROCESSOR_ARCH}/glew32.lib")
 endif()
 
 # Add the source code
@@ -148,7 +148,7 @@ foreach(Asset IN LISTS ASSET_FILES)
     file(COPY ${Asset} DESTINATION "${CMAKE_BINARY_DIR}/install/")
 endforeach()
 if (MSVC)
-    file(GLOB DLL_FILES "${SDL2_DIR}/buildfiles/windows/dlls/${PROCESSOR_ARCH}/*")
+    file(GLOB DLL_FILES "${SDL3_DIR}/buildfiles/windows/dlls/${PROCESSOR_ARCH}/*")
     foreach(DLL IN LISTS DLL_FILES)
         file(COPY ${DLL} DESTINATION "${CMAKE_BINARY_DIR}/install/")
     endforeach()

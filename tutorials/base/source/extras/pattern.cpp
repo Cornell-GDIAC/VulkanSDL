@@ -11,15 +11,16 @@ void drawgimp(SDL_Renderer *renderer, int w, int h) {
     };
     
     int i, x, y;
-    SDL_Rect rect;
+    SDL_FRect rect;
     rect.w = GRID_SIZE;
     rect.h = GRID_SIZE;
     
-    int xlimit = (w/rect.w % 2 == 0 ? w/rect.w : 1+w/rect.w);
-    int ylimit = (h/rect.h % 2 == 0 ? h/rect.h : 1+h/rect.h);
-    
+    int xlimit = (w/GRID_SIZE % 2 == 0 ? w/GRID_SIZE : 1+w/GRID_SIZE);
+    int ylimit = (h/GRID_SIZE % 2 == 0 ? h/GRID_SIZE : 1+h/GRID_SIZE);
+
     for (y = 0; y <= ylimit; y++) {
         for (x = 0; x <= xlimit; x++) {
+            i = (x+y) % 2;
             i = (x+y) % 2;
             SDL_SetRenderDrawColor(renderer, col[i].r, col[i].g, col[i].b, col[i].a);
             

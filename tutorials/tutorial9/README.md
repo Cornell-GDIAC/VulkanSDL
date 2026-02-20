@@ -13,22 +13,24 @@ link this tutorial to VulkanSDL using the python script. No additional
 configuration is necessary.
 
 This code is presented without comments to make it easier to diff against 
-the original (as an comments would appear in the diff).
+the original (as any comments would appear in the diff).
 
 ### SDL Window Management
 
-Our code uses `SDL_PollEvents` to handle windowed events rather than using a 
-callback function like `SDL_AddEventWatch`. This is the preferred way to 
-handle events in SDL, as events have to be processed on the same thread that
-the window was created. We support two window events, namely quiting and 
-resizing.
+OIn SDL2, there was a known problem where moving or resizing a window on 
+Windows would cause the application to freeze until the operating was 
+complete. That is because operations like `SDL_PollEvent` may block on 
+window operations, preventing the code from that frame from executing. As
+this tutorial animates particles on the screen, this behavior would cause 
+the animation to stop until resizing (or even dragging) was complete.
 
-More than any other tutorial, this one shows off the problems with SDL and
-Windows. This tutorial behaves perfectly fine on Linux and macOS, as well as
-the mobile platforms Android and iOS. But on Windows, the particle simulation
-freeze any time the window is moved or resized. That is because of a 
-[well-known issue](https://github.com/libsdl-org/SDL/issues/1059) where 
-(on Windows only) these actions block the main thread until they complete.
+This demo uses SDL3 which is able to reduce, but not entirely eliminate,
+this problem by separating event consumption and the draw loop into 
+separate callback functions. There is still some noticeable pause in
+resizing (particularly at the start of the resize), but it is not
+a hard freeze like would appear in SDL2. More information about this
+issue can be found in the 
+[official documentation](https://wiki.libsdl.org/SDL3/AppFreezeDuringDrag).
 
 In this tutorial, this issue has an even worse effect than freezing the frame. 
 The simulation measures the time between frames to figure out how far to move 

@@ -99,7 +99,7 @@ def place_project(config):
     :return: The project directory
     :rtype:  ``str``
     """
-    entries = ['short','sdl2','build']
+    entries = ['short','sdl3','build']
     util.check_config_keys(config,entries)
 
     # Create the build folder if necessary
@@ -109,12 +109,12 @@ def place_project(config):
 
     # Clear and create the build folder
     project = util.remake_dir(build,MAKEDIR)
-    src  = os.path.join(config['sdl2'],'templates','cmake','ReadMe.md')
+    src  = os.path.join(config['sdl3'],'templates','cmake','ReadMe.md')
     dst = os.path.join(project, 'ReadMe.md')
     shutil.copyfile(src,dst)
 
     # Copy the CMakefile
-    src = os.path.join(config['sdl2'],'templates','cmake','CMakeLists.txt')
+    src = os.path.join(config['sdl3'],'templates','cmake','CMakeLists.txt')
     dst = os.path.join(project, 'CMakeLists.txt')
     shutil.copyfile(src,dst)
 
@@ -123,7 +123,7 @@ def place_project(config):
     if 'suffix' in config and config['suffix']:
         appid = '.'.join(appid.split('.')[:-1])
 
-    src = os.path.join(config['sdl2'],'templates','cmake','flatpak')
+    src = os.path.join(config['sdl3'],'templates','cmake','flatpak')
     dst = os.path.join(project, 'flatpak')
     shutil.copytree(src, dst, copy_function = shutil.copy)
 
@@ -155,7 +155,7 @@ def config_cmake(config,project):
     :param project: The project directory
     :type project:  ``str``
     """
-    entries = ['root','name','short','version','sdl2','sources', 'assets', 'build_to_sdl2','build_to_root']
+    entries = ['root','name','short','version','sdl3','sources', 'assets', 'build_to_sdl3','build_to_root']
     util.check_config_keys(config,entries)
 
     cmake = os.path.join(project, 'CMakeLists.txt')
@@ -166,10 +166,10 @@ def config_cmake(config,project):
     context['__APPNAME__'] = config['name']
     context['__VERSION__'] = config['version']
 
-    # Set the SDL2 directory
+    # Set the SDL3 directory
     prefix = ['..']
-    sdl2dir = os.path.join(*prefix,config['build_to_sdl2'])
-    context['__SDL2DIR__'] = util.path_to_posix(sdl2dir)
+    sdl3dir = os.path.join(*prefix,config['build_to_sdl3'])
+    context['__SDL3DIR__'] = util.path_to_posix(sdl3dir)
 
     # Set the Asset directory
     assetdir = os.path.join(*prefix,config['build_to_root'],config['assets'])
@@ -247,7 +247,7 @@ def config_flatpak(config,project):
     util.file_replace(ymlfile,context)
 
     name = config['name']
-    pattern = re.compile('[^\w_]+')
+    pattern = re.compile(r'[^\w_]+')
     shortcut = pattern.sub('',name)
     context['__GAME__'] = name
     context['__SHORTCUT__'] = shortcut

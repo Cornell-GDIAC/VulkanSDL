@@ -12,4 +12,4 @@ In general, these files are taken from the [VulkanSDK](https://vulkan.lunarg.com
 
 You will note that in our releases we have an `.xcframework` for the vulkan loader and the validation layers. That is because we have added support for the iOS simulator, which is *not* currently supported by the VulkanSDK. We have compiled these ourselves and provided them as part of the release. This is another reason for using our files rather than relying on the VulkanSDK.
 
-### LunarG VulkanSDL version 1.3.290
+### LunarG VulkanSDL version 1.4.335

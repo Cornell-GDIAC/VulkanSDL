@@ -1,14 +1,14 @@
 """
 Python Script for Android Builds
 
-Behold the entire reason we have a custom build set-up for CUGL. While CMake
+Behold the entire reason we have a custom build set-up for SDL. While CMake
 conceivably works with iOS (though not well), it is not sufficient (by itself)
 for Android. That is because an Android project is an amalgamation of C++ files,
 Java files, Makefiles and Gradle files. Configuring these projects is error
 prone, as a lot of different files have to be touched.
 
 Author:  Walker M. White
-Version: 7/10/24
+Date:   11/29/25
 """
 import os, os.path
 import shutil
@@ -216,7 +216,7 @@ def place_project(config):
     build = util.remake_dir(build,MAKEDIR)
 
     # Copy the whole directory
-    template = os.path.join(config['sdl2'],'templates','android','__project__')
+    template = os.path.join(config['sdl3'],'templates','android','__project__')
     project  = os.path.join(build,config['camel'])
     shutil.copytree(template, project, copy_function = shutil.copy)
 
@@ -320,24 +320,24 @@ def config_ndkmake(config,project):
     :param project: The project directory
     :type project:  ``str``
     """
-    entries = ['sources','build_to_root','build_to_sdl2']
+    entries = ['sources','build_to_root','build_to_sdl3']
     util.check_config_keys(config,entries)
 
     # Find the folder offsets
     prefix = ['..','..','..','..']
-    sdldir  = os.path.join(*prefix,config['build_to_sdl2'])
+    sdldir  = os.path.join(*prefix,config['build_to_sdl3'])
     sdldir  = util.path_to_posix(sdldir)
     srcdir  = os.path.join(*prefix,config['build_to_root'])
     srcdir  = util.path_to_posix(srcdir)
 
-    # Modify the SDL2 Android.mk files recursively
+    # Modify the SDL3 Android.mk files recursively
     sdlroot  = os.path.join(project,'app','jni','vulkansdl')
-    contents = {'__SDL2_PATH__':sdldir}
-    util.directory_replace(sdlroot,contents,lambda path,file : file == 'Android.mk')
+    contents = {'__SDL3_PATH__':sdldir}
+    util.directory_replace(sdlroot,contents,lambda file : file == 'Android.mk')
 
     # Modify the Project makefile
     srcmake = os.path.join(project,'app','jni','src','Android.mk')
-    contents['__SDL2_PATH__'] = sdldir
+    contents['__SDL3_PATH__'] = sdldir
     contents['__SOURCE_PATH__'] = srcdir
 
     # Source files
@@ -376,7 +376,7 @@ def config_cmake(config,project):
     :param project: The project directory
     :type project:  ``str``
     """
-    entries = ['sources','build_to_root','build_to_sdl2']
+    entries = ['sources','build_to_root','build_to_sdl3']
     util.check_config_keys(config,entries)
     cmake = os.path.join(project,'app','jni', 'CMakeLists.txt')
     prefix = ['..','..','..','..']
@@ -386,9 +386,9 @@ def config_cmake(config,project):
     context['__APPNAME__'] = config['name']
     context['__VERSION__'] = config['version']
 
-    # Set the SDL2 directory
-    sdl2dir = os.path.join(*prefix,config['build_to_sdl2'])
-    context['__SDL2DIR__'] = util.path_to_posix(sdl2dir)
+    # Set the SDL3 directory
+    sdl3dir = os.path.join(*prefix,config['build_to_sdl3'])
+    context['__SDL3DIR__'] = util.path_to_posix(sdl3dir)
 
     # Set the Asset directory
     assetdir = os.path.join(*prefix,config['build_to_root'],config['assets'])

@@ -2,7 +2,7 @@
 name:   Loading Models          # The application name
 short:  Tutorial6               # The "short" name (no spaces)
 appid:  git.overv.tutorial6     # Application identifier for Mac, iOS, Android
-suffix: true                    # Set to true to avoid global appid collisions
+suffix: G1E530A6
 
 build:  build                   # The build directory (targets are each a subdirectory)
 assets: assets                  # The folder with the game assets (do not list asset)

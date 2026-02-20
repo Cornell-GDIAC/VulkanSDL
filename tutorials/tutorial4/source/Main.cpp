@@ -1,14 +1,22 @@
-#include <SDL.h>
-#include <SDL_vulkan.h>
-#include <SDL_app.h>
+/**
+ * Vulkan Tutorial: Part 4
+ *
+ * This code is the texture mapping tutorial from https://vulkan-tutorial.com.
+ * It is the material up to and including the section on the combined image.
+ * sampler. See README.md for the changes made to adapt this tutorial to SDL.
+ */
+#define SDL_MAIN_USE_CALLBACKS 1 /* use the callbacks instead of main() */
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
+#include <SDL3/SDL_app.h>
+#include <SDL3/SDL_vulkan.h>
 #include <vulkan/vulkan.h>
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "image.h"
-
+#include <string>
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
@@ -22,6 +30,30 @@
 #include <array>
 #include <optional>
 #include <set>
+
+#include <image.h>
+
+/**
+ * Prints out the API for the given version.
+ *
+ * The optional patch argument is for cases in which the path is not part of
+ * the actual version number.
+ *
+ * @param source    The API source (instance, driver, etc.)
+ * @param version    The version number
+ * @param patch        The patch number (if >= 0)
+ */
+static void print_version(const char* source, uint32_t version, int patch=-1) {
+    uint32_t major = VK_VERSION_MAJOR(version);
+    uint32_t minor = VK_VERSION_MINOR(version);
+    uint32_t impl  = patch;
+    if (patch < 0) {
+        impl = VK_VERSION_PATCH(version);
+    }
+    SDL_Log("%s %d.%d.%d",source,major,minor,impl);
+}
+
+/** Vulkan Tutorial Code **/
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -42,8 +74,18 @@ const bool enableValidationLayers = false;
 const bool enableValidationLayers = true;
 #endif
 
-#if defined (__MACOSX__) || defined(__IPHONEOS__)
+#if defined (SDL_PLATFORM_MACOS) || defined(SDL_PLATFORM_IOS)
 #define USE_MOLTEN 1
+#endif
+
+#if defined SDL_PLATFORM_IOS && SDL_PLATFORM_IOS == 1
+#include <TargetConditionals.h>
+#if TARGET_OS_MACCATALYST
+#else
+    #define MOBILE_PLATFORM 1
+#endif
+#elif defined SDL_PLATFORM_ANDROID
+    #define MOBILE_PLATFORM 1
 #endif
 
 VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
@@ -130,15 +172,7 @@ const std::vector<uint16_t> indices = {
     0, 1, 2, 2, 3, 0
 };
 
-class HelloTriangleApplication {
-public:
-    void run() {
-        initWindow();
-        initVulkan();
-        mainLoop();
-        cleanup();
-    }
-
+class TextureApplication {
 private:
     SDL_Window* window;
 
@@ -188,72 +222,67 @@ private:
     std::vector<VkSemaphore> imageAvailableSemaphores;
     std::vector<VkSemaphore> renderFinishedSemaphores;
     std::vector<VkFence> inFlightFences;
+    
     uint32_t currentFrame = 0;
 
     bool framebufferResized = false;
     VkExtent2D windowExtent;
 
-    void initWindow() {
+    bool initWindow() {
         SDL_Init(SDL_INIT_VIDEO);
 
-        SDL_Vulkan_LoadLibrary(nullptr);
-        Uint32 sdlflags = (SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN |
-                           SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
-        window = SDL_CreateWindow("Vulkan",
-                                  SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-                                  WIDTH, HEIGHT, sdlflags);
-        windowExtent.width = WIDTH;
-        windowExtent.width = HEIGHT;
-    }
-
-    void initVulkan() {
-        createInstance();
-        setupDebugMessenger();
-        createSurface();
-        pickPhysicalDevice();
-        createLogicalDevice();
-        createSwapChain();
-        createImageViews();
-        createRenderPass();
-        createDescriptorSetLayout();
-        createGraphicsPipeline();
-        createFramebuffers();
-        createCommandPool();
-        createTextureImage();
-        createTextureImageView();
-        createTextureSampler();
-        createVertexBuffer();
-        createIndexBuffer();
-        createUniformBuffers();
-        createDescriptorPool();
-        createDescriptorSets();
-        createCommandBuffers();
-        createSyncObjects();
-    }
-
-    void mainLoop() {
-        bool running = true;
-        while (running) {
-            SDL_Event windowEvent;
-            while (SDL_PollEvent(&windowEvent)) {
-                if (windowEvent.type == SDL_QUIT) {
-                    running = false;
-                    break;
-                } else if (windowEvent.type == SDL_WINDOWEVENT) {
-                    if (windowEvent.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-                        framebufferResized = true;
-                        windowExtent.width = windowEvent.window.data1;
-                        windowExtent.height = windowEvent.window.data2;
-                    }
-                }
-            }
-            
-            if (running) {
-                drawFrame();
-            }
+        if (!SDL_Vulkan_LoadLibrary(nullptr)) {
+            SDL_Log("Error : %s",SDL_GetError());
+            return false;
+        }
+#if defined(MOBILE_PLATFORM)
+        Uint32 sdlflags = (SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY |
+                           SDL_WINDOW_FULLSCREEN);
+#else
+        Uint32 sdlflags = (SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY |
+                           SDL_WINDOW_RESIZABLE);
+#endif
+        window = SDL_CreateWindow("Vulkan", WIDTH, HEIGHT, sdlflags);
+        if (window == NULL) {
+            return false;
         }
 
-        vkDeviceWaitIdle(device);
+        int w, h;
+        SDL_GetWindowSize(window,&w,&h);
+        windowExtent.width = w;
+        windowExtent.height = h;
+        return true;
+    }
+
+    bool initVulkan() {
+        try {
+            createInstance();
+            setupDebugMessenger();
+            createSurface();
+            pickPhysicalDevice();
+            createLogicalDevice();
+            createSwapChain();
+            createImageViews();
+            createRenderPass();
+            createDescriptorSetLayout();
+            createGraphicsPipeline();
+            createFramebuffers();
+            createCommandPool();
+            createTextureImage();
+            createTextureImageView();
+            createTextureSampler();
+            createVertexBuffer();
+            createIndexBuffer();
+            createUniformBuffers();
+            createDescriptorPool();
+            createDescriptorSets();
+            createCommandBuffers();
+            createSyncObjects();
+        } catch (const std::exception& e) {
+            std::cerr << e.what() << std::endl;
+            return false;
+        }
+        return true;
     }
 
     void cleanupSwapChain() {
@@ -268,10 +297,14 @@ private:
         vkDestroySwapchainKHR(device, swapChain, nullptr);
         
         // Despite the tutorial, it is not safe to reuse these semaphores
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-            vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
-            vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
-            vkDestroyFence(device, inFlightFences[i], nullptr);
+        for (size_t ii = 0; ii < renderFinishedSemaphores.size(); ii++) {
+            vkDestroySemaphore(device, renderFinishedSemaphores[ii], nullptr);
+        }
+        for (size_t ii = 0; ii < imageAvailableSemaphores.size(); ii++) {
+            vkDestroySemaphore(device, imageAvailableSemaphores[ii], nullptr);
+        }
+        for (size_t ii = 0; ii < inFlightFences.size(); ii++) {
+            vkDestroyFence(device, inFlightFences[ii], nullptr);
         }
     }
 
@@ -282,7 +315,7 @@ private:
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
         vkDestroyRenderPass(device, renderPass, nullptr);
 
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        for (size_t i = 0; i < uniformBuffers.size(); i++) {
             vkDestroyBuffer(device, uniformBuffers[i], nullptr);
             vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
         }
@@ -336,13 +369,18 @@ private:
             throw std::runtime_error("validation layers requested, but not available!");
         }
 
+        // This handles proper fallback
+        uint32_t desiredVersion = VK_API_VERSION_1_3;
+        uint32_t loaderVersion  = VK_API_VERSION_1_0;
+        vkEnumerateInstanceVersion(&loaderVersion);
+
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.pApplicationName = "Hello Triangle";
         appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.pEngineName = "No Engine";
         appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_0;
+        appInfo.apiVersion = std::min(loaderVersion, desiredVersion);
 
         VkInstanceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -375,6 +413,10 @@ private:
             createInfo.pNext = nullptr;
         }
 
+        uint32_t apiVersion = VK_API_VERSION_1_0; // fallback default
+        vkEnumerateInstanceVersion(&apiVersion);
+        print_version("Instance",apiVersion);
+
         if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
             throw std::runtime_error("failed to create instance!");
         }
@@ -400,7 +442,7 @@ private:
     }
 
     void createSurface() {
-        if (SDL_Vulkan_CreateSurface(window, instance, &surface) != SDL_TRUE) {
+        if (!SDL_Vulkan_CreateSurface(window, instance, NULL, &surface)) {
             throw std::runtime_error("failed to create window surface!");
         }
     }
@@ -426,6 +468,10 @@ private:
         if (physicalDevice == VK_NULL_HANDLE) {
             throw std::runtime_error("failed to find a suitable GPU!");
         }
+
+        VkPhysicalDeviceProperties props;
+        vkGetPhysicalDeviceProperties(physicalDevice, &props);
+        print_version(props.deviceName,props.apiVersion);
     }
 
     void createLogicalDevice() {
@@ -1209,21 +1255,29 @@ private:
     }
 
     void createSyncObjects() {
+        renderFinishedSemaphores.resize(swapChainImages.size());
         imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-
+        
         VkSemaphoreCreateInfo semaphoreInfo{};
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
+        
         VkFenceCreateInfo fenceInfo{};
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-            if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-                vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
-                vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
+        
+        for (size_t ii = 0; ii < renderFinishedSemaphores.size(); ii++) {
+            if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[ii]) != VK_SUCCESS) {
+                throw std::runtime_error("failed to create synchronization objects for a frame!");
+            }
+        }
+        for (size_t ii = 0; ii < imageAvailableSemaphores.size(); ii++) {
+            if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[ii]) != VK_SUCCESS) {
+                throw std::runtime_error("failed to create synchronization objects for a frame!");
+            }
+        }
+        for (size_t ii = 0; ii < inFlightFences.size(); ii++) {
+            if (vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[ii]) != VK_SUCCESS) {
                 throw std::runtime_error("failed to create synchronization objects for a frame!");
             }
         }
@@ -1250,7 +1304,7 @@ private:
         uint32_t imageIndex;
         VkResult result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
-        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || framebufferResized) {
             recreateSwapChain();
             return;
         } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
@@ -1276,7 +1330,7 @@ private:
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
 
-        VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
+        VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[imageIndex]};
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
@@ -1446,9 +1500,8 @@ private:
 
     std::vector<const char*> getRequiredExtensions() {
         uint32_t extensionCount = 0;
-        SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, nullptr);
-        std::vector<const char*> extensions(extensionCount);
-        SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, extensions.data());
+        const char * const *instance_extensions = SDL_Vulkan_GetInstanceExtensions(&extensionCount);
+        std::vector<const char*> extensions(instance_extensions,instance_extensions+extensionCount);
 
         if (enableValidationLayers) {
             extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
@@ -1469,6 +1522,8 @@ private:
 
             for (const auto& layerProperties : availableLayers) {
                 if (strcmp(layerName, layerProperties.layerName) == 0) {
+                    print_version(layerProperties.layerName,
+                                  layerProperties.specVersion);
                     layerFound = true;
                     break;
                 }
@@ -1483,20 +1538,19 @@ private:
     }
 
     static std::vector<char> readFile(const std::string& filename) {
-        // APP_GetAssetPath is an SDL_app extension pointing to the asset directory
-        std::string path = std::string(APP_GetAssetPath())+filename;
-        SDL_RWops* file = SDL_RWFromFile(path.c_str(), "rb");
+        std::string path = get_asset(filename);
+        SDL_IOStream* file = SDL_IOFromFile(path.c_str(), "rb");
         
         if (file == NULL) {
             throw std::runtime_error("failed to open file!");
         }
 
-        size_t fileSize = (size_t)SDL_RWsize(file);
+        size_t fileSize = (size_t)SDL_GetIOSize(file);
         std::vector<char> buffer(fileSize);
 
-        SDL_RWread(file, buffer.data(), 1, fileSize);
+        SDL_ReadIO(file, buffer.data(), fileSize);
 
-        SDL_RWclose(file);
+        SDL_CloseIO(file);
 
         return buffer;
     }
@@ -1506,17 +1560,88 @@ private:
 
         return VK_FALSE;
     }
-};
+    
+    /** Class Interface */
+public:
+    
+    TextureApplication() : window(NULL) {}
+    
+    ~TextureApplication() { cleanup(); }
+    
+    bool setup() {
+        // Set the basic metadata
+        if (!SDL_SetAppMetadata("Vulkan Tutorial", "1.0.0","com.vulkan-tutorial.tutorial4")) {
+            SDL_Log("Setup Error: %s\n", SDL_GetError());
+            return false;
+        }
+        if (!initWindow()) {
+            SDL_Log("Setup Error: Failed to create window\n");
+            return false;
+        }
+        if (!initVulkan()) {
+            SDL_Log("Setup Error: Failed to initialize Vulkan\n");
+            return false;
+        }
 
-int main(int argc, char* argv[]) {
-    HelloTriangleApplication app;
-
-    try {
-        app.run();
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
-        return EXIT_FAILURE;
+        SDL_RaiseWindow(window);
+        return true;
+    }
+    
+    bool consume(SDL_Event *event) {
+        if (event->type == SDL_EVENT_QUIT) {
+            return false;
+        } else if (event->type == SDL_EVENT_WINDOW_RESIZED) {
+            framebufferResized = true;
+            windowExtent.width  = event->window.data1;
+            windowExtent.height = event->window.data2;
+        }
+        return true;
+    }
+    
+    void run() {
+        drawFrame();
     }
 
-    return EXIT_SUCCESS;
+    void wait() {
+        vkDeviceWaitIdle(device);
+    }
+};
+
+/** SDL3 Callbacks */
+
+SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
+    TextureApplication* app = new TextureApplication();
+    *appstate = app;
+    if (app->setup()) {
+        return SDL_APP_CONTINUE;
+    }
+    return SDL_APP_FAILURE;
 }
+
+SDL_AppResult SDL_AppIterate(void *appstate) {
+    TextureApplication* app = (TextureApplication*)appstate;
+    try {
+        app->run();
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return SDL_APP_FAILURE;
+    }
+    return SDL_APP_CONTINUE;
+}
+
+SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
+    TextureApplication* app = (TextureApplication*)appstate;
+    if (app->consume(event)) {
+        return SDL_APP_CONTINUE;
+    }
+    return SDL_APP_SUCCESS;
+}
+
+void SDL_AppQuit(void *appstate, SDL_AppResult result) {
+    TextureApplication* app = (TextureApplication*)appstate;
+    if (app != nullptr) {
+        app->wait();
+        delete app;
+    }
+}
+

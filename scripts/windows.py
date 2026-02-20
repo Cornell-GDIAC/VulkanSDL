@@ -2,7 +2,7 @@
 Python Script for Windows Builds
 
 While technically Windows can run CMake, we find CMake support to be flaky. In
-particular, the optional formats in sdl2image break CMake because Microsoft
+particular, the optional formats in sdl3image break CMake because Microsoft
 MSVC compiler does not support stdatomic.h in C (sigh).  Therefore, we prefer
 to use Visual Studio for Windows builds.
 
@@ -196,16 +196,16 @@ def place_project(config):
     project  = os.path.join(build,config['camel'])
 
     # Copy the Visual Studio solution
-    template = os.path.join(config['sdl2'],'templates','windows','__project__.sln')
+    template = os.path.join(config['sdl3'],'templates','windows','__project__.sln')
     shutil.copy(template, project+'.sln')
 
     # Copy the include directory
-    src = os.path.join(config['sdl2'],'templates','windows','include')
+    src = os.path.join(config['sdl3'],'templates','windows','include')
     dst = os.path.join(build,'include')
     shutil.copytree(src, dst, copy_function = shutil.copy)
 
     # Finally, copy in all of the resources
-    src = os.path.join(config['sdl2'],'templates','windows','__project__')
+    src = os.path.join(config['sdl3'],'templates','windows','__project__')
     shutil.copytree(src, project, copy_function = shutil.copy)
 
     # We need to rename some files in the subdirectory
@@ -226,7 +226,7 @@ def place_project(config):
     shutil.move(src,dst)
 
     # Copy libs from the Vulkan folder
-    vulkan = os.path.join(config['sdl2'],'vulkan','windows')
+    vulkan = os.path.join(config['sdl3'],'vulkan','windows')
     for item in os.listdir(vulkan):
         src = os.path.join(vulkan,item)
         if os.path.isdir(src):
@@ -253,8 +253,8 @@ def reassign_vcxproj(config,project):
     :type project:  ``str``
     """
     # SDL directory (relative)
-    sdl2dir = util.path_to_windows(config['build_to_sdl2'])
-    sdl2dir = '..\\'+sdl2dir+'\\'
+    sdl3dir = util.path_to_windows(config['build_to_sdl3'])
+    sdl3dir = '..\\'+sdl3dir+'\\'
 
     # Source directory (relative)
     rootdir = util.path_to_windows(config['build_to_root'])
@@ -273,7 +273,7 @@ def reassign_vcxproj(config,project):
     if 'windows' in entries and entries['windows']:
         includes += ';'.join(map(make_include,entries['windows']))+';'
 
-    context = {'__project__':config['camel'],'__BUILD_2_SDL__':sdl2dir,'__INCLUDE_DIR__':includes}
+    context = {'__project__':config['camel'],'__BUILD_2_SDL__':sdl3dir,'__INCLUDE_DIR__':includes}
 
     # Time to update the files
     solution = project+'.sln'

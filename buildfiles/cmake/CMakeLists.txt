@@ -1,112 +1,208 @@
-# Primary CMake file for SDL_app
-# This compiles all of the individual SDL components as an interface
-if(POLICY CMP0091)
-	set(CMAKE_POLICY_DEFAULT_CMP0091 NEW)
+# Primary CMake file for VulkanSDL
+cmake_minimum_required(VERSION 3.16...3.28)
+
+# Make option() cache overrides in subdirs stick
+cmake_policy(SET CMP0077 NEW)
+
+if(NOT DEFINED CMAKE_BUILD_TYPE)
+    set(cmake_build_type_undefined 1)
 endif()
 
-if(POLICY CMP0077)
-	set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
-endif()
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/modules")
 
-cmake_minimum_required(VERSION 3.10)
+# See docs/release_checklist.md
+set(MAJOR_VERSION 3)
+set(MINOR_VERSION 2)
+set(MICRO_VERSION 0)
+set(SDL_REQUIRED_VERSION 3.2.6)
 
-# set the project name and version
-project(VulkanSDL VERSION 1.0.0)
+project(VulkanSDL
+    LANGUAGES C CXX
+    VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${MICRO_VERSION}"
+)
 
-# Define the relative position of this file in the SDL App project
+# Define the relative position of this file in the Vulkan SDL project
 # This is to make this file easily relocatable (for Android, etc.)
 set(CMAKE_CURRENT_DEPTH "${PROJECT_SOURCE_DIR}")
 
 if(NOT DEFINED PROJECT_DIR_OFFSET)
-	set(PROJECT_DIR_OFFSET "../..")
+    set(PROJECT_DIR_OFFSET "../..")
 endif()
 
-if(NOT DEFINED VULKAN_SDL_DIR)
-	set(VULKAN_SDL_DIR "${CMAKE_CURRENT_DEPTH}/${PROJECT_DIR_OFFSET}")
+if(NOT DEFINED SDL3_APP_DIR)
+    set(SDL3_APP_DIR "${CMAKE_CURRENT_DEPTH}/${PROJECT_DIR_OFFSET}")
 endif()
 
-set(SDL2_APP_DIR   "${VULKAN_SDL_DIR}")
-set(SDL2_BASE_DIR  "${VULKAN_SDL_DIR}/components/SDL")
-set(SDL2_IMAGE_DIR "${VULKAN_SDL_DIR}/components/SDL_image")
-set(SDL2_TTF_DIR   "${VULKAN_SDL_DIR}/components/SDL_ttf")
-
-# Resume the normal SDL CMake project
+set(SDL3_APP_SRC   "${SDL3_APP_DIR}/src")
+set(SDL3_APP_INC   "${SDL3_APP_DIR}/include")
+set(SDL3_BASE_DIR  "${SDL3_APP_DIR}/components/SDL")
+set(SDL3_IMAGE_DIR "${SDL3_APP_DIR}/components/SDL_image")
+set(SDL3_TTF_DIR   "${SDL3_APP_DIR}/components/SDL_ttf")
 
 # Get the platform
 include("${CMAKE_CURRENT_LIST_DIR}/modules/sdlplatform.cmake")
 SDL_DetectCMakePlatform()
 
-
 option(CMAKE_POSITION_INDEPENDENT_CODE "Build static libraries with -fPIC" ON)
-option(VULKAN_SDL_BUILD_SHARED_LIBS  "Build all components as a shared library" ON)
+option(VULKAN_SDL_BUILD_SHARED_LIBS    "Build all components as a shared library" ON)
 set(BUILD_SHARED_LIBS ${VULKAN_SDL_BUILD_SHARED_LIBS})
 
 set(COMPONENT_LIBS)
 
 if(VULKAN_SDL_BUILD_SHARED_LIBS)
-    set(vulkan_sdl_export_name VulkanSDL)
-    set(vulkan_sdl_install_name_infix shared)
+    set(vulkan_sdl_target_name VulkanSDL-shared)
+    set(APP_TYPE SHARED)
 else()
-    set(vulkan_sdl_export_name VulkanSDL-static)
-    set(vulkan_sdl_install_name_infix static)
+    set(vulkan_sdl_target_name VulkanSDL-static)
+    set(APP_TYPE STATIC)
 endif()
 
-add_library(VulkanSDL INTERFACE)
-add_library(VulkanSDL::${vulkan_sdl_export_name} ALIAS VulkanSDL)
-
-## Base SDL
-set(SDL_SHARED ${VULKAN_SDL_BUILD_SHARED_LIBS})
-set(SDL_TEST   OFF)
-add_subdirectory(sdl2)
-if (VULKAN_SDL_BUILD_SHARED_LIBS)
-	list(APPEND COMPONENT_LIBS SDL2)
-else()
-	list(APPEND COMPONENT_LIBS SDL2-static)
-endif()
-if (MSVC)
-	list(APPEND COMPONENT_LIBS SDL2::SDL2main)
-endif()
-
-## SDL Image
-set(SDL2IMAGE_BUILD_SHARED_LIBS ${VULKAN_SDL_BUILD_SHARED_LIBS})
-set(SDL2IMAGE_INSTALL OFF)
-set(SDL2IMAGE_VENDORED ON)
-add_subdirectory(sdl2image)
-if (VULKAN_SDL_BUILD_SHARED_LIBS)
-	list(APPEND COMPONENT_LIBS SDL2_image::SDL2_image)
-else()
-	list(APPEND COMPONENT_LIBS SDL2_image::SDL2_image-static)
-endif()
-
-## SDL TTF
-set(SDL2TTF_BUILD_SHARED_LIBS ${VULKAN_SDL_BUILD_SHARED_LIBS})
-set(SDL2TTF_INSTALL OFF)
-set(SDL2TTF_VENDORED ON)
-add_subdirectory(sdl2ttf)
-if (VULKAN_SDL_BUILD_SHARED_LIBS)
-	list(APPEND COMPONENT_LIBS SDL2_ttf::SDL2_ttf)
-else()
-	list(APPEND COMPONENT_LIBS SDL2_ttf::SDL2_ttf-static)
-endif()
-
-## SDL APP
-set(SDL2APP_BUILD_SHARED_LIBS ${VULKAN_SDL_BUILD_SHARED_LIBS})
-add_subdirectory(sdl2app)
-if (VULKAN_SDL_BUILD_SHARED_LIBS)
-	list(APPEND COMPONENT_LIBS SDL2_app::SDL2_app)
-else()
-    list(APPEND COMPONENT_LIBS SDL2_app::SDL2_app-static)
-endif()
-
-## Put it all together
-target_link_libraries(VulkanSDL INTERFACE ${COMPONENT_LIBS})
-
-add_library(Vulkan::SDL INTERFACE IMPORTED GLOBAL)
-set_target_properties(Vulkan::SDL PROPERTIES
-    INTERFACE_LINK_LIBRARIES "VulkanSDL"
+# New code for SDL_app
+set(APP_SOURCES
+    ${SDL3_APP_SRC}/APP_version.c
+    ${SDL3_APP_SRC}/device/APP_device.c
+    ${SDL3_APP_SRC}/display/APP_display.c
 )
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.17")
-    set_target_properties(Vulkan::SDL PROPERTIES
-        DEPRECATION "Use VulkanSDL::VulkanSDL or VulkanSDL::VulkanSDL-static instead"
+
+if(ANDROID)
+    list(APPEND APP_SOURCES ${SDL3_APP_SRC}/device/android/APP_sysdevice.c)
+    list(APPEND APP_SOURCES ${SDL3_APP_SRC}/display/android/APP_sysdisplay.c)
+elseif(MACOS)
+    enable_language(OBJC)
+    list(APPEND APP_SOURCES ${SDL3_APP_SRC}/device/appkit/APP_sysdevice.m)
+    list(APPEND APP_SOURCES ${SDL3_APP_SRC}/display/appkit/APP_sysinternals.m)
+    list(APPEND APP_SOURCES ${SDL3_APP_SRC}/display/appkit/APP_sysdisplay.m)
+elseif(IOS OR TVOS OR VISIONOS OR WATCHOS)
+    enable_language(OBJC)
+    list(APPEND APP_SOURCES ${SDL3_APP_SRC}/device/uikit/APP_sysdevice.m)
+    list(APPEND APP_SOURCES ${SDL3_APP_SRC}/display/uikit/APP_sysinternals.m)
+    list(APPEND APP_SOURCES ${SDL3_APP_SRC}/display/uikit/APP_sysdisplay.c)
+elseif(WIN32)
+    list(APPEND APP_SOURCES ${SDL3_APP_SRC}/device/windows/APP_sysdevice.cpp)
+    list(APPEND APP_SOURCES ${SDL3_APP_SRC}/display/dummy/APP_sysdisplay.c)
+elseif(LINUX)
+    list(APPEND APP_SOURCES ${SDL3_APP_SRC}/device/posix/APP_sysdevice.cpp)
+    list(APPEND APP_SOURCES ${SDL3_APP_SRC}/display/dummy/APP_sysdisplay.c)
+else()
+    list(APPEND APP_SOURCES ${SDL3_APP_SRC}/device/dummy/APP_sysdevice.c)
+    list(APPEND APP_SOURCES ${SDL3_APP_SRC}/display/dummy/APP_sysdisplay.c)
+endif()
+
+add_library(${vulkan_sdl_target_name} ${APP_TYPE} ${APP_SOURCES})
+target_compile_features(${vulkan_sdl_target_name} PRIVATE c_std_99)
+file(GLOB APP_PUBLIC_HEADERS
+    ${SDL3_APP_INC}/SDL3/*.h
+)
+if(CMAKE_VERSION VERSION_LESS 3.23)
+    message("INCLUDING ${APP_PUBLIC_HEADERS}")
+    target_sources(${vulkan_sdl_target_name} PUBLIC ${APP_PUBLIC_HEADERS})
+    target_include_directories(${vulkan_sdl_target_name}
+        PUBLIC
+            $<BUILD_INTERFACE:${SDL3_APP_INC}>
+            $<INSTALL_INTERFACE:include>
     )
+    set_target_properties(${vulkan_sdl_target_name}
+        PROPERTIES PUBLIC_HEADER "${APP_PUBLIC_HEADERS}"
+    )
+else()
+    target_sources(${vulkan_sdl_target_name}
+        PUBLIC
+            FILE_SET public_headers
+                TYPE HEADERS
+                BASE_DIRS ${SDL3_APP_INC}
+                FILES ${APP_PUBLIC_HEADERS}
+    )
+endif()
+
+target_include_directories(${vulkan_sdl_target_name} PRIVATE "${SDL3_BASE_DIR}/src")
+target_include_directories(${vulkan_sdl_target_name} PRIVATE "${SDL3_BASE_DIR}/src/video/khronos")
+target_include_directories(${vulkan_sdl_target_name} PRIVATE "${SDL3_BASE_DIR}/include/build_config")
+
+if(APPLE)
+  target_compile_options(${vulkan_sdl_target_name} PRIVATE
+    -Wno-deprecated-declarations
+    -Wno-objc-property-no-attribute
+  )
+endif()
+
+# Aliases
+add_library(VulkanSDL::${vulkan_sdl_target_name} ALIAS ${vulkan_sdl_target_name})
+if(NOT TARGET VulkanSDL::VulkanSDL)
+    add_library(VulkanSDL::VulkanSDL ALIAS ${vulkan_sdl_target_name})
+endif()
+
+# Pull in the libraries
+
+# SDL3 wants these toggles (build static, not shared)
+set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+set(SDL_STATIC ON  CACHE BOOL "" FORCE)
+set(SDL_TESTS  OFF CACHE BOOL "" FORCE)
+
+if (ANDROID) 
+    set(SDL_HIDAPI_LIBUSB OFF CACHE BOOL "Disable libusb backend on Android" FORCE)
+    set(SDL_PTHREADS ON CACHE BOOL "Enable pthreads on Android" FORCE)
+endif()
+add_subdirectory(sdl3)
+list(APPEND COMPONENT_LIBS SDL3::SDL3-static)
+
+# The other three subprojects rely on BUILD_SHARED_LIBS
+unset(BUILD_SHARED_LIBS)                 # clear any normal var
+unset(BUILD_SHARED_LIBS CACHE)           # clear any stale cache
+set(BUILD_SHARED_LIBS OFF) 
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(sdl3image)
+list(APPEND COMPONENT_LIBS SDL3_image::SDL3_image-static)
+
+add_subdirectory(sdl3ttf)
+list(APPEND COMPONENT_LIBS SDL3_ttf::SDL3_ttf-static)
+
+# Restore the settings
+set(BUILD_SHARED_LIBS "${SDL3APP_BUILD_SHARED_LIBS}")
+set(BUILD_SHARED_LIBS "${SDL3APP_BUILD_SHARED_LIBS}" CACHE BOOL "Build libs shared" FORCE)
+
+set(APP_LINK_SCOPE PUBLIC)
+if (SDL3APP_BUILD_SHARED_LIBS)
+    set(APP_LINK_SCOPE PRIVATE)
+endif()
+
+# Link libraries, exposing all symbols from SDL and its add-ons
+if(SDL3APP_BUILD_SHARED_LIBS)
+    if(NOT ANDROID AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.24")
+        # Portable, modern way
+        target_link_libraries(${vulkan_sdl_target_name} ${APP_LINK_SCOPE}
+            $<LINK_LIBRARY:WHOLE_ARCHIVE,SDL3::SDL3-static>
+            $<LINK_LIBRARY:WHOLE_ARCHIVE,SDL3_image::SDL3_image-static>
+            $<LINK_LIBRARY:WHOLE_ARCHIVE,SDL3_ttf::SDL3_ttf-static>
+        )
+    else()
+        # Back-compat per-platform fallbacks
+        if(MSVC)
+            foreach(tgt IN LISTS COMPONENT_LIBS)
+                # /WHOLEARCHIVE accepts a lib path; use generator expression for the file
+                target_link_libraries(${vulkan_sdl_target_name} ${APP_LINK_SCOPE} ${COMPONENT_LIBS})
+                target_link_options(${vulkan_sdl_target_name} ${APP_LINK_SCOPE} "/WHOLEARCHIVE:$<TARGET_FILE:${tgt}>")
+            endforeach()
+        elseif(APPLE)
+            foreach(tgt IN LISTS COMPONENT_LIBS)
+                target_link_options(${vulkan_sdl_target_name} ${APP_LINK_SCOPE} "-Wl,-force_load,$<TARGET_FILE:${tgt}>")
+            endforeach()
+        else()
+            # GNU ld / lld: wrap an extra PRIVATE pass of the libs with whole-archive
+            target_link_options(${vulkan_sdl_target_name} ${APP_LINK_SCOPE} -Wl,--whole-archive)
+            target_link_libraries(${vulkan_sdl_target_name} ${APP_LINK_SCOPE} ${COMPONENT_LIBS})
+            target_link_options(${vulkan_sdl_target_name} ${APP_LINK_SCOPE} -Wl,--no-whole-archive)
+            set_target_properties(${vulkan_sdl_target_name} PROPERTIES LINKER_LANGUAGE CXX)
+        endif()
+    endif()
+
+    # If you globally force hidden visibility, re-expose this target's symbols:
+    set_target_properties(${vulkan_sdl_target_name}  PROPERTIES C_VISIBILITY_PRESET default)
+
+    # On Windows, if you truly want to export all symbols from app_extras.dll:
+    if (WINDOWS)
+        set_target_properties(${vulkan_sdl_target_name}  PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    endif()
+else()
+    target_link_libraries(${vulkan_sdl_target_name} ${APP_LINK_SCOPE} ${COMPONENT_LIBS})
 endif()

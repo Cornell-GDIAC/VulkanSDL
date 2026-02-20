@@ -4,11 +4,8 @@ Compute Shader Revisited
 This code is our own addition to the tutorial sequence, highlighting the
 challenges of working with SDL, particularly in a cross-platform setting.
 A common theme throughout all the tutorials was the problem with window 
-management in SDL. Application windows behave differently on different 
-platforms. On Linux and macOS they can be resized and moved continuously. 
-However, on Windows, resizing or moving the window causes the animation 
-to freeze. And, of course, on mobile platforms the window cannot be moved 
-or resized at all.
+management in SDL. Certain actions could cause the window animation
+to [freeze](https://wiki.libsdl.org/SDL3/AppFreezeDuringDrag).
 
 In the classic OpenGL setting there would not be to much that we could do
 here. That is because OpenGL commands always have to be executed on the same

@@ -36,9 +36,7 @@ import scripts.util as util
 # The support platforms
 PLATFORMS = { 'android' : 'Android build via Android Studio',
               'apple' : 'Both macOS and iOS build via XCode',
-              'cmake' : 'Experimental Linux build via CMake',
-              'macos' : 'macOS only build via XCode',
-              'ios' : 'iOS only build via XCode',
+              'cmake' : 'Linux or command line build via CMake',
               'windows' : 'Windows build via Visual Studio'
             }
 
@@ -78,7 +76,7 @@ def get_config(args):
     """
     Returns the config settings for the given project
     
-    Any CUGL project must have a config.yml in the root directory in order for 
+    Any SDL project must have a config.yml in the root directory in order for 
     the build system to work properly. This method parses that YML file and 
     converts it into a Python data structure. If there is no config.yml, this 
     method returns None.
@@ -115,21 +113,21 @@ def get_config(args):
         
         # Now add computed attributes
         data['root'] = os.path.abspath(args.project)
-        data['sdl2'] = os.path.split(__file__)[0]
+        data['sdl3'] = os.path.split(__file__)[0]
         
         if not args.build is None:
             data['build'] = os.path.abspath(args.build)
         else:
             data['build'] = os.path.normpath(os.path.join(data['root'],data['build']))
         
-        data['build_to_sdl2'] = os.path.relpath(data['sdl2'],data['build'])
+        data['build_to_sdl3'] = os.path.relpath(data['sdl3'],data['build'])
         data['build_to_root'] = os.path.relpath(data['root'],data['build'])
     
     
     if args.symlink:
-        dst = os.path.abspath(os.path.join(data['sdl2'],'vulkan','include','SDL'))
+        dst = os.path.abspath(os.path.join(data['sdl3'],'vulkan','include','SDL'))
         if not os.path.exists(dst):
-            src = os.path.abspath(os.path.join(data['sdl2'],'include'))
+            src = os.path.abspath(os.path.join(data['sdl3'],'include'))
             dir = os.path.dirname(dst)
             src = os.path.relpath(src, dir)
             os.symlink(src, dst, True)
@@ -168,7 +166,7 @@ def normalize(config,args):
     if not 'version' in config:
         config['version'] = '1.0'
     
-    pattern = re.compile('[^\w_]+')
+    pattern = re.compile(r'[^\w_]+')
     if not 'short' in config:
         config['short'] = pattern.sub('_',config['name'])
     elif not config['short'].isidentifier():
@@ -198,17 +196,6 @@ def normalize(config,args):
             config['targets'] = []
     else:
         config['targets'] = []
-    
-    # We only allow one of these
-    if 'apple' in config['targets']:
-        if 'ios' in config['targets']:
-            config['targets'].remove('ios')
-        if 'macos' in config['targets']:
-            config['targets'].remove('macos')
-    elif 'macos' in config['targets'] and 'ios' in config['targets']:
-        config['targets'].remove('ios')
-        config['targets'].remove('macos')
-        config['targets'].append('apple')
     
     if not 'assets' in config:
         config['assets'] = '.'
@@ -283,7 +270,7 @@ def expand_sources(config):
         util.insert_filetree(filetree,files,'all')
     
     # Get the auxiliary sources
-    for target in ['android','apple','macos','ios','windows','cmake']:
+    for target in ['android','apple','windows','cmake']:
         if target in config and 'sources' in config[target]:
             if type(config[target]['sources']) == list:
                 for item in config[target]['sources']:
@@ -350,7 +337,7 @@ def expand_includes(config):
         result['all'] = includes
     
     # Get the auxiliary sources
-    for target in ['android','apple','macos','ios','windows','cmake']:
+    for target in ['android','apple','windows','cmake']:
         includes = []
         if target in config and 'includes' in config[target]:
             if type(config[target]['includes']) == list:
@@ -416,7 +403,7 @@ def main():
         if target == 'android':
             import scripts.android
             scripts.android.make(config)
-        if target in ['apple','macos','ios']:
+        if target == 'apple':
             import scripts.apple
             scripts.apple.make(config)
         if target == 'windows':

@@ -1,7 +1,7 @@
 """
 Python Script for Apple Builds
 
-Another reason for the custom build set-up for CUGL is iOS builds. There is a 
+Another reason for the custom build set-up for SDL is iOS builds. There is a 
 lot to set up in an iOS build beyond the source code. Note, however, that we do 
 not separate iOS and macOS projects. We build one XCode project and put it in 
 the Apple build folder.
@@ -13,22 +13,21 @@ to group subelements, and does so with no apparent explanation. As a result,
 a lot of the file manipulation is essentially hard-coded.
 
 Author: Walker M. White
-Date:   7/10/24
+Date:   10/29/25
 """
 import os, os.path
 import shutil
 import glob
 from . import util
 
-# To indicate the type of an XCode entry
-TYPE_APPLE = 0
-TYPE_MACOS = 1
-TYPE_IOS   = 2
+# The components of a pbxproj file
+PBX_SEQUENCE = ['PBXHeader','PBXBuildFile','PBXContainerItemProxy','PBXCopyFilesBuildPhase',
+                'PBXFileReference','PBXFrameworksBuildPhase','PBXGroup','PBXNativeTarget',
+                'PBXProject','PBXReferenceProxy','PBXResourcesBuildPhase','PBXSourcesBuildPhase',
+                'XCBuildConfiguration','XCConfigurationList','PBXFooter']
 
-# These are unique to the template project
-MAC_TARGET = 'EB0F3C9527FB9DCB0037CC66'
-IOS_TARGET = 'EBC7AEC127FBB41F001F1467'
-ALL_TARGET = 'XXXXXX'
+# This is unique to the template project
+TARGET_ID = 'EB0F3C9527FB9DCB0037CC66'
 
 # The subbuild folder for the project
 MAKEDIR = 'apple'
@@ -59,34 +58,28 @@ def parse_pbxproj(project):
     :rtype:  ``dict``
     """
     source = os.path.join(project,'project.pbxproj')
+    contents = None
     with open(source) as file:
-        state = 'PBXHeader'
+        index = 0
+        state = PBX_SEQUENCE[index]
         block = []
         accum = None
         brace = 0
-        contents = {'PBXOrder':[]}
-        contents[state] = block
-        contents['PBXOrder'].append(state)
+        contents = {state:block}
         between  = False
-
-        check = 0
+        
         for line in file:
-            check += 1
             advance  = False
             if state != 'PBXFooter':
-                advance = '/* Begin' in line and 'section */' in line
-                if advance:
-                    pos = line.find('/* Begin ')+len('/* Begin ')
-                    state = line[pos:]
-                    pos = state.find('section */')
-                    state = state[:pos].strip()
-                    contents['PBXOrder'].append(state)
+                advance = ('/* Begin '+PBX_SEQUENCE[index+1]+' section */') in line
             complete = ('/* End '+state+' section */') in line
-
-            if advance:
+            
+            if advance or (complete and index == len(PBX_SEQUENCE)-2):
                 # Time to advance state
                 if accum:
                     block.append(accum)
+                index += 1
+                state = PBX_SEQUENCE[index]
                 block = []
                 accum = None
                 brace = 0
@@ -97,24 +90,12 @@ def parse_pbxproj(project):
             elif complete:
                 if accum and accum != '\n':
                     block.append(accum)
-                between = True
-            elif between:
-                # Look for evidence of the end
-                if len(line.strip()) > 0:
-                    state = 'PBXFooter'
-                    contents['PBXOrder'].append(state)
-                    if accum:
-                        block.append(accum)
-                    block = []
-                    accum = line
-                    brace = 0
-                    contents[state] = block
-                    between = False
-            else:
+                    between = True
+            elif not between:
                 # Now it is time to parse objects
                 brace += util.group_parity(line,'{}')
                 if brace < 0:
-                    print('ERROR: Braces mismatch at line %d of pbxproj file' % check)
+                    print('ERROR: Braces mistmatch in pbxproj file')
                     return None
                 else:
                     accum = line if accum is None else accum+line
@@ -122,10 +103,10 @@ def parse_pbxproj(project):
                         if accum != '\n':
                             block.append(accum)
                         accum = None
-
+        
         # Do not forget the footer
         block.append(accum)
-
+    
     return contents
 
 
@@ -141,10 +122,11 @@ def write_pbxproj(pbxproj,project):
     """
     path = os.path.join(project,'project.pbxproj')
     with open(path,'w') as file:
-        for state in pbxproj['PBXOrder']:
+        for state in pbxproj:
             if not state in ['PBXHeader', 'PBXFooter']:
                 file.write('/* Begin '+state+' section */\n')
             for item in pbxproj[state]:
+                #file.write(item.replace('__DISPLAY_NAME__',name))
                 file.write(item)
             if not state in ['PBXHeader', 'PBXFooter']:
                 file.write('/* End '+state+' section */\n\n')
@@ -248,17 +230,17 @@ def place_project(config):
     build = util.remake_dir(build,MAKEDIR)
     
     # Copy the XCode project
-    template = os.path.join(config['sdl2'],'templates','apple','app.xcodeproj')
+    template = os.path.join(config['sdl3'],'templates','apple','app.xcodeproj')
     project  = os.path.join(build,config['camel']+'.xcodeproj')
     shutil.copytree(template, project, symlinks=True, copy_function = shutil.copy)
     
     # Now copy the resources folder
-    src = os.path.join(config['sdl2'],'templates','apple','Resources')
+    src = os.path.join(config['sdl3'],'templates','apple','Resources')
     dst  = os.path.join(build,'Resources')
     shutil.copytree(src, dst, symlinks=True, copy_function = shutil.copy)
 
     # Copy frameworks from the Vulkan folder
-    src = os.path.join(config['sdl2'],'vulkan','apple')
+    src = os.path.join(config['sdl3'],'vulkan','apple')
     dst  = os.path.join(build,'Frameworks')
     shutil.copytree(src, dst, symlinks=True, copy_function = shutil.copy)
     
@@ -269,10 +251,10 @@ def place_entries(obj,entries,prefix='files'):
     """
     Returns a copy of XCode object with the given entries added
     
-    An XCode object is one recognized by parse_pbxproj. Entries are typically written
-    between two parentheses, with a parent value such as 'files' or 'children'. This
-    function adds these entries to the parentheses, properly indented (so the entries
-    should not be indented beforehand).
+    An XCode object is one recognized by parse_pbxproj. Entries are typically 
+    written  between two parentheses, with a parent value such as 'files' or 
+    'children'. This function adds these entries to the parentheses, properly 
+    indented (so the entries should not be indented beforehand).
     
     :param obj: The XCode object to modify
     :type obj:  ``str``
@@ -311,18 +293,18 @@ def reassign_pbxproj(config,pbxproj):
     :type pbxproj:  ``dict``
     """
     # SDL directory (relative)
-    sdl2dir = '../'+util.path_to_posix(config['build_to_sdl2'])
+    sdl3dir = '../'+util.path_to_posix(config['build_to_sdl3'])
     rootdir = '../'+util.path_to_posix(config['build_to_root'])
     
     # Replace the project path
     section = pbxproj['PBXFileReference']
     index = -1
     for pos in range(len(section)):
-        if 'sdl2app.xcodeproj' in section[pos]:
+        if 'sdl3app.xcodeproj' in section[pos]:
             entry = section[pos]
             pos0 = entry.find('path')
             pos1 = entry.find(';',pos0)
-            section[pos] = entry[:pos0]+'path = '+sdl2dir+'/buildfiles/apple/sdl2app.xcodeproj'+entry[pos1:]
+            section[pos] = entry[:pos0]+'path = '+sdl3dir+'/buildfiles/apple/sdl3app.xcodeproj'+entry[pos1:]
     
     # Asset and Source directory
     section = pbxproj['PBXGroup']
@@ -344,14 +326,6 @@ def reassign_pbxproj(config,pbxproj):
     
     indent = '\t\t\t\t\t'
     entries = config['include_dict']
-    if 'macos' in entries and entries['macos']:
-        macincludes = indent+(',\n'+indent).join(map(groupdir,entries['macos']))+',\n'
-    else:
-        macincludes = ''
-    if 'ios' in entries and entries['ios']:
-        iosincludes = indent+(',\n'+indent).join(map(groupdir,entries['ios']))+',\n'
-    else:
-        iosincludes = ''
     if 'all' in entries and entries['all']:
         allincludes = config['include_dict']['all']
     else:
@@ -366,35 +340,22 @@ def reassign_pbxproj(config,pbxproj):
         allincludes = ''
     
     appid = config['appid']
-    macid = appid.split('.')
-    macid = '.'.join(macid[:-1]+['mac']+macid[-1:])
-    iosid = appid.split('.')
-    iosid = '.'.join(iosid[:-1]+['ios']+iosid[-1:])
-    
     for pos in range(len(section)):
         if '__SDL_INCLUDE__' in section[pos]:
-            section[pos] = section[pos].replace('__SDL_INCLUDE__','"$(SRCROOT)/'+sdl2dir+'/include"')
+            section[pos] = section[pos].replace('__SDL_INCLUDE__','"$(SRCROOT)/'+sdl3dir+'/include"')
         if '__VULKAN_INCLUDE__' in section[pos]:
-            section[pos] = section[pos].replace('__VULKAN_INCLUDE__','"$(SRCROOT)/'+sdl2dir+'/vulkan/include"')
+            section[pos] = section[pos].replace('__VULKAN_INCLUDE__','"$(SRCROOT)/'+sdl3dir+'/vulkan/include"')
         if '__APPLE_INCLUDE__' in section[pos]:
             section[pos] = section[pos].replace(indent+'__APPLE_INCLUDE__,\n',allincludes)
-        if '__MACOS_INCLUDE__' in section[pos]:
-            section[pos] = section[pos].replace(indent+'__MACOS_INCLUDE__,\n',macincludes)
-        if '__IOS_INCLUDE__' in section[pos]:
-            section[pos] = section[pos].replace(indent+'__IOS_INCLUDE__,\n',iosincludes)
-        if '__MAC_APP_ID__' in section[pos]:
-            section[pos] = section[pos].replace('__MAC_APP_ID__',macid)
-        if '__IOS_APP_ID__' in section[pos]:
-            section[pos] = section[pos].replace('__IOS_APP_ID__',iosid)
+        if '__APP_ID__' in section[pos]:
+            section[pos] = section[pos].replace('__APP_ID__',appid)
     
-    # Update the targets
+    # Update the target
     for category in ['PBXProject','XCConfigurationList','PBXNativeTarget']:
         section = pbxproj[category]
         for pos in range(len(section)):
-            if 'app-mac' in section[pos]:
-                section[pos] = section[pos].replace('app-mac',config['short'].lower()+'-mac')
-            if 'app-ios' in section[pos]:
-                section[pos] = section[pos].replace('app-ios',config['short'].lower()+'-ios')
+            if 'main-app' in section[pos]:
+                section[pos] = section[pos].replace('main-app',config['short'].lower())
     
     # Finally, update the display name everywhere
     for category in pbxproj:
@@ -462,22 +423,18 @@ def populate_assets(config,pbxproj):
     uuidsvc = config['uuids']
     
     # Locate the resource entries
-    mac_rsc = None
-    ios_rsc   = None
+    the_rsc = None
     # Find the resources
     for obj in pbxproj['PBXNativeTarget']:
         pos1 = obj.find('/* Resources */')
         pos0 = obj.rfind('\n',0,pos1)
         if pos0 != -1 and pos1 != -1:
-            if MAC_TARGET in obj:
-                mac_rsc = obj[pos0:pos1].strip()
-            elif IOS_TARGET in obj:
-                ios_rsc = obj[pos0:pos1].strip()
+            if TARGET_ID in obj:
+                the_rsc = obj[pos0:pos1].strip()
     
     # Put in assets
     children = []
-    macref = []
-    iosref = []
+    the_ref = []
     for asset in config['asset_list']:
         uuid = uuidsvc.getAppleUUID('ASSET://'+asset[0])
         uuid = uuidsvc.applyPrefix('AA',uuid)
@@ -490,18 +447,12 @@ def populate_assets(config,pbxproj):
             entry = '\t\t%s /* %s */ = {isa = PBXFileReference; lastKnownFileType = folder; path = %s; sourceTree = "<group>"; };\n' % (uuid,apath,apath)
         pbxproj['PBXFileReference'].append(entry)
         
-        newid = uuidsvc.getAppleUUID('MACOS://'+uuid)
+        newid = uuidsvc.getAppleUUID('CATALYST://'+uuid)
         newid = uuidsvc.applyPrefix('AB',newid)
         entry = '\t\t%s /* %s in Resources */ = {isa = PBXBuildFile; fileRef = %s /* %s */; };\n' % (newid, apath, uuid, apath)
-        macref.append('%s /* %s in Resources */,' % (newid,asset[0]))
+        the_ref.append('%s /* %s in Resources */,' % (newid,asset[0]))
         pbxproj['PBXBuildFile'].append(entry)
         
-        newid = uuidsvc.getAppleUUID('IOS://'+uuid)
-        newid = uuidsvc.applyPrefix('AC',newid)
-        entry = '\t\t%s /* %s in Resources */ = {isa = PBXBuildFile; fileRef = %s /* %s */; };\n' % (newid, apath, uuid, apath)
-        iosref.append('%s /* %s in Resources */,' % (newid,asset[0]))
-        pbxproj['PBXBuildFile'].append(entry)
-    
     # Add them to the group
     groups = pbxproj['PBXGroup']
     for pos in range(len(groups)):
@@ -511,19 +462,18 @@ def populate_assets(config,pbxproj):
     # Add them to the resources
     groups = pbxproj['PBXResourcesBuildPhase']
     for pos in range(len(groups)):
-        if mac_rsc and mac_rsc in groups[pos]:
-            groups[pos] = place_entries(groups[pos],macref)
-        elif ios_rsc and ios_rsc in groups[pos]:
-            groups[pos] = place_entries(groups[pos],iosref)
+        if the_rsc and the_rsc in groups[pos]:
+            groups[pos] = place_entries(groups[pos],the_ref)
 
 
 def populate_sources(config,pbxproj):
     """
     Adds the source code files to the XCode project
     
-    This method builds a filetree so that are can organize subdirectories as explicit
-    groups in XCode.  Note that the build script has the ability to separate source
-    code into three categories: macOS only, iOS only, and both apple builds.
+    This method builds a filetree so that are can organize subdirectories as 
+    explicit groups in XCode.  Note that the build script has the ability to 
+    separate source code into three categories: macOS only, iOS only, and both 
+    apple builds.
     
     :param config: The project configuration settings
     :type config:  ``dict``
@@ -570,82 +520,34 @@ def populate_sources(config,pbxproj):
             groups.append(text)
     
     # Now populate the files
-    macref = []
-    iosref = []
+    the_ref = []
     for item in files:
         ipath = util.path_to_posix(item[1])
         entry = '\t\t%s /* %s */ = {isa = PBXFileReference; fileEncoding = 4; path = %s; sourceTree = "<group>"; };\n' % (item[0],ipath,ipath)
         pbxproj['PBXFileReference'].append(entry)
         
         if os.path.splitext(item[1])[1] in SOURCE_EXT:
-            if item[2] in ['all','apple','macos']:
-                newid = uuidsvc.getAppleUUID('MACOS://'+item[0])
+            if item[2] in ['all','apple']:
+                newid = uuidsvc.getAppleUUID('CATALYST://'+item[0])
                 newid = uuidsvc.applyPrefix('BB',newid)
                 entry = '\t\t%s /* %s in Sources */ = {isa = PBXBuildFile; fileRef = %s /* %s */; };\n' % (newid, ipath, item[0], ipath)
-                macref.append('%s /* %s in Sources */,' % (newid,ipath))
-                pbxproj['PBXBuildFile'].append(entry)
-            
-            if item[2] in ['all','apple','ios']:
-                newid = uuidsvc.getAppleUUID('IOS://'+item[0])
-                newid = uuidsvc.applyPrefix('BC',newid)
-                entry = '\t\t%s /* %s in Sources */ = {isa = PBXBuildFile; fileRef = %s /* %s */; };\n' % (newid, ipath, item[0], ipath)
-                iosref.append('%s /* %s in Sources */,' % (newid,ipath))
+                the_ref.append('%s /* %s in Sources */,' % (newid,ipath))
                 pbxproj['PBXBuildFile'].append(entry)
     
     # Locate the source entries
-    mac_src = None
-    ios_src   = None
+    the_src = None
     for obj in pbxproj['PBXNativeTarget']:
         pos1 = obj.find('/* Sources */')
         pos0 = obj.rfind('\n',0,pos1)
         if pos0 != -1 and pos1 != -1:
-            if MAC_TARGET in obj:
-                mac_src = obj[pos0:pos1].strip()
-            elif IOS_TARGET in obj:
-                ios_src = obj[pos0:pos1].strip()
+            if TARGET_ID in obj:
+                the_src = obj[pos0:pos1].strip()
     
     # Add them to the builds
     groups = pbxproj['PBXSourcesBuildPhase']
     for pos in range(len(groups)):
-        if mac_src and mac_src in groups[pos]:
-            groups[pos] = place_entries(groups[pos],macref)
-        elif ios_src and ios_src in groups[pos]:
-            groups[pos] = place_entries(groups[pos],iosref)
-
-
-def filter_targets(config,pbxproj):
-    """
-    Removes an extraneous targets if necessary.
-    
-    The build script has the option to specify a macOS only build, or an iOS only build.
-    If that is the case, we remove the build that is not relevant.
-    
-    :param config: The project configuration settings
-    :type config:  ``dict``
-    
-    :param pbxproj: The dictionary of XCode objects
-    :type pbxproj:  ``dict``
-    """
-    targets = config['targets'] if type(config['targets']) == list else [config['targets']]
-    if 'apple' in targets:
-        return
-    
-    rems = []
-    section = pbxproj['PBXNativeTarget']
-    for pos in range(len(section)):
-        if 'ios' in targets and 'macos' in section[pos]:
-            rems.append(pos)
-        if 'macos' in targets and 'ios' in section[pos]:
-            rems.append(pos)
-    
-    pos = 0
-    off = 0
-    while pos < len(section):
-        if pos+off in rems:
-            del section[pos]
-            off += 1
-        else:
-            pos += 1
+        if the_src and the_src in groups[pos]:
+            groups[pos] = place_entries(groups[pos],the_ref)
 
 
 def update_schemes(config,project):
@@ -663,25 +565,15 @@ def update_schemes(config,project):
     targets = config['targets'] if type(config['targets']) == list else [config['targets']]
     
     management = os.path.join(project,'xcshareddata','xcschemes','xcschememanagement.plist')
-    context = { 'app-mac':config['short'].lower()+'-mac', 'app-ios':config['short'].lower()+'-ios' }
+    context = { 'main-app':config['short'].lower() }
     util.file_replace(management,context)
     
-    name = config['short'].lower()+'-mac'
-    src = os.path.join(project,'xcshareddata','xcschemes','app-mac.xcscheme')
+    name = config['short'].lower()
+    src = os.path.join(project,'xcshareddata','xcschemes','app.xcscheme')
     dst = os.path.join(project,'xcshareddata','xcschemes',name+'.xcscheme')
-    if 'apple' in targets or 'macos' in targets:
+    if 'apple' in targets:
         shutil.move(src,dst)
-        context = {'__DISPLAY_NAME__':config['name'],'app-mac':name,'container:app.xcodeproj':'container:'+config['camel']+'.xcodeproj'}
-        util.file_replace(dst,context)
-    else:
-        os.remove(src)
-    
-    name = config['short'].lower()+'-ios'
-    src = os.path.join(project,'xcshareddata','xcschemes','app-ios.xcscheme')
-    dst = os.path.join(project,'xcshareddata','xcschemes',name+'.xcscheme')
-    if 'apple' in targets or 'ios' in targets:
-        shutil.move(src,dst)
-        context['app-ios'] = name
+        context = {'__DISPLAY_NAME__':config['name'],'main-app':name,'container:app.xcodeproj':'container:'+config['camel']+'.xcodeproj'}
         util.file_replace(dst,context)
     else:
         os.remove(src)
@@ -691,8 +583,8 @@ def make(config):
     """
     Creates the XCode project
     
-    This only creates the XCode project; it does not actually build the project. To
-    build the project, you must open it up in XCode.
+    This only creates the XCode project; it does not actually build the project. 
+    To build the project, you must open it up in XCode.
     
     :param config: The project configuration settings
     :type config:  ``dict``
@@ -709,7 +601,6 @@ def make(config):
     populate_assets(config,pbxproj)
     populate_sources(config,pbxproj)
     print('-- Retargeting builds')
-    filter_targets(config,pbxproj)
     write_pbxproj(pbxproj,project)
     update_schemes(config,project)
     

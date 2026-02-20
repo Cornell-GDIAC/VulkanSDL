@@ -14,7 +14,7 @@ new orgnization. The resulting release will be a folder of all of the source
 and header files, together with a python script for configuring SDL projects.
 
 Author: Walker M. White
-Date:   7/10/24
+Date:   11/20/25
 """
 import os
 import os.path
@@ -26,7 +26,7 @@ import yaml
 import traceback
 
 # Default values
-VERSION   = '2.1.0'
+VERSION   = '3.2.0'
 DIRECTORY = os.path.join('..','release')
 MANIFEST  = 'MANIFEST.yml'
 
@@ -49,11 +49,12 @@ def load_from_path(path,name):
     """
     Loads a module with the given name in the specified path.
 
-    This is the preferred way to import an external module without poisoning sys.path.
-    The module is assigned the given name, and is executed. The function returns the
-    module object after execution.
+    This is the preferred way to import an external module without poisoning 
+    sys.path. The module is assigned the given name, and is executed. The 
+    function returns the module object after execution.
 
-    The path specified as a list of strings, ensuring that it is platform agnostic.
+    The path specified as a list of strings, ensuring that it is platform
+    agnostic.
 
     :param path: The path to the module
     :type path: ``list`` of ``str``
@@ -79,11 +80,11 @@ def check_safe_replace(patterns):
     """
     Returns a set of warnings if the replacement patterns are not safe.
 
-    A replacement pattern is a dictionary mapping old strings to their replacements. To
-    be well-defined this dictionary must ensure that (1) no key is a prefix of any other
-    and (2) no key is a substring of any value. This function varifies that this is the
-    case. If so, it returns an empty list. Otherwise, it returns a list of warnings,
-    identifying the violations.
+    A replacement pattern is a dictionary mapping old strings to their 
+    replacements. To be well-defined this dictionary must ensure that (1) no 
+    key is a prefix of any other and (2) no key is a substring of any value. 
+    This function varifies that this is the case. If so, it returns an empty 
+    list. Otherwise, it returns a list of warnings, identifying the violations.
 
     :param patterns: The set of replacement patterns
     :type patterns: ``dict``
@@ -115,9 +116,10 @@ def reescape(text):
     """
     Restores escape characters removed from text during processing.
 
-    PyYAML does not recognize escape characters, and turns \t into \\t and so on. This
-    can cause a problem with our replacement patterns. This function restores those
-    escape characters. Any time it sees a \\, it assumes that is an unescaped character.
+    PyYAML does not recognize escape characters, and turns \t into \\t and so 
+    on. This can cause a problem with our replacement patterns. This function 
+    restores those escape characters. Any time it sees a \\, it assumes that is 
+    an unescaped character.
 
     :param text: The text to modify
     :type text: ``str``
@@ -204,9 +206,9 @@ def configure_manifest(path,manifest):
     """
     Configures any files in the manifest that must be modified after placement.
 
-    The manifest identifies what files should be modified, the original values and
-    their replacements.  The manifest should
-    be a nested dictionary parsed from a YAML or JSON file.
+    The manifest identifies what files should be modified, the original values 
+    and their replacements. The manifest should be a nested dictionary parsed 
+    from a YAML or JSON file.
 
     :param path: The path to copy to
     :type path:  ``str``
@@ -220,7 +222,7 @@ def configure_manifest(path,manifest):
     for item in manifest['configure']:
         if 'comment' in item:
             print('-- %s' % item['comment'])
-        elif 'file' in item and 'substitutions' in item:
+        elif 'substitutions' in item:
             patterns = {}
             for pair in item['substitutions']:
                 if 'old' in pair and 'new' in pair:
@@ -229,27 +231,31 @@ def configure_manifest(path,manifest):
                     patterns[old] = new
 
             warnings = check_safe_replace(patterns)
-            for warn in warnings:
-                print('WARNING [%s]: %s' % (item['file'],warn))
+            
+            if 'file' in item:
+                for warn in warnings:
+                    print('WARNING [%s]: %s' % (item['file'],warn))
+                file = os.path.join(path,util.posix_to_path(item['file']))
+                util.file_replace(file,patterns)
+            elif 'directory' in item:
+                for warn in warnings:
+                    print('WARNING [%s]: %s' % (item['directory'],warn))
+                folder = os.path.join(path,util.posix_to_path(item['directory']))
+                filter = None
+                if 'filter' in item and item['filter']:
+                    filter=util.make_file_filter(item)
+                util.directory_replace(folder,patterns,filter)
 
-            file = os.path.join(path,util.posix_to_path(item['file']))
-            util.file_replace(file,patterns)
-        elif 'link' in item and 'name' in item:
-            src = os.path.abspath(os.path.join(path,util.posix_to_path(item['link'])))
-            dst = os.path.abspath(os.path.join(path,util.posix_to_path(item['name'])))
-            dir = os.path.dirname(dst)
-            src = os.path.relpath(src, dir)
-            isdir = 'directory' in item and item['directory']
-            os.symlink(src, dst, isdir)
+
 
 
 def prune_manifest(path,manifest):
     """
     Removes any files that were unnecessarily copied during placement
 
-    This function is primarily for XCode projects. For these projects, it is easier to
-    copy the whole project and then remove what is needed later, rather than copy one
-    element at a time.
+    This function is primarily for XCode projects. For these projects, it is 
+    easier to copy the whole project and then remove what is needed later, 
+    rather than copy one element at a time.
 
     :param path: The path to copy to
     :type path:  ``str``
@@ -325,7 +331,7 @@ def main():
     if os.path.isdir(path):
         shutil.rmtree(path)
 
-    print("Creating SDL_app release")
+    print("Creating Vulkan SDL release")
     os.mkdir(path)
     try:
         deploy_manifest(path,data)

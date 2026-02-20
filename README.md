@@ -51,9 +51,9 @@ Studio, you will need to install extra files in the `vulkan` folder. See the
 In addition to the VulkanSDK, VulkanSDL is a software release composed of the 
 following packages:
 
-- SDL2, version 2.30.5
-- SDL2-Image, version 2.8.2
-- SDL2-TTF, version 2.20.1
+- SDL3, version 3.2.31
+- SDL3-Image, version 3.2.7
+- SDL3-TTF, version 3.2.3
 
 These are integrated by source. On mobile devices, these have to be built from 
 source anyway, so we find it easiest to just to link these as submodules to 

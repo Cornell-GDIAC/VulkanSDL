@@ -16,10 +16,10 @@
 //  tutorial to minimum, only pointing out changes that we have made.
 //
 //  Author: Walker White
-//  Version: 7/27/24
+//  Version: 2/20/26
 //
 #include "RenderThread.h"
-#include <SDL_app.h>
+#include <SDL3/SDL_app.h>
 
 #include <algorithm>
 #include <cstdint>
@@ -49,8 +49,18 @@ const bool enableValidationLayers = false;
 const bool enableValidationLayers = true;
 #endif
 
-#if defined (__MACOSX__) || defined(__IPHONEOS__)
+#if defined (SDL_PLATFORM_MACOS) || defined(SDL_PLATFORM_IOS)
 #define USE_MOLTEN 1
+#endif
+
+#if defined SDL_PLATFORM_IOS && SDL_PLATFORM_IOS == 1
+#include <TargetConditionals.h>
+#if TARGET_OS_MACCATALYST
+#else
+    #define MOBILE_PLATFORM 1
+#endif
+#elif defined SDL_PLATFORM_ANDROID
+    #define MOBILE_PLATFORM 1
 #endif
 
 struct QueueFamilyIndices {
@@ -153,7 +163,7 @@ void RenderThread::cleanup() {
 
     vkDestroyRenderPass(device, renderPass, nullptr);
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+    for (size_t i = 0; i < uniformBuffers.size(); i++) {
         vkDestroyBuffer(device, uniformBuffers[i], nullptr);
         vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
     }
@@ -185,12 +195,35 @@ void RenderThread::cleanupSwapChain() {
     vkDestroySwapchainKHR(device, swapChain, nullptr);
     
     // Despite the tutorial, it is not safe to reuse these semaphores
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
-        vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
-        vkDestroySemaphore(device, computeFinishedSemaphores[i], nullptr);
-        vkDestroyFence(device, inFlightFences[i], nullptr);
-        vkDestroyFence(device, computeInFlightFences[i], nullptr);
+    for (size_t ii = 0; ii < renderFinishedSemaphores.size(); ii++) {
+        if (renderFinishedSemaphores[ii] != nullptr) {
+            vkDestroySemaphore(device, renderFinishedSemaphores[ii], nullptr);
+            renderFinishedSemaphores[ii] = nullptr;
+        }
+    }
+    for (size_t ii = 0; ii < imageAvailableSemaphores.size(); ii++) {
+        if (imageAvailableSemaphores[ii] != nullptr) {
+            vkDestroySemaphore(device, imageAvailableSemaphores[ii], nullptr);
+            imageAvailableSemaphores[ii] = nullptr;
+        }
+    }
+    for (size_t ii = 0; ii < computeFinishedSemaphores.size(); ii++) {
+        if (computeFinishedSemaphores[ii] != nullptr) {
+            vkDestroySemaphore(device, imageAvailableSemaphores[ii], nullptr);
+            computeFinishedSemaphores[ii] = nullptr;
+        }
+    }
+    for (size_t ii = 0; ii < inFlightFences.size(); ii++) {
+        if (inFlightFences[ii] != nullptr) {
+            vkDestroyFence(device, inFlightFences[ii], nullptr);
+            inFlightFences[ii] = nullptr;
+        }
+    }
+    for (size_t ii = 0; ii < computeInFlightFences.size(); ii++) {
+        if (computeInFlightFences[ii] != nullptr) {
+            vkDestroyFence(device, computeInFlightFences[ii], nullptr);
+            computeInFlightFences[ii] = nullptr;
+        }
     }
 }
 
@@ -229,6 +262,10 @@ void RenderThread::pickPhysicalDevice() {
     if (physicalDevice == VK_NULL_HANDLE) {
         throw std::runtime_error("failed to find a suitable GPU!");
     }
+    
+    VkPhysicalDeviceProperties props;
+    vkGetPhysicalDeviceProperties(physicalDevice, &props);
+    print_version(props.deviceName,props.apiVersion);
 }
 
 void RenderThread::createLogicalDevice() {
@@ -925,8 +962,8 @@ void RenderThread::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
 }
 
 void RenderThread::createSyncObjects() {
+    renderFinishedSemaphores.resize(swapChainImages.size());
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-    renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     computeFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
     computeInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -938,14 +975,29 @@ void RenderThread::createSyncObjects() {
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
-            vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
+    for (size_t ii = 0; ii < renderFinishedSemaphores.size(); ii++) {
+        if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[ii]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create graphics synchronization objects for a frame!");
         }
-        if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &computeFinishedSemaphores[i]) != VK_SUCCESS ||
-            vkCreateFence(device, &fenceInfo, nullptr, &computeInFlightFences[i]) != VK_SUCCESS) {
+    }
+    for (size_t ii = 0; ii < imageAvailableSemaphores.size(); ii++) {
+        if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[ii]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create graphics synchronization objects for a frame!");
+        }
+    }
+    for (size_t ii = 0; ii < inFlightFences.size(); ii++) {
+        if (vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[ii]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create graphics synchronization objects for a frame!");
+        }
+    }
+    
+    for (size_t ii = 0; ii < computeFinishedSemaphores.size(); ii++) {
+        if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &computeFinishedSemaphores[ii]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create compute synchronization objects for a frame!");
+        }
+    }
+    for (size_t ii = 0; ii < computeInFlightFences.size(); ii++) {
+        if (vkCreateFence(device, &fenceInfo, nullptr, &computeInFlightFences[ii]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create compute synchronization objects for a frame!");
         }
     }
@@ -991,6 +1043,7 @@ void RenderThread::drawFrame() {
         uint32_t imageIndex;
         VkResult result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
         
+        // Suboptimal handles resizes that may have been missed in race condition
         if (result == VK_ERROR_OUT_OF_DATE_KHR || framebufferResized) {
             recreateSwapChain();
             return;
@@ -1014,7 +1067,7 @@ void RenderThread::drawFrame() {
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
         submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = &renderFinishedSemaphores[currentFrame];
+        submitInfo.pSignalSemaphores = &renderFinishedSemaphores[imageIndex];
         
         if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
             throw std::runtime_error("failed to submit draw command buffer!");
@@ -1024,7 +1077,7 @@ void RenderThread::drawFrame() {
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
         
         presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores = &renderFinishedSemaphores[currentFrame];
+        presentInfo.pWaitSemaphores = &renderFinishedSemaphores[imageIndex];
         
         VkSwapchainKHR swapChains[] = {swapChain};
         presentInfo.swapchainCount = 1;
@@ -1179,20 +1232,19 @@ QueueFamilyIndices RenderThread::findQueueFamilies(VkPhysicalDevice device) {
 }
 
 std::vector<char> RenderThread::readFile(const std::string& filename) {
-    // APP_GetAssetPath is an SDL_app extension pointing to the asset directory
-    std::string path = std::string(APP_GetAssetPath())+filename;
-    SDL_RWops* file = SDL_RWFromFile(path.c_str(), "rb");
+    std::string path = get_asset(filename);
+    SDL_IOStream* file = SDL_IOFromFile(path.c_str(), "rb");
     
     if (file == NULL) {
         throw std::runtime_error("failed to open file!");
     }
 
-    size_t fileSize = (size_t)SDL_RWsize(file);
+    size_t fileSize = (size_t)SDL_GetIOSize(file);
     std::vector<char> buffer(fileSize);
 
-    SDL_RWread(file, buffer.data(), 1, fileSize);
+    SDL_ReadIO(file, buffer.data(), fileSize);
 
-    SDL_RWclose(file);
+    SDL_CloseIO(file);
 
     return buffer;
 }
