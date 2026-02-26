@@ -78,7 +78,7 @@
     <OutDir>$(SolutionDir)x86\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)objs\app\x86\$(Configuration)\</IntDir>
     <LocalDebuggerWorkingDirectory>$(AssetDir)</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerEnvironment>PATH=$(SDL2Dir)buildfiles\windows\dlls\x86;%PATH%
+    <LocalDebuggerEnvironment>PATH=$(SDL3Dir)buildfiles\windows\dlls\x86;%PATH%
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
     <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
   </PropertyGroup>
@@ -86,7 +86,7 @@ $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
     <LinkIncremental>true</LinkIncremental>
     <IntDir>$(SolutionDir)objs\app\$(Platform)\$(Configuration)\</IntDir>
     <LocalDebuggerWorkingDirectory>$(AssetDir)</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerEnvironment>PATH=$(SDL2Dir)buildfiles\windows\dlls\x64;%PATH%
+    <LocalDebuggerEnvironment>PATH=$(SDL3Dir)buildfiles\windows\dlls\x64;%PATH%
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -94,14 +94,14 @@ $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
     <OutDir>$(SolutionDir)x86\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)objs\app\x86\$(Configuration)\</IntDir>
     <LocalDebuggerWorkingDirectory>$(AssetDir)</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerEnvironment>PATH=$(SDL2Dir)buildfiles\windows\dlls\x86;%PATH%
+    <LocalDebuggerEnvironment>PATH=$(SDL3Dir)buildfiles\windows\dlls\x86;%PATH%
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IntDir>$(SolutionDir)objs\app\$(Platform)\$(Configuration)\</IntDir>
     <LocalDebuggerWorkingDirectory>$(AssetDir)</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerEnvironment>PATH=$(SDL2Dir)buildfiles\windows\dlls\x64;%PATH%
+    <LocalDebuggerEnvironment>PATH=$(SDL3Dir)buildfiles\windows\dlls\x64;%PATH%
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -110,7 +110,7 @@ $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)include\;$(SolutionDir)..\source\;$(SDL2Dir)include\;$(SDL2Dir)vulkan\include\;__INCLUDE_DIR__%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include\;$(SolutionDir)..\source\;$(SDL3Dir)include\;$(SDL3Dir)vulkan\include\;__INCLUDE_DIR__%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <DisableSpecificWarnings>4068;4018;4244;4305%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
@@ -128,7 +128,7 @@ $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
       <Command>if not exist "$(SolutionDir)output" md "$(SolutionDir)output"
 copy "$(TargetPath)" "$(SolutionDir)output"
 if not exist "$(SolutionDir)output\explicit_layer.d" md "$(SolutionDir)output\explicit_layer.d"
-xcopy /y /d  "$(SDL2Dir)buildfiles\windows\dlls\x86\*.dll" "$(SolutionDir)output"
+xcopy /y /d  "$(SDL3Dir)buildfiles\windows\dlls\x86\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x86\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x86\explicit_layer.d\*" "$(SolutionDir)output\explicit_layer.d"
 xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
@@ -142,7 +142,7 @@ xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)include\;$(SolutionDir)..\source\;$(SDL2Dir)include\;$(SDL2Dir)vulkan\include\;__INCLUDE_DIR__%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include\;$(SolutionDir)..\source\;$(SDL3Dir)include\;$(SDL3Dir)vulkan\include\;__INCLUDE_DIR__%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <DisableSpecificWarnings>4068;4018;4244;4305%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -160,7 +160,7 @@ xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
       <Command>if not exist "$(SolutionDir)output" md "$(SolutionDir)output"
 copy "$(TargetPath)" "$(SolutionDir)output"
 if not exist "$(SolutionDir)output\explicit_layer.d" md "$(SolutionDir)output\explicit_layer.d"
-xcopy /y /d  "$(SDL2Dir)buildfiles\windows\dlls\x64\*.dll" "$(SolutionDir)output"
+xcopy /y /d  "$(SDL3Dir)buildfiles\windows\dlls\x64\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x64\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x64\explicit_layer.d\*" "$(SolutionDir)output\explicit_layer.d"
 xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
@@ -174,7 +174,7 @@ xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)include\;$(SolutionDir)..\source\;$(SDL2Dir)include\;$(SDL2Dir)vulkan\include\;__INCLUDE_DIR__%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include\;$(SolutionDir)..\source\;$(SDL3Dir)include\;$(SDL3Dir)vulkan\include\;__INCLUDE_DIR__%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <DisableSpecificWarnings>4068;4018;4244;4305%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -192,7 +192,7 @@ xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
       <Command>if not exist "$(SolutionDir)output" md "$(SolutionDir)output"
 copy "$(TargetPath)" "$(SolutionDir)output"
 if not exist "$(SolutionDir)output\explicit_layer.d" md "$(SolutionDir)output\explicit_layer.d"
-xcopy /y /d  "$(SDL2Dir)buildfiles\windows\dlls\x86\*.dll" "$(SolutionDir)output"
+xcopy /y /d  "$(SDL3Dir)buildfiles\windows\dlls\x86\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x86\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x86\explicit_layer.d\*" "$(SolutionDir)output\explicit_layer.d"
 xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
@@ -210,7 +210,7 @@ xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)include\;$(SolutionDir)..\source\;$(SDL2Dir)include\;$(SDL2Dir)vulkan\include\;__INCLUDE_DIR__%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include\;$(SolutionDir)..\source\;$(SDL3Dir)include\;$(SDL3Dir)vulkan\include\;__INCLUDE_DIR__%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <DisableSpecificWarnings>4068;4018;4244;4305;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -228,7 +228,7 @@ xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
       <Command>if not exist "$(SolutionDir)output" md "$(SolutionDir)output"
 copy "$(TargetPath)" "$(SolutionDir)output"
 if not exist "$(SolutionDir)output\explicit_layer.d" md "$(SolutionDir)output\explicit_layer.d"
-xcopy /y /d  "$(SDL2Dir)buildfiles\windows\dlls\x64\*.dll" "$(SolutionDir)output"
+xcopy /y /d  "$(SDL3Dir)buildfiles\windows\dlls\x64\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x64\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x64\explicit_layer.d\*" "$(SolutionDir)output\explicit_layer.d"
 xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
@@ -246,7 +246,7 @@ xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
     <Image Include="icon1.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(SDL2Dir)buildfiles\windows\sdl2app\sdl2app.vcxproj">
+    <ProjectReference Include="$(SDL3Dir)buildfiles\windows\sdl3app\sdl3app.vcxproj">
       <Project>{af490661-a652-4d5b-9cee-75536d8330c4}</Project>
     </ProjectReference>
   </ItemGroup>
