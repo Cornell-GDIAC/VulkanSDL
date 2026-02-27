@@ -300,15 +300,15 @@ configure:
     new: 'set(SDL2_TTF_DIR   "${VULKAN_SDL_DIR}")'
 # Windows build files
 - comment: "Configuring Windows buildfiles"
-- file: buildfiles/windows/sdl2/sdl2.vcxproj
+- file: buildfiles/windows/sdl3/sdl3.vcxproj
   substitutions:
   - old: 'components\\SDL\\'
     new: '\\'
-- file: buildfiles/windows/sdl2/sdl2.vcxproj.filters
+- file: buildfiles/windows/sdl3/sdl3.vcxproj.filters
   substitutions:
   - old: 'components\\SDL\\'
     new: '\\'
-- file: buildfiles/windows/sdl2image/sdl2image.vcxproj
+- file: buildfiles/windows/sdl3image/sdl3image.vcxproj
   substitutions:
   - old: 'components\\SDL\\include'
     new: 'include'
@@ -320,54 +320,50 @@ configure:
     new: 'include\\SDL_image.h'
   - old: 'components\\SDL_image\\external'
     new: 'external'
-- file: buildfiles/windows/sdl2image/sdl2image.vcxproj.filters
+- file: buildfiles/windows/sdl3image/sdl3image.vcxproj.filters
   substitutions:
   - old: 'components\\SDL\\include'
     new: 'include'
+  - old: 'components\\SDL_image\\include\\SDL3_image'
+    new: 'include\\SDL3'
   - old: 'components\\SDL_image\\src\\IMG.c'
     new: 'src\\image\\IMG.c'
   - old: 'components\\SDL_image\\src\\IMG_'
     new: 'src\\image\\IMG_'
-  - old: 'components\\SDL_image\\SDL_image.h'
-    new: 'include\\SDL_image.h'
   - old: 'components\\SDL_image\\external'
     new: 'external'
-- file: buildfiles/windows/sdl2ttf/sdl2ttf.vcxproj
+- file: buildfiles/windows/sdl3ttf/sdl3ttf.vcxproj
   substitutions:
   - old: 'components\\SDL\\include'
     new: 'include'
-  - old: 'components\\SDL_ttf\\SDL_ttf.c'
-    new: 'src\\ttf\\SDL_ttf.c'
-  - old: 'components\\SDL_ttf\\SDL_ttf.h'
-    new: 'include\\SDL_ttf.h'
+  - old: 'components\\SDL_ttf\\include\\SDL3_ttf'
+    new: 'include\\SDL3'
+  - old: 'components\\SDL_ttf\\src\\SDL_'
+    new: 'src\\ttf\\SDL_'
   - old: 'components\\SDL_ttf\\external'
     new: 'external'
-- file: buildfiles/windows/sdl2ttf/sdl2ttf.vcxproj.filters
+- file: buildfiles/windows/sdl3ttf/sdl3ttf.vcxproj.filters
   substitutions:
   - old: 'components\\SDL\\include'
     new: 'include'
-  - old: 'components\\SDL_ttf\\SDL_ttf.c'
-    new: 'src\\ttf\\SDL_ttf.c'
-  - old: 'components\\SDL_ttf\\SDL_ttf.h'
-    new: 'include\\SDL_ttf.h'
+  - old: 'components\\SDL_ttf\\include\\SDL3_ttf'
+    new: 'include\\SDL3'
+  - old: 'components\\SDL_ttf\\SDL_'
+    new: 'src\\ttf\\SDL_'
   - old: 'components\\SDL_ttf\\external'
     new: 'external'
-- file: buildfiles/windows/sdl2app/sdl2app.vcxproj
+- file: buildfiles/windows/sdl3app/sdl3app.vcxproj
   substitutions:
-  - old: 'components\\SDL\\include'
-    new: 'include'
+  - old: 'components\\SDL\\include\\SDL3_app'
+    new: 'include\\SDL3'
   - old: '..\\src'
     new: '..\\src\\app'
-- file: buildfiles/windows/sdl2app/sdl2app.vcxproj.filters
+- file: buildfiles/windows/sdl3app/sdl3app.vcxproj.filters
   substitutions:
-  - old: 'components\\SDL\\include'
-    new: 'include'
+  - old: 'components\\SDL\\include\\SDL3_app'
+    new: 'include\\SDL3'
   - old: '..\\src'
     new: '..\\src\\app'
-- file: buildfiles/windows/sdl2main/sdl2main.vcxproj
-  substitutions:
-  - old: 'components\\SDL\\'
-    new: '\\'
 remove:
 # Apple Extras
 - comment: "Removing unneeded Apple files"
@@ -381,7 +377,7 @@ remove:
 - directory: buildfiles/apple/sdl3ttf.xcodeproj/xcuserdata
 # Windows Extras
 - comment: "Removing unneeded Windows files"
-- directory: buildfiles/windows/pkg-support
-- file: buildfiles/windows/sdl2/sdl2.sln
-- file: buildfiles/windows/sdl2image/sdl2image.sln
-- file: buildfiles/windows/sdl2ttf/sdl2ttf.sln
+- file: buildfiles/windows/sdl3/sdl3.sln
+- file: buildfiles/windows/sdl3atk/sdl3atk.sln
+- file: buildfiles/windows/sdl3image/sdl3image.sln
+- file: buildfiles/windows/sdl3ttf/sdl3ttf.sln

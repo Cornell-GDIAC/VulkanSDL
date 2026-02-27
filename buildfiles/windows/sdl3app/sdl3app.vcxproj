@@ -185,9 +185,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\sdl3atk\sdl3atk.vcxproj">
-      <Project>{531302a4-1972-4dd5-a0cd-24ee1d93d2fb}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\sdl3image\sdl3image.vcxproj">
       <Project>{2bd5534e-00e2-4bea-ac96-d9a92ea24696}</Project>
     </ProjectReference>
