@@ -67,7 +67,11 @@ static std::string get_asset(const std::string& asset) {
     std::string result = std::string(path)+asset;
     SDL_free(path);
 # else
-    std::string result = std::string(SDL_GetBasePath())+asset;
+    const char* path = SDL_GetBasePath();
+    std::string result = asset;
+    if (path != NULL) {
+        result = std::string(path)+asset;
+    }
 #endif
     return result;
 }
@@ -370,8 +374,16 @@ private:
         // This handles proper fallback
         uint32_t desiredVersion = VK_API_VERSION_1_3;
         uint32_t loaderVersion  = VK_API_VERSION_1_0;
+#ifdef SDL_PLATFORM_ANDROID
+        PFN_vkEnumerateInstanceVersion pfnEnumerateInstanceVersion = (PFN_vkEnumerateInstanceVersion) vkGetInstanceProcAddr(VK_NULL_HANDLE, "vkEnumerateInstanceVersion");
+        if (pfnEnumerateInstanceVersion) {
+            pfnEnumerateInstanceVersion(&loaderVersion);
+        }
+#else
         vkEnumerateInstanceVersion(&loaderVersion);
-
+#endif
+        print_version("Instance",loaderVersion);
+        
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.pApplicationName = "Hello Triangle";
@@ -410,10 +422,6 @@ private:
 
             createInfo.pNext = nullptr;
         }
-
-        uint32_t apiVersion = VK_API_VERSION_1_0; // fallback default
-        vkEnumerateInstanceVersion(&apiVersion);
-        print_version("Instance",apiVersion);
 
         if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
             throw std::runtime_error("failed to create instance!");

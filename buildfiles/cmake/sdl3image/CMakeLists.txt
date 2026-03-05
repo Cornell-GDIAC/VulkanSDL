@@ -146,7 +146,7 @@ option(SDLIMAGE_PNM "Support loading PNM images" ON)
 option(SDLIMAGE_QOI "Support loading QOI images" ON)
 option(SDLIMAGE_SVG "Support loading SVG images" ON)
 option(SDLIMAGE_TGA "Support loading TGA images" ON)
-option(SDLIMAGE_TIF "Support loading TIFF images" OFF)	# Too brittle, removed
+option(SDLIMAGE_TIF "Support loading TIFF images" OFF)	 # Too brittle, removed
 option(SDLIMAGE_WEBP "Support loading WEBP images" ON)
 option(SDLIMAGE_XCF "Support loading XCF images" ON)
 option(SDLIMAGE_XPM "Support loading XPM images" ON)

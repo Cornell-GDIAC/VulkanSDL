@@ -31,7 +31,7 @@ if (UNIX AND NOT APPLE)
 endif()
 
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Change this to modify how the library is handled
@@ -40,7 +40,9 @@ option(USE_VULKAN "Include Vulkan in this application build" ON)
 
 # Set the correct directories
 set(SDL3_DIR  __SDL3DIR__)
-set(ASSET_DIR  __ASSETDIR__)
+set(ASSET_DIR __ASSETDIR__)
+set(VULKAN_SDL_DIR "${PROJECT_SOURCE_DIR}/${SDL3_DIR}")
+
 if (MSVC)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/install>)
 else()
@@ -60,7 +62,6 @@ endif()
 list(APPEND EXTRA_INCLUDES "${SDL3_DIR}/include")
 list(APPEND EXTRA_INCLUDES "${SDL3_DIR}/vulkan/include")
 __EXTRA_INCLUDES__
-
 
 # Everyone EXCEPT APPLE needs some form of OpenGL
 if(APPLE)

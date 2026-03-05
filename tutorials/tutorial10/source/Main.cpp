@@ -205,7 +205,15 @@ private:
         // This handles proper fallback
         uint32_t desiredVersion = VK_API_VERSION_1_3;
         uint32_t loaderVersion  = VK_API_VERSION_1_0;
+#ifdef SDL_PLATFORM_ANDROID
+        PFN_vkEnumerateInstanceVersion pfnEnumerateInstanceVersion = (PFN_vkEnumerateInstanceVersion) vkGetInstanceProcAddr(VK_NULL_HANDLE, "vkEnumerateInstanceVersion");
+        if (pfnEnumerateInstanceVersion) {
+            pfnEnumerateInstanceVersion(&loaderVersion);
+        }
+#else
         vkEnumerateInstanceVersion(&loaderVersion);
+#endif
+        print_version("Instance",loaderVersion);
         
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -245,10 +253,6 @@ private:
             
             createInfo.pNext = nullptr;
         }
-        
-        uint32_t apiVersion = VK_API_VERSION_1_0; // fallback default
-        vkEnumerateInstanceVersion(&apiVersion);
-        print_version("Instance",apiVersion);
         
         if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
             throw std::runtime_error("failed to create instance!");

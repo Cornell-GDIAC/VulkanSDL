@@ -22,11 +22,10 @@ copy:
 - directory: components/SDL_image/src
   destination: src/image
   filter: true
-  selection: 'IMG*'
-- directory: components/SDL_image/src
-  destination: src/image
-  filter: true
-  selection: '*.h'
+  selection: 
+  - 'IMG*'
+  - '*.h'
+  - '*.sym'
 - directory: components/SDL_image/include/SDL3_image
   destination: include/SDL3
   filter: true
@@ -43,6 +42,7 @@ copy:
   selection:
   - '*.h'
   - '*.c'
+  - '*.sym'
 - directory: components/SDL_ttf/include/SDL3_ttf
   destination: include/SDL3
   filter: false
@@ -240,64 +240,60 @@ configure:
     new: 'set(SDL3_TTF_OFFSET "")'
 - file: buildfiles/cmake/CMakeLists.txt
   substitutions:
-  - old: 'set(SDL3_APP_SRC   "${SDL3_APP_DIR}/src")'
-    new: 'set(SDL3_APP_SRC   "${SDL3_APP_DIR}/src/app")'
-  - old: 'set(SDL3_BASE_DIR  "${SDL3_APP_DIR}/components/SDL")'
-    new: 'set(SDL3_BASE_DIR  "${SDL3_APP_DIR}")'
-  - old: 'set(SDL3_IMAGE_DIR "${SDL3_APP_DIR}/components/SDL_image")'
-    new: 'set(SDL3_IMAGE_DIR "${SDL3_APP_DIR}")'
-  - old: 'set(SDL3_TTF_DIR   "${SDL3_APP_DIR}/components/SDL_ttf")'
-    new: 'set(SDL3_TTF_DIR   "${SDL3_APP_DIR}")'
+  - old: 'set(SDL3_APP_SRC   "${VULKAN_SDL_DIR}/src")'
+    new: 'set(SDL3_APP_SRC   "${VULKAN_SDL_DIR}/src/app")'
+  - old: 'set(SDL3_BASE_DIR  "${VULKAN_SDL_DIR}/components/SDL")'
+    new: 'set(SDL3_BASE_DIR  "${VULKAN_SDL_DIR}")'
+  - old: 'set(SDL3_IMAGE_DIR "${VULKAN_SDL_DIR}/components/SDL_image")'
+    new: 'set(SDL3_IMAGE_DIR "${VULKAN_SDL_DIR}")'
+  - old: 'set(SDL3_TTF_DIR   "${VULKAN_SDL_DIR}/components/SDL_ttf")'
+    new: 'set(SDL3_TTF_DIR   "${VULKAN_SDL_DIR}")'
   - old: '${SDL3_APP_INC}/SDL3_app'
     new: '${SDL3_APP_INC}/SDL3'
 # Android build files
 - comment: "Configuring Android buildfiles"
-- file: buildfiles/android/jni/sdl2/Android.mk
+- file: buildfiles/android/jni/sdl3/Android.mk
   substitutions:
-  - old: 'SDL2_OFFSET := ../../../components/SDL'
-    new: 'SDL2_OFFSET := ../../..'
-- file: buildfiles/android/jni/sdl2app/Android.mk
+  - old: 'SDL3_OFFSET := ../../../components/SDL'
+    new: 'SDL3_OFFSET := ../../..'
+- file: buildfiles/android/jni/sdl3app/Android.mk
   substitutions:
-  - old: 'SDL2_OFFSET := ../../../components/SDL'
-    new: 'SDL2_OFFSET := ../../..'
-  - old: 'SDL2_APP_SOURCE := $(SDL2_APP_PATH)/src'
-    new: 'SDL2_APP_SOURCE := $(SDL2_APP_PATH)/src/app'
-- file: buildfiles/android/jni/sdl2image/Android.mk
+  - old: 'SDL3_OFFSET := ../../../components/SDL'
+    new: 'SDL3_OFFSET := ../../..'
+  - old: 'SDL3_APP_SOURCE := $(SDL3_APP_PATH)/src'
+    new: 'SDL3_APP_SOURCE := $(SDL3_APP_PATH)/src/app'
+- file: buildfiles/android/jni/sdl3image/Android.mk
   substitutions:
-  - old: 'SDL2_OFFSET := ../../../components/SDL'
-    new: 'SDL2_OFFSET := ../../..'
+  - old: 'SDL3_OFFSET := ../../../components/SDL'
+    new: 'SDL3_OFFSET := ../../..'
   - old: 'IMAGE_OFFSET := ../../../components/SDL_image'
     new: 'IMAGE_OFFSET := ../../..'
-  - old: 'SDL2_IMAGE_SOURCE  := $(SDL2_IMAGE_PATH)/src'
-    new: 'SDL2_IMAGE_SOURCE  := $(SDL2_IMAGE_PATH)/src/image'
-- file: buildfiles/android/jni/sdl2image/external/libwebp/Android.mk
+  - old: 'SDL3_IMAGE_SOURCE  := $(SDL3_IMAGE_PATH)/src'
+    new: 'SDL3_IMAGE_SOURCE  := $(SDL3_IMAGE_PATH)/src/image'
+- file: buildfiles/android/jni/sdl3image/external/libwebp/Android.mk
   substitutions:
   - old: 'IMAGE_OFFSET := ../../../components/SDL_image'
     new: 'IMAGE_OFFSET := ../../..'
-- file: buildfiles/android/jni/sdl2ttf/Android.mk
+- file: buildfiles/android/jni/sdl3ttf/Android.mk
   substitutions:
-  - old: 'SDL2_OFFSET := ../../../components/SDL'
-    new: 'SDL2_OFFSET := ../../..'
+  - old: 'SDL3_OFFSET := ../../../components/SDL'
+    new: 'SDL3_OFFSET := ../../..'
   - old: 'TTF_OFFSET  := ../../../components/SDL_ttf'
     new: 'TTF_OFFSET  := ../../..'
-  - old: 'SDL2_TTF_SOURCE := $(SDL2_TTF_PATH)'
-    new: 'SDL2_TTF_SOURCE := $(SDL2_TTF_PATH)/src/ttf'
-- file: buildfiles/android/jni/sdl2ttf/external/freetype/Android.mk
-  substitutions:
-  - old: 'TTF_OFFSET  := ../../../components/SDL_ttf'
-    new: 'TTF_OFFSET  := ../../..'
-- file: buildfiles/android/jni/sdl2ttf/external/harfbuzz/Android.mk
+  - old: 'SDL3_TTF_SOURCE  := $(SDL3_TTF_PATH)/src'
+    new: 'SDL3_TTF_SOURCE  := $(SDL3_TTF_PATH)/src/ttf'
+- file: buildfiles/android/jni/sdl3ttf/external/freetype/Android.mk
   substitutions:
   - old: 'TTF_OFFSET  := ../../../components/SDL_ttf'
     new: 'TTF_OFFSET  := ../../..'
-- file: buildfiles/android/jni/CMakeLists.txt
+- file: buildfiles/android/jni/sdl3ttf/external/harfbuzz/Android.mk
   substitutions:
-  - old: 'set(SDL2_BASE_DIR  "${VULKAN_SDL_DIR}/components/SDL")'
-    new: 'set(SDL2_BASE_DIR  "${VULKAN_SDL_DIR}")'
-  - old: 'set(SDL2_IMAGE_DIR "${VULKAN_SDL_DIR}/components/SDL_image")'
-    new: 'set(SDL2_IMAGE_DIR "${VULKAN_SDL_DIR}")'
-  - old: 'set(SDL2_TTF_DIR   "${VULKAN_SDL_DIR}/components/SDL_ttf")'
-    new: 'set(SDL2_TTF_DIR   "${VULKAN_SDL_DIR}")'
+  - old: 'TTF_OFFSET  := ../../../components/SDL_ttf'
+    new: 'TTF_OFFSET  := ../../..'
+- file: buildfiles/android/jni/sdl3ttf/external/plutosvg/Android.mk
+  substitutions:
+  - old: 'TTF_OFFSET  := ../../../components/SDL_ttf'
+    new: 'TTF_OFFSET  := ../../..'
 # Windows build files
 - comment: "Configuring Windows buildfiles"
 - file: buildfiles/windows/sdl3/sdl3.vcxproj
@@ -377,7 +373,7 @@ remove:
 - directory: buildfiles/apple/sdl3ttf.xcodeproj/xcuserdata
 # Windows Extras
 - comment: "Removing unneeded Windows files"
+- directory: buildfiles/windows/pkg-support
 - file: buildfiles/windows/sdl3/sdl3.sln
-- file: buildfiles/windows/sdl3atk/sdl3atk.sln
 - file: buildfiles/windows/sdl3image/sdl3image.sln
 - file: buildfiles/windows/sdl3ttf/sdl3ttf.sln

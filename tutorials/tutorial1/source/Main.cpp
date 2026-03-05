@@ -61,7 +61,11 @@ static std::string get_asset(const std::string& asset) {
     std::string result = std::string(path)+asset;
     SDL_free(path);
 # else
-    std::string result = std::string(SDL_GetBasePath())+asset;
+    const char* path = SDL_GetBasePath();
+    std::string result = asset;
+    if (path != NULL) {
+        result = std::string(path)+asset;
+    }
 #endif
     return result;
 }
@@ -196,6 +200,7 @@ private:
 
     bool initVulkan() {
         try {
+            SDL_Log("AAAA");
             createInstance();
             setupDebugMessenger();
             createSurface();
@@ -204,7 +209,9 @@ private:
             createSwapChain();
             createImageViews();
             createRenderPass();
+            SDL_Log("BBBBB");
             createGraphicsPipeline();
+            SDL_Log("CCCCC");
             createFramebuffers();
             createCommandPool();
             createCommandBuffers();
@@ -283,8 +290,16 @@ private:
         // This handles proper fallback
         uint32_t desiredVersion = VK_API_VERSION_1_3;
         uint32_t loaderVersion  = VK_API_VERSION_1_0;
+#ifdef SDL_PLATFORM_ANDROID
+        PFN_vkEnumerateInstanceVersion pfnEnumerateInstanceVersion = (PFN_vkEnumerateInstanceVersion) vkGetInstanceProcAddr(VK_NULL_HANDLE, "vkEnumerateInstanceVersion");
+        if (pfnEnumerateInstanceVersion) {
+            pfnEnumerateInstanceVersion(&loaderVersion);
+        }
+#else
         vkEnumerateInstanceVersion(&loaderVersion);
-        
+#endif
+        print_version("Instance",loaderVersion);
+
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.pApplicationName = "Hello Triangle";
@@ -323,11 +338,7 @@ private:
 
             createInfo.pNext = nullptr;
         }
-        
-        uint32_t apiVersion = VK_API_VERSION_1_0; // fallback default
-        vkEnumerateInstanceVersion(&apiVersion);
-        print_version("Instance",apiVersion);
-        
+
         if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
             throw std::runtime_error("failed to create instance!");
         }
@@ -1023,7 +1034,6 @@ private:
     static std::vector<char> readFile(const std::string& filename) {
         std::string path = get_asset(filename);
         SDL_IOStream* file = SDL_IOFromFile(path.c_str(), "rb");
-        
         if (file == NULL) {
             throw std::runtime_error("failed to open file!");
         }

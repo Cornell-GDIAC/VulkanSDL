@@ -34,6 +34,23 @@
 #include <jni.h>
 
 /**
+ * This anchor prevents the link from optimizing out this .o file
+ */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((visibility("default")))
+#endif
+void sdl_app_jni_anchor(void) {}
+
+#ifdef __cplusplus
+}
+#endif
+
+
+/**
  * System dependent version of APP_GetWindowSafeAreaInPixels
  *
  * @param window        The window to query

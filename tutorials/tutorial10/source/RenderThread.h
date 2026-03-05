@@ -84,7 +84,11 @@ static std::string get_asset(const std::string& asset) {
     std::string result = std::string(path)+asset;
     SDL_free(path);
 #else
-    std::string result = std::string(SDL_GetBasePath())+asset;
+    const char* path = SDL_GetBasePath();
+    std::string result = asset;
+    if (path != NULL) {
+        result = std::string(path)+asset;
+    }
 #endif
     return result;
 }

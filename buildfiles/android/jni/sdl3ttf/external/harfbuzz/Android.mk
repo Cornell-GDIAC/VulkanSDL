@@ -4,7 +4,7 @@ TTF_OFFSET  := ../../../components/SDL_ttf
 
 ###########################
 #
-# harfbuzz static library
+# plutosvg static library
 #
 ###########################
 FREETYPE_PATH := $(LOCAL_PATH)/$(CURR_DEPTH)/$(TTF_OFFSET)/external/freetype
@@ -24,15 +24,12 @@ LOCAL_CPP_EXTENSION := .cc
 
 LOCAL_C_INCLUDES = \
     $(HARFBUZZ_PATH)/ \
-    $(HB_PATCH_PATH)/src/ \
     $(FREETYPE_PATH)/include/ \
 
 #LOCAL_CFLAGS += -DHB_NO_MT -DHAVE_OT -DHAVE_UCDN -fPIC
 LOCAL_CFLAGS += -DHAVE_CONFIG_H -fPIC 
 
 LOCAL_STATIC_LIBRARIES += freetype
-
-LOCAL_EXPORT_C_INCLUDES = $(HB_PATCH_PATH)/src/
 
 # -DHAVE_ICU -DHAVE_ICU_BUILTIN
 LOCAL_MODULE:= harfbuzz

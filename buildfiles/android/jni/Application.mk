@@ -7,7 +7,7 @@ APP_PLATFORM=android-28
 
 # C++ Settings
 APP_STL := c++_static
-APP_CPPFLAGS += -std=c++17
+APP_CPPFLAGS += -std=c++20
 APP_CPPFLAGS += -fexceptions
 APP_CPPFLAGS += -frtti
 APP_CPPFLAGS += -Wno-conversion-null

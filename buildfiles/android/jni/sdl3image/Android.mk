@@ -1,18 +1,21 @@
-LOCAL_PATH   := $(call my-dir)
-CURR_DEPTH   := ../..
-SDL2_OFFSET  := __SDL2_PATH__
-IMAGE_OFFSET := __SDL2_PATH__
+LOCAL_PATH  := $(call my-dir)
+CURR_DEPTH  := ..
+SDL3_OFFSET := ../../../components/SDL
+IMAGE_OFFSET := ../../../components/SDL_image
+
+SDL3_BUILD_STATIC ?= true
+SDL3_BUILD_SHARED ?= true
 
 ###########################
 #
 # SDL_Image shared library
 #
 ###########################
-SDL2_PATH  := $(LOCAL_PATH)/$(CURR_DEPTH)/$(SDL2_OFFSET)
-SDL2_IMAGE_MAKE := $(LOCAL_PATH)
-SDL2_IMAGE_PATH := $(LOCAL_PATH)/$(CURR_DEPTH)/$(IMAGE_OFFSET)
-SDL2_IMAGE_SOURCE  := $(SDL2_IMAGE_PATH)/src/image
-SDL2_IMAGE_INCLUDE := $(SDL2_IMAGE_PATH)/include
+SDL3_PATH  := $(LOCAL_PATH)/$(CURR_DEPTH)/$(SDL3_OFFSET)
+SDL3_IMAGE_MAKE := $(LOCAL_PATH)
+SDL3_IMAGE_PATH := $(LOCAL_PATH)/$(CURR_DEPTH)/$(IMAGE_OFFSET)
+SDL3_IMAGE_SOURCE  := $(SDL3_IMAGE_PATH)/src
+SDL3_IMAGE_INCLUDE := $(SDL3_IMAGE_PATH)/include
 
 # Enable this if you want PNG and JPG support with minimal dependencies
 USE_STBIMAGE ?= true
@@ -45,45 +48,43 @@ PNG_LIBRARY_PATH := external/libpng
 
 # Enable this if you want to support loading WebP images
 # The library path should be a relative path to this directory.
-SUPPORT_WEBP ?= true
+SUPPORT_WEBP ?= false
 WEBP_LIBRARY_PATH := external/libwebp
 
-# NOTE: There is no TIFF support in this build system
-# Use CMake for proper TIFF support
 
 # Build the library
 ifeq ($(SUPPORT_AVIF),true)
-    include $(SDL2_IMAGE_MAKE)/$(AVIF_LIBRARY_PATH)/Android.mk
-    include $(SDL2_IMAGE_MAKE)/$(DAV1D_LIBRARY_PATH)/Android.mk
+    include $(SDL3_IMAGE_MAKE)/$(AVIF_LIBRARY_PATH)/Android.mk
+    include $(SDL3_IMAGE_MAKE)/$(DAV1D_LIBRARY_PATH)/Android.mk
 endif
 
 # Build the library
 ifeq ($(SUPPORT_JPG),true)
-    include $(SDL2_IMAGE_MAKE)/$(JPG_LIBRARY_PATH)/Android.mk
+    include $(SDL3_IMAGE_MAKE)/$(JPG_LIBRARY_PATH)/Android.mk
 endif
 
 # Build the library
 ifeq ($(SUPPORT_JXL),true)
-    include $(SDL2_IMAGE_MAKE)/$(JXL_LIBRARY_PATH)/Android.mk
+    include $(SDL3_IMAGE_MAKE)/$(JXL_LIBRARY_PATH)/Android.mk
 endif
 
 # Build the library
 ifeq ($(SUPPORT_PNG),true)
-    include $(SDL2_IMAGE_MAKE)/$(PNG_LIBRARY_PATH)/Android.mk
+    include $(SDL3_IMAGE_MAKE)/$(PNG_LIBRARY_PATH)/Android.mk
 endif
 
 # Build the library
 ifeq ($(SUPPORT_WEBP),true)
-    include $(SDL2_IMAGE_MAKE)/$(WEBP_LIBRARY_PATH)/Android.mk
+    include $(SDL3_IMAGE_MAKE)/$(WEBP_LIBRARY_PATH)/Android.mk
 endif
 
-
 # Restore local path
-LOCAL_PATH := $(SDL2_IMAGE_SOURCE)
-
+LOCAL_PATH := $(SDL3_IMAGE_SOURCE)
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := SDL2_image
+LOCAL_MODULE := SDL3_image
+LOCAL_C_INCLUDES := $(SDL3_IMAGE_INCLUDE)
+LOCAL_C_INCLUDES += $(SDL3_PATH)/include
 
 LOCAL_SRC_FILES :=  \
 	$(subst $(LOCAL_PATH)/,, \
@@ -106,29 +107,31 @@ LOCAL_SRC_FILES :=  \
     $(LOCAL_PATH)/IMG_WIC.c       \
     $(LOCAL_PATH)/IMG_xcf.c       \
     $(LOCAL_PATH)/IMG_xpm.c.arm   \
-    $(LOCAL_PATH)/IMG_xv.c        \
-    $(LOCAL_PATH)/IMG_xxx.c)
+    $(LOCAL_PATH)/IMG_xv.c)
+
 
 LOCAL_CFLAGS := -DLOAD_BMP -DLOAD_GIF -DLOAD_LBM -DLOAD_PCX -DLOAD_PNM \
                 -DLOAD_SVG -DLOAD_TGA -DLOAD_XCF -DLOAD_XPM -DLOAD_XV  \
                 -DLOAD_QOI
 LOCAL_LDLIBS :=
+LOCAL_LDFLAGS := -Wl,--no-undefined -Wl,--version-script=$(LOCAL_PATH)/SDL_image.sym
 LOCAL_STATIC_LIBRARIES :=
-LOCAL_SHARED_LIBRARIES := SDL2
+LOCAL_SHARED_LIBRARIES := SDL3
 
 ifeq ($(USE_STBIMAGE),true)
     LOCAL_CFLAGS += -DLOAD_JPG -DLOAD_PNG -DUSE_STBIMAGE
 endif
 
 ifeq ($(SUPPORT_AVIF),true)
-    LOCAL_C_INCLUDES += $(SDL2_IMAGE_PATH)/$(AVIF_LIBRARY_PATH)/include
+    LOCAL_C_INCLUDES += $(SDL3_IMAGE_PATH)/$(AVIF_LIBRARY_PATH)/include
     LOCAL_CFLAGS += -DLOAD_AVIF
     LOCAL_STATIC_LIBRARIES += avif
     LOCAL_WHOLE_STATIC_LIBRARIES += dav1d dav1d-8bit dav1d-16bit
 endif
 
 ifeq ($(SUPPORT_JPG),true)
-    LOCAL_C_INCLUDES += $(SDL2_IMAGE_PATH)/$(JPG_LIBRARY_PATH)
+    LOCAL_C_INCLUDES += $(SDL3_IMAGE_PATH)/$(JPG_LIBRARY_PATH)              \
+                        $(SDL3_IMAGE_PATH)/$(JPG_LIBRARY_PATH)/android
     LOCAL_CFLAGS += -DLOAD_JPG
     LOCAL_STATIC_LIBRARIES += jpeg
 ifeq ($(SUPPORT_SAVE_JPG),true)
@@ -139,14 +142,15 @@ endif
 endif
 
 ifeq ($(SUPPORT_JXL),true)
-    LOCAL_C_INCLUDES += $(SDL2_IMAGE_PATH)/$(JXL_LIBRARY_PATH)/lib/include \
-                        $(SDL2_IMAGE_PATH)/$(JXL_LIBRARY_PATH)/android
+    LOCAL_C_INCLUDES += $(SDL3_IMAGE_PATH)/$(JXL_LIBRARY_PATH)/lib/include \
+                        $(SDL3_IMAGE_PATH)/$(JXL_LIBRARY_PATH)/android
     LOCAL_CFLAGS += -DLOAD_JXL
     LOCAL_STATIC_LIBRARIES += jxl
 endif
 
 ifeq ($(SUPPORT_PNG),true)
-    LOCAL_C_INCLUDES += $(SDL2_IMAGE_PATH)/$(PNG_LIBRARY_PATH)
+    LOCAL_C_INCLUDES += $(SDL3_IMAGE_PATH)/$(PNG_LIBRARY_PATH)             \
+                        $(SDL3_IMAGE_PATH)/$(PNG_LIBRARY_PATH)/android
     LOCAL_CFLAGS += -DLOAD_PNG
     LOCAL_STATIC_LIBRARIES += png
     LOCAL_LDLIBS += -lz
@@ -158,28 +162,33 @@ endif
 endif
 
 ifeq ($(SUPPORT_WEBP),true)
-    LOCAL_C_INCLUDES += $(SDL2_IMAGE_PATH)/$(WEBP_LIBRARY_PATH)/src
+    LOCAL_C_INCLUDES += $(SDL3_IMAGE_PATH)/$(WEBP_LIBRARY_PATH)/src
     LOCAL_CFLAGS += -DLOAD_WEBP
-    LOCAL_STATIC_LIBRARIES += webp
     LOCAL_STATIC_LIBRARIES += webpdemux
+    LOCAL_STATIC_LIBRARIES += webp
 endif
 
-LOCAL_EXPORT_C_INCLUDES += $(SDL2_IMAGE_INCLUDE)
+LOCAL_EXPORT_C_INCLUDES += $(SDL3_IMAGE_INCLUDE)
 
-include $(BUILD_SHARED_LIBRARY)
+ifeq ($(SDL3_BUILD_SHARED),true)
+	include $(BUILD_SHARED_LIBRARY)
+endif
 
 ###########################
 #
-# SDL2_image static library
+# SDL3_image static library
 #
 ###########################
 
-LOCAL_MODULE := SDL2_image_static
+LOCAL_MODULE := SDL3_image_static
 
-LOCAL_MODULE_FILENAME := libSDL2_image
+LOCAL_MODULE_FILENAME := libSDL3_image
 
-LOCAL_LDLIBS :=
+LOCAL_LDLIBS  :=
+LOCAL_LDFLAGS :=
 LOCAL_EXPORT_LDLIBS :=
+LOCAL_SHARED_LIBRARIES := 
 
-include $(BUILD_STATIC_LIBRARY)
-
+ifeq ($(SDL3_BUILD_STATIC),true)
+	include $(BUILD_STATIC_LIBRARY)
+endif

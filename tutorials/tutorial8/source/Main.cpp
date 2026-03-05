@@ -405,8 +405,16 @@ private:
         // This handles proper fallback
         uint32_t desiredVersion = VK_API_VERSION_1_3;
         uint32_t loaderVersion  = VK_API_VERSION_1_0;
+#ifdef SDL_PLATFORM_ANDROID
+        PFN_vkEnumerateInstanceVersion pfnEnumerateInstanceVersion = (PFN_vkEnumerateInstanceVersion) vkGetInstanceProcAddr(VK_NULL_HANDLE, "vkEnumerateInstanceVersion");
+        if (pfnEnumerateInstanceVersion) {
+            pfnEnumerateInstanceVersion(&loaderVersion);
+        }
+#else
         vkEnumerateInstanceVersion(&loaderVersion);
-        
+#endif
+        print_version("Instance",loaderVersion);
+                
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.pApplicationName = "Hello Triangle";
@@ -445,10 +453,6 @@ private:
             
             createInfo.pNext = nullptr;
         }
-        
-        uint32_t apiVersion = VK_API_VERSION_1_0; // fallback default
-        vkEnumerateInstanceVersion(&apiVersion);
-        print_version("Instance",apiVersion);
         
         if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
             throw std::runtime_error("failed to create instance!");
@@ -1223,18 +1227,18 @@ private:
 #if defined(SDL_PLATFORM_ANDROID)
 #define BUFF_SIZE 1024
         // ifstream does NOT work on Android. Must intercept
-        SDL_RWops* rwops = SDL_RWFromFile(path.c_str(),"r");
+        SDL_IOStream* rwops = SDL_IOFromFile(path.c_str(),"r");
         char buffer[BUFF_SIZE];
         std::stringstream ss;
         
         size_t amt = BUFF_SIZE;
         while (amt > 0) {
             amt = BUFF_SIZE-1;
-            amt = SDL_RWread(rwops, buffer, sizeof(char), amt);
+            amt = SDL_ReadIO(rwops, buffer, sizeof(char)*amt);
             buffer[amt] = 0;
             ss << buffer;
         }
-        SDL_RWclose(rwops);
+        SDL_CloseIO(rwops);
         
         std::istringstream istream(ss.str());
         

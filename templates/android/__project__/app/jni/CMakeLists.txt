@@ -8,19 +8,47 @@ endif()
 # set the project name and version
 project(__TARGET__ VERSION __VERSION__)
 
+# Disallow in-source builds
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+    message("ERROR: The application cannot be built in this directory.")
+    message("See the README.md for more information.")
+    message(FATAL_ERROR "Quitting configuration")
+endif()
+
+# Need all this for Linux
+if (UNIX AND NOT APPLE)
+    include(CheckLibraryExists)
+    include(CheckIncludeFiles)
+    include(CheckIncludeFile)
+    include(CheckLanguage)
+    include(CheckSymbolExists)
+    include(CheckCSourceCompiles)
+    include(CheckCSourceRuns)
+    include(CheckCCompilerFlag)
+    include(CheckCXXCompilerFlag)
+    include(CheckStructHasMember)
+    include(CMakeDependentOption)
+    include(CMakePushCheckState)
+    include(GNUInstallDirs)
+endif()
+
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# We really want there to be only one shared library
+option(BUILD_SHARED_BASE "Build the SDL component as a shared library" OFF)
 option(USE_VULKAN "Include Vulkan in this application build" ON)
 
-# Add Android specific features
-if (ANDROID)
-	include(AndroidNdkModules)
-	if (${ANDROID_ABI} STREQUAL "armeabi-v7a")
-		# armeabi-v7a requires cpufeatures library
-		android_ndk_import_module_cpufeatures()
-	endif()
+# Set the correct directories
+set(SDL3_DIR  __SDL3DIR__)
+set(ASSET_DIR  __ASSETDIR__)
+set(VULKAN_SDL_DIR "${PROJECT_SOURCE_DIR}/${SDL3_DIR}")
+
+if (MSVC)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/install>)
+else()
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/install")
 endif()
 
 # Make sure we support Vulkan
@@ -28,14 +56,18 @@ if (USE_VULKAN)
 	find_library(vulkan-lib vulkan)
 endif()
 
-# Set the correct directories
-set(SDL2_DIR  __SDL2DIR__)
-set(ASSET_DIR  __ASSETDIR__)
-
-# Add the SDL App project
-add_subdirectory(${SDL2_DIR}/buildfiles/cmake "vulkansdl.dir")
-list(APPEND EXTRA_INCLUDES "${SDL2_DIR}/include")
-list(APPEND EXTRA_INCLUDES "${SDL2_DIR}/vulkan/include")
+# Link in sdl3
+if (BUILD_SHARED_BASE)
+	set(VULKAN_SDL_BUILD_SHARED_LIBS ON)
+	add_subdirectory(vulkansdl)
+	list(APPEND EXTRA_LIBS VulkanSDL::VulkanSDL)
+else()
+	set(VULKAN_SDL_BUILD_SHARED_LIBS OFF)
+	add_subdirectory(vulkansdl)
+	list(APPEND EXTRA_LIBS VulkanSDL::VulkanSDL-static)
+endif()
+list(APPEND EXTRA_INCLUDES "${SDL3_DIR}/include")
+list(APPEND EXTRA_INCLUDES "${SDL3_DIR}/vulkan/include")
 __EXTRA_INCLUDES__
 
 # Add the source code
@@ -54,5 +86,5 @@ target_include_directories(main PUBLIC
                            "${PROJECT_BINARY_DIR}"
                             ${EXTRA_INCLUDES}
                            )
-target_link_libraries(main VulkanSDL ${ANDROID_LIBS})
-
+target_link_libraries(main ${EXTRA_LIBS} ${ANDROID_LIBS})
+target_link_options(main PRIVATE -Wl,-u,sdl_app_jni_anchor)

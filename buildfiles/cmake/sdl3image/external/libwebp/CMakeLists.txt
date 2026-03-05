@@ -47,13 +47,10 @@ endif()
 option(WEBP_LINK_STATIC
        "Link using static libraries. If OFF, use dynamic libraries."
        ${WEBP_LINK_STATIC_DEFAULT})
-if(NOT EMSCRIPTEN)
-  # Disable SIMD on Emscripten by default, as it's a new unstable Wasm feature.
-  # Users can still explicitly opt-in to make a SIMD-enabled build.
-  set(WEBP_ENABLE_SIMD_DEFAULT ON)
-endif()
-option(WEBP_ENABLE_SIMD "Enable any SIMD optimization."
-       ${WEBP_ENABLE_SIMD_DEFAULT})
+
+# SIMD is brittle and broken; remove by default
+set(WEBP_ENABLE_SIMD_DEFAULT OFF)
+option(WEBP_ENABLE_SIMD "Enable any SIMD optimization." ${WEBP_ENABLE_SIMD_DEFAULT})
 option(WEBP_BUILD_ANIM_UTILS "Build animation utilities." OFF)
 option(WEBP_BUILD_CWEBP "Build the cwebp command line tool." OFF)
 option(WEBP_BUILD_DWEBP "Build the dwebp command line tool." OFF)

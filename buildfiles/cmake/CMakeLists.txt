@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16...3.28)
 
 # Make option() cache overrides in subdirs stick
 cmake_policy(SET CMP0077 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0091 NEW)
 
 if(NOT DEFINED CMAKE_BUILD_TYPE)
     set(cmake_build_type_undefined 1)
@@ -29,15 +30,15 @@ if(NOT DEFINED PROJECT_DIR_OFFSET)
     set(PROJECT_DIR_OFFSET "../..")
 endif()
 
-if(NOT DEFINED SDL3_APP_DIR)
-    set(SDL3_APP_DIR "${CMAKE_CURRENT_DEPTH}/${PROJECT_DIR_OFFSET}")
+if(NOT DEFINED VULKAN_SDL_DIR)
+    set(VULKAN_SDL_DIR "${CMAKE_CURRENT_DEPTH}/${PROJECT_DIR_OFFSET}")
 endif()
 
-set(SDL3_APP_SRC   "${SDL3_APP_DIR}/src")
-set(SDL3_APP_INC   "${SDL3_APP_DIR}/include")
-set(SDL3_BASE_DIR  "${SDL3_APP_DIR}/components/SDL")
-set(SDL3_IMAGE_DIR "${SDL3_APP_DIR}/components/SDL_image")
-set(SDL3_TTF_DIR   "${SDL3_APP_DIR}/components/SDL_ttf")
+set(SDL3_APP_SRC   "${VULKAN_SDL_DIR}/src")
+set(SDL3_APP_INC   "${VULKAN_SDL_DIR}/include")
+set(SDL3_BASE_DIR  "${VULKAN_SDL_DIR}/components/SDL")
+set(SDL3_IMAGE_DIR "${VULKAN_SDL_DIR}/components/SDL_image")
+set(SDL3_TTF_DIR   "${VULKAN_SDL_DIR}/components/SDL_ttf")
 
 # Get the platform
 include("${CMAKE_CURRENT_LIST_DIR}/modules/sdlplatform.cmake")

@@ -365,6 +365,27 @@ def config_ndkmake(config,project):
 
     util.file_replace(srcmake,contents)
 
+def copy_cmake(config,project):
+    """
+    Copies the CMake build files into the Android project
+    
+    This is necessary to prevent long path names on Windows.
+
+    :param config: The project configuration settings
+    :type config:  ``dict``
+
+    :param project: The project directory
+    :type project:  ``str``
+    """
+    entries = ['sources','build','build_to_root','build_to_sdl3']
+    util.check_config_keys(config,entries)
+
+    # Get the SDL3 directory
+    sdl3dir = os.path.join(config['build'],config['build_to_sdl3'])
+    srcdir = os.path.join(sdl3dir,'buildfiles','cmake')
+    dstdir  = os.path.join(project,'app','jni', 'vulkansdl')
+    shutil.copytree(srcdir, dstdir, dirs_exist_ok=True)
+
 
 def config_cmake(config,project):
     """
@@ -441,6 +462,7 @@ def make(config):
     config_settings(config,project)
     print('-- Modifying project makefiles')
     config_ndkmake(config,project)
+    copy_cmake(config,project)
     config_cmake(config,project)
 
     if 'icon' in config:
