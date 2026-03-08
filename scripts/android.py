@@ -362,6 +362,17 @@ def config_ndkmake(config,project):
     for item in inclist:
         incstr += 'LOCAL_C_INCLUDES += $(PROJ_PATH)/'+util.path_to_posix(item)+'\n'
     contents['__EXTRA_INCLUDES__'] = incstr
+    
+    # The preprocessor definitions
+    deflist = []
+    entries = config['defines_dict']
+    deflist.extend(entries['all'] if ('all' in entries and entries['all']) else [])
+    deflist.extend(entries['android'] if ('android' in entries and entries['android']) else [])
+    
+    defstr = ''
+    for item in deflist:
+        defstr += f'LOCAL_CPPFLAGS += -D{item}\n'
+    contents['__EXTRA_DEFINES__'] = defstr
 
     util.file_replace(srcmake,contents)
 
@@ -440,6 +451,15 @@ def config_cmake(config,project):
         path = '${PROJECT_SOURCE_DIR}/'+util.path_to_posix(path)
         incstr += 'list(APPEND EXTRA_INCLUDES "'+path+'")\n'
     context['__EXTRA_INCLUDES__'] = incstr
+
+    # Set the defines
+    deflist = []
+    entries = config['defines_dict']
+    deflist.extend(entries['all'] if ('all' in entries and entries['all']) else [])
+    deflist.extend(entries['android'] if ('android' in entries and entries['android']) else [])
+    
+    defstr = 'target_compile_definitions('+config['short']+' PRIVATE '+' '.join(deflist)+')'
+    context['__EXTRA_DEFINES__'] = defstr
 
     util.file_replace(cmake,context)
 

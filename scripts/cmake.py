@@ -202,6 +202,15 @@ def config_cmake(config,project):
         incstr += 'list(APPEND EXTRA_INCLUDES "'+path+'")\n'
     context['__EXTRA_INCLUDES__'] = incstr
 
+    # Set the defines
+    deflist = []
+    entries = config['defines_dict']
+    deflist.extend(entries['all'] if ('all' in entries and entries['all']) else [])
+    deflist.extend(entries['cmake'] if ('cmake' in entries and entries['cmake']) else [])
+    
+    defstr = 'target_compile_definitions('+config['short']+' PRIVATE '+' '.join(deflist)+')'
+    context['__EXTRA_DEFINES__'] = defstr
+
     util.file_replace(cmake,context)
 
 

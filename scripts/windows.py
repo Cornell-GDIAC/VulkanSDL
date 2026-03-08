@@ -264,6 +264,8 @@ def reassign_vcxproj(config,project):
     assetdir = util.path_to_windows(config['assets'])
     assetdir = rootdir+assetdir+'\\'
 
+    context = {'__project__':config['camel'],'__BUILD_2_SDL__':sdl3dir}
+
     # Compute all the include directories
     make_include = lambda x : '$(GameDir)'+util.path_to_windows(x)
     entries = config['include_dict']
@@ -272,8 +274,16 @@ def reassign_vcxproj(config,project):
         includes += ';'.join(map(make_include,entries['all']))+';'
     if 'windows' in entries and entries['windows']:
         includes += ';'.join(map(make_include,entries['windows']))+';'
-
-    context = {'__project__':config['camel'],'__BUILD_2_SDL__':sdl3dir,'__INCLUDE_DIR__':includes}
+    context['__INCLUDE_DIR__'] = includes
+    
+    # Support the preprocessor defines
+    entries = config['defines_dict']
+    defines = ''
+    if 'all' in entries and entries['all']:
+        defines += ';'.join(entries['all'])+';'
+    if 'windows' in entries and entries['windows']:
+        defines += ';'.join(entries['windows'])+';'
+    context['__WINDOWS_DEFINES__'] = defines
 
     # Time to update the files
     solution = project+'.sln'

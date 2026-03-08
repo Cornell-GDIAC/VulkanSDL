@@ -28,6 +28,15 @@
     #define MOBILE_PLATFORM 1
 #endif
 
+/** Color struct to test out defines */
+typedef struct
+{
+    unsigned int red;
+    unsigned int green;
+    unsigned int blue;
+    unsigned int alpha;
+} Color;
+
 /** The struct for defining the application state */
 typedef struct
 {
@@ -66,19 +75,19 @@ static const struct
  * Returns the string representation of the orientation
  */
 const char* get_orientation(SDL_DisplayOrientation orient) {
-	switch(orient) {
-	case SDL_ORIENTATION_PORTRAIT:
-		return "portrait";
-	case SDL_ORIENTATION_PORTRAIT_FLIPPED:
-		return "portrait flipped";
-	case SDL_ORIENTATION_LANDSCAPE:
-		return "landscape";
-	case SDL_ORIENTATION_LANDSCAPE_FLIPPED:
-		return "landscape flipped";
-	case SDL_ORIENTATION_UNKNOWN:
-		return "unknown";
-	}
-	return "unknown";
+    switch(orient) {
+    case SDL_ORIENTATION_PORTRAIT:
+        return "portrait";
+    case SDL_ORIENTATION_PORTRAIT_FLIPPED:
+        return "portrait flipped";
+    case SDL_ORIENTATION_LANDSCAPE:
+        return "landscape";
+    case SDL_ORIENTATION_LANDSCAPE_FLIPPED:
+        return "landscape flipped";
+    case SDL_ORIENTATION_UNKNOWN:
+        return "unknown";
+    }
+    return "unknown";
 }
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -128,7 +137,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     flags = SDL_WINDOW_HIDDEN;
         if (fullscreen) {
-    	SDL_Log("ALERT: Going Fullscreen");
+        SDL_Log("ALERT: Going Fullscreen");
         flags |= SDL_WINDOW_FULLSCREEN;
     }
     if (useHighDPI) {
@@ -161,9 +170,9 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     as->windowOrientation = orient;
     
     if (orient == SDL_ORIENTATION_PORTRAIT || orient == SDL_ORIENTATION_PORTRAIT_FLIPPED) {
-    	// This will cause a flip on Android if not careful
+        // This will cause a flip on Android if not careful
         h = WIDTH;
-    	w = HEIGHT;
+        w = HEIGHT;
     }
     
     as->window = SDL_CreateWindow("SDL Demo", w, h, flags);
@@ -211,7 +220,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         as->safe = as->full;
     }
 
-	orient = APP_GetDeviceOrientation();
+    orient = APP_GetDeviceOrientation();
     as->deviceOrientation = orient;
     SDL_Log("Device orientation is %s", get_orientation(orient));
     orient = APP_GetDisplayConfiguration(display);
@@ -233,9 +242,9 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 #else
     const char* bpath = SDL_GetBasePath();
 #endif
-	if (bpath == NULL) {
-		bpath = "";
-	}
+    if (bpath == NULL) {
+        bpath = "";
+    }
     std::string assets = bpath;
     std::string path = assets+"logo.png";
 
@@ -326,17 +335,17 @@ SDL_AppResult SDL_AppIterate(void *appstate)
         SDL_Log("Safe update to (%d,%d)-(%d,%d)", disp.x,disp.y,disp.w,disp.h);
         as->safe = disp;
         int nw, nh;
-	    SDL_GetWindowSizeInPixels(as->window,&nw,&nh);
+        SDL_GetWindowSizeInPixels(as->window,&nw,&nh);
         SDL_Log("Window size is now (%d,%d)", nw,nh);
 
-		// Update the full area
-	    SDL_GetCurrentRenderOutputSize(as->renderer,&(as->full.w),&(as->full.h));
-		
-		// Update the objects
-		as->impos.x = (as->safe.w- as->impos.w)/2.0f+as->safe.x;
-		as->impos.y = (as->safe.h- as->impos.h)/4.0f+as->safe.y;
-		as->txpos.x = (int)((as->safe.w- as->txpos.w)/2.0f)+as->safe.x;
-		as->txpos.y = (int)(4*(as->safe.h- as->txpos.h)/5.0f)+as->safe.y;
+        // Update the full area
+        SDL_GetCurrentRenderOutputSize(as->renderer,&(as->full.w),&(as->full.h));
+        
+        // Update the objects
+        as->impos.x = (as->safe.w- as->impos.w)/2.0f+as->safe.x;
+        as->impos.y = (as->safe.h- as->impos.h)/4.0f+as->safe.y;
+        as->txpos.x = (int)((as->safe.w- as->txpos.w)/2.0f)+as->safe.x;
+        as->txpos.y = (int)(4*(as->safe.h- as->txpos.h)/5.0f)+as->safe.y;
     }
     
     SDL_DisplayOrientation orient;
@@ -359,23 +368,40 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     }
 
     drawgimp(as->renderer, as->full.w, as->full.h);
+
+// To test out the defines functionality
+#ifdef MULTICOLOR
+    Color tlcolor = {255, 0, 0, 255};
+    Color trcolor = {255, 255, 255, 255};
+    Color blcolor = {0, 255, 0, 255};
+    Color brcolor = {0, 0, 255, 255};
+#else
+    Color tlcolor = {255, 255, 255, 255};
+    Color trcolor = {255, 255, 255, 255};
+    Color blcolor = {255, 255, 255, 255};
+    Color brcolor = {255, 255, 255, 255};
+#endif
     
     // Show the corners
     test.x = as->safe.x;
     test.y = as->safe.y;
-    SDL_SetRenderDrawColor(as->renderer,255,0,0,255);
+    SDL_SetRenderDrawColor(as->renderer,
+                           tlcolor.red,tlcolor.green,tlcolor.blue,tlcolor.alpha);
     SDL_RenderFillRect(as->renderer,&test);
     
     test.y = as->safe.h+as->safe.y-tsize;
-    SDL_SetRenderDrawColor(as->renderer,0,255,0,255);
+    SDL_SetRenderDrawColor(as->renderer,
+                           blcolor.red,blcolor.green,blcolor.blue,blcolor.alpha);
     SDL_RenderFillRect(as->renderer,&test);
     
     test.x = as->safe.w+as->safe.x-tsize;
-    SDL_SetRenderDrawColor(as->renderer,0,0,255,255);
+    SDL_SetRenderDrawColor(as->renderer,
+                           brcolor.red,brcolor.green,brcolor.blue,brcolor.alpha);
     SDL_RenderFillRect(as->renderer,&test);
     
     test.y = as->safe.y;
-    SDL_SetRenderDrawColor(as->renderer,255,255,255,255);
+    SDL_SetRenderDrawColor(as->renderer,
+                           trcolor.red,trcolor.green,trcolor.blue,trcolor.alpha);
     SDL_RenderFillRect(as->renderer,&test);
     
     test.x = as->safe.x;

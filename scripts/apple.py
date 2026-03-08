@@ -339,6 +339,21 @@ def reassign_pbxproj(config,pbxproj):
     else:
         allincludes = ''
     
+    indent = '\t\t\t\t\t'
+    entries = config['defines_dict']
+    if 'all' in entries and entries['all']:
+        alldefines = config['defines_dict']['all']
+    else:
+        alldefines = []
+    if 'apple' in entries and entries['apple']:
+        alldefines += config['defines_dict']['all']
+    else:
+        alldefines += []
+    if alldefines:
+        alldefines = indent+(',\n'+indent).join(map(lambda x : '"'+x+'"',alldefines))+',\n'
+    else:
+        alldefines = ''
+
     appid = config['appid']
     for pos in range(len(section)):
         if '__SDL_INCLUDE__' in section[pos]:
@@ -347,6 +362,8 @@ def reassign_pbxproj(config,pbxproj):
             section[pos] = section[pos].replace('__VULKAN_INCLUDE__','"$(SRCROOT)/'+sdl3dir+'/vulkan/include"')
         if '__APPLE_INCLUDE__' in section[pos]:
             section[pos] = section[pos].replace(indent+'__APPLE_INCLUDE__,\n',allincludes)
+        if '__APPLE_DEFINE__' in section[pos]:
+            section[pos] = section[pos].replace(indent+'__APPLE_DEFINE__,\n',alldefines)
         if '__APP_ID__' in section[pos]:
             section[pos] = section[pos].replace('__APP_ID__',appid)
     

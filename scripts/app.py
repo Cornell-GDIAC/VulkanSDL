@@ -315,7 +315,6 @@ def expand_includes(config):
     """
     Updates the config to include all of the include directories
 
-    Include directories are specified as a string of space separated directories.
     The directories are placed into the entry 'include_dict' as a dict. The keys 
     are the targets.
 
@@ -336,7 +335,7 @@ def expand_includes(config):
             includes.extend(map(util.posix_to_path,files))
         result['all'] = includes
     
-    # Get the auxiliary sources
+    # Get the auxiliary includes
     for target in ['android','apple','windows','cmake']:
         includes = []
         if target in config and 'includes' in config[target]:
@@ -350,6 +349,38 @@ def expand_includes(config):
         result[target] = includes
     
     config['include_dict'] = result
+
+
+def expand_defines(config):
+    """
+    Updates the config to include all of the preprocessor definitions
+
+    The preprocessor defs are placed into the entry 'defines_dict' as a dict. 
+    The keys are the targets.
+
+    :param config: The project configuration settings
+    :type config:  ``dict``
+    """
+    result = {}
+    defines = []
+    if 'defines' in config and config['defines']:
+        if type(config['defines']) == list:
+            defines.extend(config['defines'])
+        elif config['includes']:
+            defines.append(config['defines'])
+        result['all'] = defines
+    
+    # Get the auxiliary defines
+    for target in ['android','apple','windows','cmake']:
+        defines = []
+        if target in config and 'defines' in config[target]:
+            if type(config[target]['defines']) == list:
+                defines.extend(config[target]['defines'])
+            elif config[target]['includes']:
+                defines.append(config[target]['defines'])
+        result[target] = defines
+    
+    config['defines_dict'] = result
 
 
 def build_icon(config):
@@ -394,6 +425,7 @@ def main():
     expand_sources(config)
     expand_assets(config)
     expand_includes(config)
+    expand_defines(config)
     build_icon(config)
     
     for target in config['targets']:

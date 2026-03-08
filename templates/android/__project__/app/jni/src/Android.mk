@@ -16,6 +16,7 @@ LOCAL_MODULE := main
 LOCAL_C_INCLUDES := $(SDL3_PATH)/include
 LOCAL_C_INCLUDES += $(SDL3_PATH)/vulkan/include
 __EXTRA_INCLUDES__
+__EXTRA_DEFINES__
 
 # Add your application source files here.
 LOCAL_PATH = $(PROJ_PATH)

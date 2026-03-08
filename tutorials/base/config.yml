@@ -16,6 +16,9 @@ icon:
     rounded:     true           # Whether to use a round background on desktops
 
 
+defines:                        # The preprocessor definitions
+    - MULTICOLOR
+
 includes: ~                     # The list of the include directories
 
 sources:                        # The list of the source code files

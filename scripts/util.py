@@ -590,10 +590,10 @@ def file_replace_after(path,data):
                 pos0 = contents.find(key,pos1)
                 if pos0 != -1:
                     pos0 += len(key)
-                pos1 = contents.find('\n',pos0)
-                if pos1 == -1:
-                    pos1 = len(contents)
-                contents = contents[:pos0]+data[key]+contents[pos1:]
+                    pos1 = contents.find('\n',pos0)
+                    if pos1 == -1:
+                        pos1 = len(contents)
+                    contents = contents[:pos0]+data[key]+contents[pos1:]
     
     if contents:
         with open(path, 'w') as file:

@@ -131,6 +131,7 @@ set_target_properties(
         SUFFIX ".exe"
 )
 
+__EXTRA_DEFINES__
 target_link_libraries(__TARGET__ PUBLIC ${EXTRA_LIBS})
 if (LINK_TO_OPENGL AND OPENGL_FOUND)
     target_link_libraries(__TARGET__ PUBLIC ${OPENGL_LIBRARIES})

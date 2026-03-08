@@ -86,5 +86,7 @@ target_include_directories(main PUBLIC
                            "${PROJECT_BINARY_DIR}"
                             ${EXTRA_INCLUDES}
                            )
+
+__EXTRA_DEFINES__
 target_link_libraries(main ${EXTRA_LIBS} ${ANDROID_LIBS})
 target_link_options(main PRIVATE -Wl,-u,sdl_app_jni_anchor)
