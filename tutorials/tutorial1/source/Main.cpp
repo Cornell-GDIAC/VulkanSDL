@@ -200,7 +200,6 @@ private:
 
     bool initVulkan() {
         try {
-            SDL_Log("AAAA");
             createInstance();
             setupDebugMessenger();
             createSurface();
@@ -209,9 +208,7 @@ private:
             createSwapChain();
             createImageViews();
             createRenderPass();
-            SDL_Log("BBBBB");
             createGraphicsPipeline();
-            SDL_Log("CCCCC");
             createFramebuffers();
             createCommandPool();
             createCommandBuffers();

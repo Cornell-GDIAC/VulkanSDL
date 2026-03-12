@@ -10,7 +10,7 @@ assets: assets                  # The folder with the game assets (do not list a
 # This must be one of portrait, landscape, portrait-flipped, landscape-flipped,
 orientation: landscape          # The orientation for mobile devices
 
-icon: 
+icon:
     image:       icon.png       # The image file for the icon
     background:  '#FFFFFF'      # The background color
     transparent: true           # Whether to omit the background on desktops

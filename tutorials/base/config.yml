@@ -2,14 +2,14 @@
 name:   Base Test               # The application name
 short:  Base                    # The "short" name (no spaces)
 appid:  edu.gdiac.sdldemo       # Application identifier for Mac, iOS, Android
-suffix: G1753F80
+suffix: true
 
 build:  build                   # The build directory (targets are each a subdirectory)
 assets: assets                  # The folder with the game assets (do not list asset)
 
 orientation: portrait           # The orientation for mobile devices
 
-icon: 
+icon:
     image:       icon.png       # The image file for the icon
     background:  '#FFFFFF'      # The background color
     transparent: true           # Whether to omit the background on desktops

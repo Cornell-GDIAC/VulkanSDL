@@ -22,7 +22,7 @@ copy:
 - directory: components/SDL_image/src
   destination: src/image
   filter: true
-  selection: 
+  selection:
   - 'IMG*'
   - '*.h'
   - '*.sym'
@@ -109,6 +109,9 @@ copy:
   destination: README.md
 - file: scripts/app.py
   destination: __main__.py
+- directory: licenses
+  destination: licenses
+  filter: false
 configure:
 # Make sure all files agree on header space
 - comment: "Reconfiguring SDL3 header locations"
