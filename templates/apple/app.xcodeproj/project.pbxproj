@@ -45,6 +45,7 @@
 		EB669FF02EABF7730018B866 /* iOS.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EB0F3CB127FB9FD40037CC66 /* iOS.xcassets */; platformFilters = (ios, tvos, xros, ); };
 		EB669FFE2EABF7A30018B866 /* Landscape.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EB0F3CB027FB9FD40037CC66 /* Landscape.storyboard */; platformFilters = (ios, tvos, xros, ); };
 		EB669FFF2EABF7A30018B866 /* Portrait.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EB0F3CB527FB9FD40037CC66 /* Portrait.storyboard */; platformFilters = (ios, tvos, xros, ); };
+		EB6E0E61298C1A3E00704E87 /* licenses in Resources */ = {isa = PBXBuildFile; fileRef = EB6E0E5D298C1A3300704E87 /* licenses */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -120,6 +121,7 @@
 		EB0F3CB027FB9FD40037CC66 /* Landscape.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Landscape.storyboard; sourceTree = "<group>"; };
 		EB0F3CB527FB9FD40037CC66 /* Portrait.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Portrait.storyboard; sourceTree = "<group>"; };
 		EB669F6B2EABD9BD0018B866 /* sdl3app.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = sdl3app.xcodeproj; path = ../../buildfiles/apple/sdl3app.xcodeproj; sourceTree = "<group>"; };
+		EB6E0E5D298C1A3300704E87 /* licenses */ = {isa = PBXFileReference; lastKnownFileType = folder; name = licenses; path = __LICENSES__; sourceTree = "<group>"; };
 /* End PBXFileReference section *//* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -200,6 +202,7 @@
 				EBC7AEF027FBBEF5001F1467 /* ios.plist */,
 				EB0F3CB027FB9FD40037CC66 /* Landscape.storyboard */,
 				EB0F3CB527FB9FD40037CC66 /* Portrait.storyboard */,
+				EB6E0E5D298C1A3300704E87 /* licenses */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -356,6 +359,7 @@
 				EB17A3092EB3E6C3006BC19C /* ios.plist in Resources */,
 				EB669FFE2EABF7A30018B866 /* Landscape.storyboard in Resources */,
 				EB669FFF2EABF7A30018B866 /* Portrait.storyboard in Resources */,
+				EB6E0E61298C1A3E00704E87 /* licenses in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

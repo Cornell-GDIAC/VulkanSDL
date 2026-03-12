@@ -141,6 +141,28 @@ def place_project(config):
     return project
 
 
+def copy_cmake(config,project):
+    """
+    Copies the VulkanSDDLbuild files into the CMake project
+    
+    This is necessary to prevent long path names on Windows.
+
+    :param config: The project configuration settings
+    :type config:  ``dict``
+
+    :param project: The project directory
+    :type project:  ``str``
+    """
+    entries = ['sources','build','build_to_root','build_to_sdl3']
+    util.check_config_keys(config,entries)
+
+    # Get the SDL3 directory
+    sdl3dir = os.path.join(config['build'],config['build_to_sdl3'])
+    srcdir = os.path.join(sdl3dir,'buildfiles','cmake')
+    dstdir  = os.path.join(project,'vulkansdl')
+    shutil.copytree(srcdir, dstdir, dirs_exist_ok=True)
+
+
 def config_cmake(config,project):
     """
     Configures the contents of CMakeLists.txt
@@ -208,7 +230,10 @@ def config_cmake(config,project):
     deflist.extend(entries['all'] if ('all' in entries and entries['all']) else [])
     deflist.extend(entries['cmake'] if ('cmake' in entries and entries['cmake']) else [])
     
-    defstr = 'target_compile_definitions('+config['short']+' PRIVATE '+' '.join(deflist)+')'
+    if deflist:
+        defstr = 'target_compile_definitions('+config['short']+' PRIVATE '+' '.join(deflist)+')'
+    else:
+        defstr = ''
     context['__EXTRA_DEFINES__'] = defstr
 
     util.file_replace(cmake,context)
@@ -317,6 +342,7 @@ def make(config):
     print('-- Creating the build directory')
     project = place_project(config)
     print('-- Configuring top level CMakeLists.txt')
+    copy_cmake(config,project)
     config_cmake(config,project)
     print('-- Configuring Flatpak settings')
     config_flatpak(config,project)

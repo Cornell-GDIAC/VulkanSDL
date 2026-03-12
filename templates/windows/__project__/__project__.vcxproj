@@ -131,6 +131,7 @@ if not exist "$(SolutionDir)output\explicit_layer.d" md "$(SolutionDir)output\ex
 xcopy /y /d  "$(SDL3Dir)buildfiles\windows\dlls\x86\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x86\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x86\explicit_layer.d\*" "$(SolutionDir)output\explicit_layer.d"
+xcopy /y /d  "$(SDL3Dir)licenses\*.txt" "$(SolutionDir)output\licenses"
 xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
       <Message>
       </Message>
@@ -163,6 +164,7 @@ if not exist "$(SolutionDir)output\explicit_layer.d" md "$(SolutionDir)output\ex
 xcopy /y /d  "$(SDL3Dir)buildfiles\windows\dlls\x64\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x64\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x64\explicit_layer.d\*" "$(SolutionDir)output\explicit_layer.d"
+xcopy /y /d  "$(SDL3Dir)licenses\*.txt" "$(SolutionDir)output\licenses"
 xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -195,6 +197,7 @@ if not exist "$(SolutionDir)output\explicit_layer.d" md "$(SolutionDir)output\ex
 xcopy /y /d  "$(SDL3Dir)buildfiles\windows\dlls\x86\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x86\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x86\explicit_layer.d\*" "$(SolutionDir)output\explicit_layer.d"
+xcopy /y /d  "$(SDL3Dir)licenses\*.txt" "$(SolutionDir)output\licenses"
 xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -231,6 +234,7 @@ if not exist "$(SolutionDir)output\explicit_layer.d" md "$(SolutionDir)output\ex
 xcopy /y /d  "$(SDL3Dir)buildfiles\windows\dlls\x64\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x64\*.dll" "$(SolutionDir)output"
 xcopy /y /d  "$(SolutionDir)\dlls\x64\explicit_layer.d\*" "$(SolutionDir)output\explicit_layer.d"
+xcopy /y /d  "$(SDL3Dir)licenses\*.txt" "$(SolutionDir)output\licenses"
 xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

@@ -147,7 +147,7 @@ public:
            NULL                         // Reserved
        );
 
-       if (FAILED(hres)) {
+       if (FAILED(hres) && hres != RPC_E_TOO_LATE) {
            stream   << "Failed to initialize COM security. Error code = 0x"
                     << hex << hres << endl;
            SDL_SetError(stream.str().c_str());
@@ -174,9 +174,8 @@ public:
        // Step 4: Connect to WMI through the IWbemLocator::ConnectServer method
        IWbemServices *pSvc = NULL;
 
-       // Connect to the root\cimv2 namespace with
-       // the current user and obtain pointer pSvc
-       // to make IWbemServices calls.
+       // Connect to the root\cimv2 namespace with the current user and obtain 
+       // pointer pSvc to make IWbemServices calls.
        hres = pLoc->ConnectServer(
             _bstr_t(L"ROOT\\CIMV2"), // Object path of WMI namespace
             NULL,                    // User name. NULL = current user

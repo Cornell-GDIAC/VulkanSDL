@@ -298,6 +298,7 @@ def reassign_pbxproj(config,pbxproj):
     
     # Replace the project path
     section = pbxproj['PBXFileReference']
+    licenses = '../'+sdl3dir+"/licenses"
     index = -1
     for pos in range(len(section)):
         if 'sdl3app.xcodeproj' in section[pos]:
@@ -305,6 +306,8 @@ def reassign_pbxproj(config,pbxproj):
             pos0 = entry.find('path')
             pos1 = entry.find(';',pos0)
             section[pos] = entry[:pos0]+'path = '+sdl3dir+'/buildfiles/apple/sdl3app.xcodeproj'+entry[pos1:]
+        if '__LICENSES__' in section[pos]:
+            section[pos] = section[pos].replace('__LICENSES__','"'+licenses+'"')
     
     # Asset and Source directory
     section = pbxproj['PBXGroup']
