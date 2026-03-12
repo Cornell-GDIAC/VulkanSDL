@@ -75,31 +75,6 @@ packaging x86 Linux builds for rapid deployment on the Steam Deck.  See the
 readme in the `cmake` build folder for your project for how to package
 with flatpak.
 
-## Project Includes
-
-Because we are building SDL and its extensions by source, it would break the 
-code to put the headers inside of a folder called `SDL` (as SDL source code 
-does not use angle brackets and instead expects these headers to be in folder 
-called `include`). Hence all SDL headers should be included directly without 
-a prefix. In other words
-
-```
-#include <SDL.h>     // Correct
-#include <SDL/SDL.h> // Incorrect
-```
-
-It is possible to solve this problem by duplicating the headers, creating a 
-second include directory. But seeing as the headers for SDL are almost 3 MB, 
-we opted not to do this.
-
-In an attempt at compatibility, you can add a symbolic link named `SDL` in 
-the `vulkan/include` directory, which is the secondary include directory. As 
-symbolic links are OS dependent, it is not installed automatically. You can 
-install it by calling the python script with the option `-s, --symlink`.
-This will install a symbolic link if one does not exist.
-
-All other headers should be included normally.
-
 ## Project Suffix
 
 One of the least understood aspects of the config file is the project suffix. 
@@ -137,19 +112,19 @@ for both the macOS and iOS targets.
 
 This version of the application creator is built from the following packages:
 
-- SDL2, version 2.30.5
-- SDL2-Image, version 2.8.2
-- SDL2-TTF, version 2.20.1
+- SDL3, version 3.2.31
+- SDL3-Image, version 3.2.7
+- SDL3-TTF, version 3.2.3
 
-For SDL2-Image we enable JPEG, PNG, TIFF and WEBP formats. These are the only 
-formats we can build without error on all platforms. For SDL2-TTF, we enable 
-both FreeType and Harfbuzz.
+For SDL3-Image we enable JPEG, PNG, and WEBP formats. These are the only 
+formats we can build without error on all platforms. For SDL3-TTF, we enable 
+FreeType, Harfbuzz, and PlutoSVG.
 
 ## Vulkan Support
 
 The `cmake` builds (including Android) always use the version of Vulkan 
 installed on the system. For Visual Studio and Xcode, we have packaged
-libraries taken from version 1.3.290 of the VulkanSDK.
+libraries taken from version 1.4.335 of the VulkanSDK.
 
 Feel free to update these with newer versions of the Vulkan libraries as you
 see fit. The files are located here:
