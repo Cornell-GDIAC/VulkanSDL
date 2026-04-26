@@ -18,6 +18,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.content.Context;
 import android.os.Build;
+import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.OrientationEventListener;
 import android.view.Surface;
@@ -63,13 +65,13 @@ public class DisplayOrientation {
         mConfigOrientation = -1;
         mWindowOrientation = -1;
 
-		// Respond to orientation changed
+        // Respond to orientation changed
         orientationListener = new OrientationEventListener(activity) {
-        	/**
-        	 * Updates the device rotation
-        	 *
-        	 * @param orientation	the current orientation
-        	 */
+            /**
+             * Updates the device rotation
+             *
+             * @param orientation	the current orientation
+             */
             @Override
             public void onOrientationChanged(int orientation) {
                 if (orientation == ORIENTATION_UNKNOWN) {
@@ -89,7 +91,7 @@ public class DisplayOrientation {
 
                 if (newRotation != mDeviceRotation) {
                     mDeviceRotation = newRotation;
-					updateWindowOrientation();
+                    updateWindowOrientation();
                 }
             }
         };
@@ -122,41 +124,41 @@ public class DisplayOrientation {
         }
     }
 
-	/**
-	 * Returns the configuration orientation.
-	 *
-	 * This method does not update the configuration orientation. Call 
-	 * {@link #updateConfigOrientation} to make sure this is the most recent
-	 * orientation value.
-	 *
-	 * Note that a configuration orientation is always one of 
-	 * SDL_ORIENTATION_LANDSCAPE or SDL_ORIENTATION_PORTRAIT. The configuration
-	 * is never unknown and never flipped.
-	 *
-	 * @return the configuration orientation.
-	 */
+    /**
+     * Returns the configuration orientation.
+     *
+     * This method does not update the configuration orientation. Call 
+     * {@link #updateConfigOrientation} to make sure this is the most recent
+     * orientation value.
+     *
+     * Note that a configuration orientation is always one of 
+     * SDL_ORIENTATION_LANDSCAPE or SDL_ORIENTATION_PORTRAIT. The configuration
+     * is never unknown and never flipped.
+     *
+     * @return the configuration orientation.
+     */
     public int getConfigOrientation() {
         return mConfigOrientation;
     }
 
-	/**
-	 * Returns the window orientation.
-	 *
-	 * This method does not update the window orientation. Call 
-	 * {@link #updateWindowOrientation} to make sure this is the most recent
-	 * orientation value.
-	 *
-	 * @return the window orientation.
-	 */
+    /**
+     * Returns the window orientation.
+     *
+     * This method does not update the window orientation. Call 
+     * {@link #updateWindowOrientation} to make sure this is the most recent
+     * orientation value.
+     *
+     * @return the window orientation.
+     */
     public int getWindowOrientation() {
         return mWindowOrientation;
     }
 
-	/**
-	 * Updates both the configuration and window orientation
-	 *
-	 * @return true if either orientation changed in the update
-	 */
+    /**
+     * Updates both the configuration and window orientation
+     *
+     * @return true if either orientation changed in the update
+     */
     public boolean update() {
         boolean changed = updateConfigOrientation();
         return updateWindowOrientation() || changed;
@@ -164,33 +166,42 @@ public class DisplayOrientation {
     
     /**
      * Updates the configuration orientation
-	 *
-	 * @return true if the orientation changed in the update
-	 */
+     *
+     * @return true if the orientation changed in the update
+     */
     public boolean updateConfigOrientation() {
         int result = SDLActivity.SDL_ORIENTATION_UNKNOWN;
-
-        Configuration config = mActivity.getResources().getConfiguration();
-        if (config != null && config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            result = SDLActivity.SDL_ORIENTATION_LANDSCAPE;
-        } else if (config != null) {
-        	// Just assume portrait if square or unknown
-            result = SDLActivity.SDL_ORIENTATION_PORTRAIT;
+        
+        try {
+            Bundle metadata = ((APPActivity)mActivity).getMetaData();
+            if (metadata != null) {
+                String value = metadata.getString("config.orientation");
+                if (value.equals("portrait") || value.equals("sensorPortrait")) {
+                    result = SDLActivity.SDL_ORIENTATION_PORTRAIT;
+                } else if (value.equals("landscape") || value.equals("sensorLandscape")) {
+                    result = SDLActivity.SDL_ORIENTATION_LANDSCAPE;
+                } else if (value.equals("reversePortrait")) {
+                    result = SDLActivity.SDL_ORIENTATION_PORTRAIT_FLIPPED;
+                } else if (value.equals("reverseLandscape")) {
+                    result = SDLActivity.SDL_ORIENTATION_LANDSCAPE_FLIPPED;
+                }
+            }
+        } catch (Exception e) {
         }
 
         boolean changed = mConfigOrientation != result;
         mConfigOrientation = result;
         if (changed) {
-			nativeSetConfigOrientation(mConfigOrientation);
+            nativeSetConfigOrientation(mConfigOrientation);
         }
         return changed;
     }
 
     /**
      * Updates the window orientation
-	 *
-	 * @return true if the orientation changed in the update
-	 */
+     *
+     * @return true if the orientation changed in the update
+     */
     public boolean updateWindowOrientation() {
         SDLSurface surface = ((APPActivity)mActivity).getSurface();
         int width = surface.getWidth();
@@ -243,19 +254,19 @@ public class DisplayOrientation {
         boolean changed = result != mWindowOrientation;
         mWindowOrientation = result;
         if (changed) {
-			nativeSetWindowOrientation(mWindowOrientation);
+            nativeSetWindowOrientation(mWindowOrientation);
         }
         return changed;
     }
     
-	/**
+    /**
      * Pushes the configuration orientation to SDL3
      *
      * @param orientation	The configuration orientation
      */
-	private static native void nativeSetConfigOrientation(int orientation);
+    private static native void nativeSetConfigOrientation(int orientation);
 
-	/**
+    /**
      * Pushes the window orientation to SDL3
      *
      * @param orientation	The window orientation

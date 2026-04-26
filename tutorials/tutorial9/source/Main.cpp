@@ -317,7 +317,7 @@ private:
             vkDestroySemaphore(device, imageAvailableSemaphores[ii], nullptr);
         }
         for (size_t ii = 0; ii < computeFinishedSemaphores.size(); ii++) {
-            vkDestroySemaphore(device, imageAvailableSemaphores[ii], nullptr);
+            vkDestroySemaphore(device, computeFinishedSemaphores[ii], nullptr);
         }
         for (size_t ii = 0; ii < inFlightFences.size(); ii++) {
             vkDestroyFence(device, inFlightFences[ii], nullptr);

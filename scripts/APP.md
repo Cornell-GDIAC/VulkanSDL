@@ -46,7 +46,7 @@ projects will have weaker uniqueness guarantees on their UUIDs.
 To create a VulkanSDL application, run this folder as a python program as 
 follows
 
-    python sdl2 <project>
+    python VulkanSDL <project>
 
 where `project` is a directory containing `config.yml`. This is a YAML 
 configuration file describing all of the application properties. See the 
@@ -74,6 +74,18 @@ We also have a `flatpak` option. This is a project built on top of CMake for
 packaging x86 Linux builds for rapid deployment on the Steam Deck.  See the
 readme in the `cmake` build folder for your project for how to package
 with flatpak.
+
+## Project Includes
+
+VulkanSDL consolidates the SDL3 headers into a single place. So all SDL3 headers, including the headers from `SDL3_Image` and `SDL3_ttf` are placed in the `SDL3` directory. For example,
+
+```
+#include <SDL3/SDL.h>           // Correct
+#include <SDL3_tff/SDL_ttf.h>   // Incorrect
+#include <SDL3/SDL_ttf.h>       // Correct
+```
+
+All other headers should be included normally.
 
 ## Project Suffix
 
@@ -133,7 +145,7 @@ see fit. The files are located here:
 - `vulkan/windows`: The Windows libraries and dlls
 - `vulkan/apple`: The macOS and iOS frameworks
 
-All versions of use the Vulkan loader (e.g. they do not statically link to 
+All versions use the Vulkan loader (e.g. they do not statically link to 
 Vulkan) and provide support for validation layers. For Xcode we have provided
 frameworks that support the iOS simulator (not currently supported by the 
 VulkanSDK).

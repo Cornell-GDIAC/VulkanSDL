@@ -156,6 +156,23 @@ public class APPActivity extends SDLActivity {
     public SDLSurface getSurface() {
         return mSurface;
     }
+    
+    /**
+     * Returns the meta-data bundle for this activity
+     *
+     * @return the meta-data bundle for this activity
+     */
+    public Bundle getMetaData() {
+        try {
+            ActivityInfo info = getPackageManager().getActivityInfo(
+                                    getComponentName(),
+                                    PackageManager.GET_META_DATA
+                                );
+            return info.metaData;
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }    
+    }
 
     /**
      * Computes the the insets for notched devices

@@ -458,7 +458,7 @@ def config_cmake(config,project):
     deflist.extend(entries['all'] if ('all' in entries and entries['all']) else [])
     deflist.extend(entries['android'] if ('android' in entries and entries['android']) else [])
     
-    defstr = 'target_compile_definitions('+config['short']+' PRIVATE '+' '.join(deflist)+')'
+    defstr = 'target_compile_definitions(main PRIVATE '+' '.join(deflist)+')'
     context['__EXTRA_DEFINES__'] = defstr
 
     util.file_replace(cmake,context)
