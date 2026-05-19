@@ -156,7 +156,7 @@ private:
     VkExtent2D swapChainExtent;
     std::vector<VkImageView> swapChainImageViews;
 
-    std::vector<VkRenderingInfo> renderingInfo;
+    VkRenderingInfo renderingInfo;
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
 
@@ -167,6 +167,10 @@ private:
     std::vector<VkSemaphore> renderFinishedSemaphores;
     std::vector<VkFence> inFlightFences;
     uint32_t currentFrame = 0;
+    
+    // We need to use pointers because we dynamically load these in android
+    PFN_vkCmdBeginRendering pvkCmdBeginRendering;
+    PFN_vkCmdEndRendering pvkCmdEndRendering;
 
     bool framebufferResized = false;
     VkExtent2D windowExtent;
@@ -206,6 +210,7 @@ private:
             createLogicalDevice();
             createSwapChain();
             createImageViews();
+            loadRenderCommands();
             createRenderingInfo();
             createGraphicsPipeline();
             createCommandPool();
@@ -240,10 +245,8 @@ private:
     void cleanup() {
         cleanupSwapChain();
         
-        for(auto it=renderingInfo.begin(); it != renderingInfo.end(); ++it) {
-            VkRenderingAttachmentInfo* info = const_cast<VkRenderingAttachmentInfo*>(it->pColorAttachments);
-            free(info);
-        }
+        VkRenderingAttachmentInfo* info = const_cast<VkRenderingAttachmentInfo*>(renderingInfo.pColorAttachments);
+        free(info);
         
         vkDestroyPipeline(device, graphicsPipeline, nullptr);
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
@@ -525,32 +528,39 @@ private:
         }
     }
     
+    void loadRenderCommands() {
+#if defined(SDL_PLATFORM_ANDROID)
+        pvkCmdBeginRendering = (PFN_vkCmdBeginRendering)vkGetDeviceProcAddr(device, "vkCmdBeginRendering");
+        pvkCmdEndRendering = (PFN_vkCmdEndRendering)vkGetDeviceProcAddr(device, "vkCmdEndRendering");
+#else
+        pvkCmdBeginRendering = &vkCmdBeginRendering;
+        pvkCmdEndRendering = &vkCmdEndRendering;
+#endif
+    }
+
+    
     void createRenderingInfo() {
         VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-        for(auto it = swapChainImageViews.begin(); it != swapChainImageViews.end(); ++it) {
-            VkRenderingAttachmentInfo* colorAttachmentInfo = (VkRenderingAttachmentInfo*)malloc(sizeof(VkRenderingAttachmentInfo));
-            colorAttachmentInfo->sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-            colorAttachmentInfo->imageView = *it;
-            colorAttachmentInfo->imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            colorAttachmentInfo->resolveMode = VK_RESOLVE_MODE_NONE;
-            colorAttachmentInfo->resolveImageView = VK_NULL_HANDLE;
-            colorAttachmentInfo->resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            colorAttachmentInfo->loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            colorAttachmentInfo->storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-            colorAttachmentInfo->clearValue = clearColor;
-            
-            VkRenderingInfo info{};
-            info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-            info.renderArea.offset = {0, 0};
-            info.renderArea.extent = swapChainExtent;
-            info.layerCount = 1;
-            info.viewMask = 0;
-            info.colorAttachmentCount = 1;
-            info.pColorAttachments = colorAttachmentInfo;
-            info.pDepthAttachment = nullptr;
-            info.pStencilAttachment = nullptr;
-            renderingInfo.emplace_back(info);
-        }
+        VkRenderingAttachmentInfo* colorAttachmentInfo = (VkRenderingAttachmentInfo*)malloc(sizeof(VkRenderingAttachmentInfo));
+        colorAttachmentInfo->sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        colorAttachmentInfo->imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        colorAttachmentInfo->resolveMode = VK_RESOLVE_MODE_NONE;
+        colorAttachmentInfo->resolveImageView = VK_NULL_HANDLE;
+        colorAttachmentInfo->resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        colorAttachmentInfo->loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        colorAttachmentInfo->storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        colorAttachmentInfo->clearValue = clearColor;
+        
+        renderingInfo = {};
+        renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+        renderingInfo.renderArea.offset = {0, 0};
+        renderingInfo.renderArea.extent = swapChainExtent;
+        renderingInfo.layerCount = 1;
+        renderingInfo.viewMask = 0;
+        renderingInfo.colorAttachmentCount = 1;
+        renderingInfo.pColorAttachments = colorAttachmentInfo;
+        renderingInfo.pDepthAttachment = nullptr;
+        renderingInfo.pStencilAttachment = nullptr;
     }
 
     void createGraphicsPipeline() {
@@ -699,6 +709,7 @@ private:
             throw std::runtime_error("failed to allocate command buffers!");
         }
     }
+    
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
         VkCommandBufferBeginInfo beginInfo{};
@@ -712,12 +723,11 @@ private:
                                              VK_IMAGE_LAYOUT_UNDEFINED,
                                              VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         
-        auto renderInfo = renderingInfo.data()+imageIndex;
-        auto colorAttachment = const_cast<VkRenderingAttachmentInfo*>(renderInfo->pColorAttachments);
+        auto colorAttachment = const_cast<VkRenderingAttachmentInfo*>(renderingInfo.pColorAttachments);
         colorAttachment->imageView = swapChainImageViews[imageIndex];
-        renderInfo->renderArea.extent = swapChainExtent;
+        renderingInfo.renderArea.extent = swapChainExtent;
 
-        vkCmdBeginRendering(commandBuffer, renderInfo);
+        pvkCmdBeginRendering(commandBuffer, &renderingInfo);
         
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
@@ -737,8 +747,7 @@ private:
 
             vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
-        vkCmdEndRendering(commandBuffer);
-
+        pvkCmdEndRendering(commandBuffer);
         transitionSwapchainImageForRendering(commandBuffer, swapChainImages[imageIndex],
                                              VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                                              VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
@@ -1152,6 +1161,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     try {
         app->run();
     } catch (const std::exception& e) {
+        SDL_Log("Failure");
         std::cerr << e.what() << std::endl;
         return SDL_APP_FAILURE;
     }

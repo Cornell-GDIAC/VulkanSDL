@@ -193,18 +193,31 @@ def build_groups(path,filetree,uuidsvc):
     result = {uuid:('',contents)}
     for item in filetree:
         if type(filetree[item]) == dict: # This is a group
-            subresult = build_groups(path+'/'+item,filetree[item],uuidsvc)
-            contents.append((subresult[0],item,'group'))
-            for key in subresult[1]:
-                if key == subresult[0]:
-                    result[key] = (item,subresult[1][key][1])
-                else:
-                    result[key] = subresult[1][key]
+            if item == '..':
+                subresult = build_groups(os.path.join(path,item),filetree[item],uuidsvc)
+                adjustments = {}
+                for element in subresult[1][subresult[0]][1]:
+                    adjustments[element[0]] = element[3]+1
+                    contents.append((element[0],element[1],element[2],element[3]+1))
+                for key in subresult[1]:
+                    if key != subresult[0]:
+                        element = subresult[1][key]
+                        if key in adjustments:
+                            result[key] = (element[0],element[1],adjustments[key])
+                        else:
+                            result[key] = element
+            else:
+                subresult = build_groups(os.path.join(path,item),filetree[item],uuidsvc)
+                contents.append((subresult[0],item,'group',0))
+                for key in subresult[1]:
+                    if key == subresult[0]:
+                        result[key] = (item,subresult[1][key][1],0)
+                    else:
+                        result[key] = subresult[1][key]
         else:
             newid = uuidsvc.getAppleUUID('FILE://'+path+'/'+item)
             newid = uuidsvc.applyPrefix('BA',newid)
-            contents.append((newid,item,filetree[item]))
-    
+            contents.append((newid,item,filetree[item],0))
     return (uuid,result)
 
 
@@ -535,7 +548,12 @@ def populate_sources(config,pbxproj):
                 if item[2] != 'group':
                     files.append(item)
                 text += '\t\t\t\t%s /* %s */,\n' % (item[0],util.path_to_posix(item[1]))
-            text += '\t\t\t);\n\t\t\tpath = %s;\n' % util.path_to_posix(result[key][0])
+            truepath = result[key][0]
+            if result[key][2]:
+                truepath = os.path.join(*(['..']*result[key][2]),truepath)
+                text += '\t\t\t);\n\t\t\tname = %s;\n\t\t\tpath = %s;\n' % (result[key][0],util.path_to_posix(truepath))
+            else:
+                text += '\t\t\t);\n\t\t\tpath = %s;\n' % util.path_to_posix(truepath)
             text += '\t\t\tsourceTree = "<group>";\n\t\t};\n'
             groups.append(text)
     

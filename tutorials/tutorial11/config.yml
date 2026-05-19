@@ -1,7 +1,7 @@
 ---
 name:   Dynamic Rendering       # The application name
-short:  Tutorial1               # The "short" name (no spaces)
-appid:  git.overv.tutorial11    # Application identifier for Mac, iOS, Android
+short:  Tutorial11              # The "short" name (no spaces)
+appid:  git.overv.tutorial111   # Application identifier for Mac, iOS, Android
 suffix: true
 
 build:  build                   # The build directory (targets are each a subdirectory)
