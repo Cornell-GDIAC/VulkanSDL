@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.SDL" parent="@android:style/Theme.NoTitleBar.Fullscreen">
-        <item name="android:windowLayoutInDisplayCutoutMode">
-            shortEdges <!-- default, shortEdges, never -->
-        </item>
         <item name="android:windowBackground">@color/white</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 </resources>

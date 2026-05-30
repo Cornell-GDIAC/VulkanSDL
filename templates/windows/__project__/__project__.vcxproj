@@ -112,10 +112,10 @@ $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;__WINDOWS_DEFINES__%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)include\;$(SolutionDir)..\source\;$(SDL3Dir)include\;$(SDL3Dir)vulkan\include\;__INCLUDE_DIR__%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <DisableSpecificWarnings>4068;4018;4244;4305%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4068;4018;4244;4305;4996;6001;26812;26439;26495;26819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -146,9 +146,9 @@ xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
       <AdditionalIncludeDirectories>$(SolutionDir)include\;$(SolutionDir)..\source\;$(SDL3Dir)include\;$(SDL3Dir)vulkan\include\;__INCLUDE_DIR__%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <DisableSpecificWarnings>4068;4018;4244;4305%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4068;4018;4244;4305;4996;6001;26812;26439;26495;26819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -178,8 +178,8 @@ xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;__WINDOWS_DEFINES__%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)include\;$(SolutionDir)..\source\;$(SDL3Dir)include\;$(SDL3Dir)vulkan\include\;__INCLUDE_DIR__%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
-      <DisableSpecificWarnings>4068;4018;4244;4305%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>4068;4018;4244;4305;4996;6001;26812;26439;26495;26819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -215,8 +215,8 @@ xcopy /y /d /e  "$(AssetDir)*" "$(SolutionDir)output"</Command>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;__WINDOWS_DEFINES__%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)include\;$(SolutionDir)..\source\;$(SDL3Dir)include\;$(SDL3Dir)vulkan\include\;__INCLUDE_DIR__%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
-      <DisableSpecificWarnings>4068;4018;4244;4305;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>4068;4018;4244;4305;4996;6001;26812;26439;26495;26819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

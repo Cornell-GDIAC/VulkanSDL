@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -26,6 +27,10 @@ import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.OrientationEventListener;
 import android.view.Surface;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -54,7 +59,7 @@ public class APPActivity extends SDLActivity {
     /**
      * Initializes this activity.
      *
-     * This method just calles the initialization for the subclass and then 
+     * This method just calls the initialization for the subclass and then 
      * gives default values to our new attributes.
      */
     public static void initialize() {
@@ -86,6 +91,7 @@ public class APPActivity extends SDLActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        applyImmersiveMode();
         mDeviceOrientation  = new DeviceOrientation(this);
         mDisplayOrientation = new DisplayOrientation(this);
         
@@ -137,6 +143,27 @@ public class APPActivity extends SDLActivity {
         super.onAttachedToWindow();
         computeSafeInsets();
     }
+    
+    /**
+     * Ensures cut-outs are hidden on resume
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        applyImmersiveMode();
+    }
+
+    /**
+     * Ensures cut-outs are hidden on focus change
+     *
+     * @param hasFocus whether the window has focus
+     */
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        applyImmersiveMode();
+    }
+    
 
     /**
      * Recomputes the insets when the orientation changes
@@ -155,23 +182,6 @@ public class APPActivity extends SDLActivity {
      */
     public SDLSurface getSurface() {
         return mSurface;
-    }
-    
-    /**
-     * Returns the meta-data bundle for this activity
-     *
-     * @return the meta-data bundle for this activity
-     */
-    public Bundle getMetaData() {
-        try {
-            ActivityInfo info = getPackageManager().getActivityInfo(
-                                    getComponentName(),
-                                    PackageManager.GET_META_DATA
-                                );
-            return info.metaData;
-        } catch (PackageManager.NameNotFoundException e) {
-            return null;
-        }    
     }
 
     /**
@@ -233,6 +243,48 @@ public class APPActivity extends SDLActivity {
         
         // Send to SDL3
         SDLActivity.onNativeInsetsChanged(safeInsets.left, safeInsets.right, safeInsets.top, safeInsets.bottom);
+    }
+    
+    /**
+     * Forces the application to hide all visible cutouts and insets
+     */
+    @SuppressWarnings("deprecation")
+    public void applyImmersiveMode() {
+        Window window = getWindow();
+        window.setNavigationBarColor(Color.WHITE);
+        window.setStatusBarColor(Color.WHITE);
+        if (Build.VERSION.SDK_INT >= 29) {
+            window.setNavigationBarContrastEnforced(false);
+            window.setStatusBarContrastEnforced(false);
+        }
+
+        if (Build.VERSION.SDK_INT >= 28) {
+            WindowManager.LayoutParams attrs = window.getAttributes();
+            attrs.layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+            window.setAttributes(attrs);
+        }
+
+        if (Build.VERSION.SDK_INT >= 30) {
+            WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) {
+                controller.hide(WindowInsets.Type.systemBars());
+                controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            }
+
+            getWindow().setDecorFitsSystemWindows(false);
+        } else {
+            window.getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_FULLSCREEN |
+                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+                            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            );
+        }
+        window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
     }
     
     /**

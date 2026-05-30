@@ -2,5 +2,9 @@
 <resources>
 <style name="Theme.SDL" parent="@android:style/Theme.NoTitleBar.Fullscreen">
     <item name="android:windowBackground">@color/white</item>
+    <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:enforceNavigationBarContrast">false</item>
+    <item name="android:windowLightStatusBar">true</item>
 </style>
 </resources>
